@@ -323,7 +323,9 @@ public class IdentityCard extends Applet {
 			short teller = (short) (buffer[0] & (short) 0xFF); //test?
 			
 			short hulp = 0;
-			for(short i = (short) (teller*240); i < teller*240 + 240; i++) {
+			short start = (short) (teller*240);
+			short end = (short) (start + 240);
+			for(short i = start; i < end; i++) {
 				output[hulp] = certificate[teller];
 			}
 			
