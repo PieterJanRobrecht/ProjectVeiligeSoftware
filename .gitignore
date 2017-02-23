@@ -3,6 +3,7 @@ JavaCard/.jcproject
 *.txt
 *.bat
 *.xml
+Javacard/target/
 
 # Created by https://www.gitignore.io/api/eclipse,java
 
