@@ -204,14 +204,17 @@ public class Client {
 			if(size == certificate.length) System.out.println("Insert MIMIMI song pls");
 			
 			int aantalCalls = (int) Math.ceil((double) size / 240 );
+			System.out.println("Aantal calls: "+aantalCalls);
 			
 			byte[] finalCertificate = new byte[size];
 			
 			for(int i = 0; i < aantalCalls; i++) {
 				//doe nu uw calls, pleb
-				a = new CommandAPDU(IDENTITY_CARD_CLA, ASK_LENGTH_INS, 0x00, 0x00, (byte) i);
+				System.out.println("Call: "+i);
+				byte[] data = new byte[]{(byte) i};
+				a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CERT_INS, 0x00, 0x00, data);
 				r = c.transmit(a);
-
+				
 				System.out.println(r);
 				if (r.getSW() != 0x9000)
 					throw new Exception("Exception on the card: " + r.getSW());
