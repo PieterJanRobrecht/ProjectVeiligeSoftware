@@ -320,13 +320,15 @@ public class IdentityCard extends Applet {
 			 * TODO: vorm buffer om naar getal (short?) --> steek in teller
 			 */
 			
-			short teller = (short) (buffer[0] & (short) 0xFF); //test?
+			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); //test?
 			
 			short hulp = 0;
 			short start = (short) (teller*240);
 			short end = (short) (start + 240);
+			
 			for(short i = start; i < end; i++) {
-				output[hulp] = certificate[teller];
+				output[hulp] = certificate[i];
+				hulp++;
 			}
 			
 			// This sequence of three methods sends the data contained in

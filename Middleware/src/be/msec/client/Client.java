@@ -209,7 +209,7 @@ public class Client {
 			
 			for(int i = 0; i < aantalCalls; i++) {
 				//doe nu uw calls, pleb
-				a = new CommandAPDU(IDENTITY_CARD_CLA, ASK_LENGTH_INS, 0x00, 0x00, (byte) i);
+				a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CERT_INS, (byte) i, 0x00, 0xff);
 				r = c.transmit(a);
 
 				System.out.println(r);
@@ -217,7 +217,13 @@ public class Client {
 					throw new Exception("Exception on the card: " + r.getSW());
 				
 			    //finalCertificate.append(r.getData()); --> lukt ni :( voorlopig 1 voor 1 uitschrijven
-				System.out.println(new BigInteger(1, r.getData()).toString(16));
+
+				System.out.println(r.getData().toString());
+				for(byte b: r.getData())
+					System.out.print(b);
+				
+
+				System.out.println("");
 			}
 			
 			
