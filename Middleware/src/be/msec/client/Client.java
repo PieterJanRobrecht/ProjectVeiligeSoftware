@@ -4,10 +4,15 @@ import be.msec.client.connection.Connection;
 import be.msec.client.connection.IConnection;
 import be.msec.client.connection.SimulatedConnection;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 import javax.smartcardio.*;
 
@@ -80,11 +85,11 @@ public class Client {
 		IConnection c;
 
 		/* Simulation: */
-		c = new SimulatedConnection();
+		//c = new SimulatedConnection();
 
 		/* Real Card: */
-		// c = new Connection();
-		// ((Connection) c).setTerminal(0);
+		c = new Connection();
+		 ((Connection) c).setTerminal(0);
 		// depending on which cardreader you use
 
 		c.connect();
@@ -100,29 +105,31 @@ public class Client {
 			CommandAPDU a;
 			ResponseAPDU r;
 
-			// 0. create applet (only for simulator!!!)
-			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
-					new byte[] { (byte) 0xa0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x08, 0x01 }, 0x7f);
-			r = c.transmit(a);
-			System.out.println(r);
-			if (r.getSW() != 0x9000)
-				throw new Exception("select installer applet failed");
-
-			a = new CommandAPDU(0x80, 0xB8, 0x00, 0x00,
-					new byte[] { 0xb, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00, 0x00 }, 0x7f);
-			r = c.transmit(a);
-			System.out.println(r);
-			if (r.getSW() != 0x9000)
-				throw new Exception("Applet creation failed");
-
-			// 1. Select applet (not required on a real card, applet is selected
-			// by default)
-			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
-					new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00 }, 0x7f);
-			r = c.transmit(a);
-			System.out.println(r);
-			if (r.getSW() != 0x9000)
-				throw new Exception("Applet selection failed");
+			boolean simulator = false;
+//
+//			// 0. create applet (only for simulator!!!)
+//			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
+//					new byte[] { (byte) 0xa0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x08, 0x01 }, 0x7f);
+//			r = c.transmit(a);
+//			System.out.println(r);
+//			if (r.getSW() != 0x9000)
+//				throw new Exception("select installer applet failed");
+//
+//			a = new CommandAPDU(0x80, 0xB8, 0x00, 0x00,
+//					new byte[] { 0xb, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00, 0x00 }, 0x7f);
+//			r = c.transmit(a);
+//			System.out.println(r);
+//			if (r.getSW() != 0x9000)
+//				throw new Exception("Applet creation failed");
+//
+//			// 1. Select applet (not required on a real card, applet is selected
+//			// by default)
+//			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
+//					new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00 }, 0x7f);
+//			r = c.transmit(a);
+//			System.out.println(r);
+//			if (r.getSW() != 0x9000)
+//				throw new Exception("Applet selection failed");
 
 			// 2. Send PIN
 			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00, 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04 });
@@ -135,7 +142,7 @@ public class Client {
 				throw new Exception("Exception on the card: " + r.getSW());
 			System.out.println("PIN Verified");
 
-			// 3. eigen random shizzle
+			// 3. Get identity instruction
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_IDENTITY_INS, 0x00, 0x00, 0xff);
 			r = c.transmit(a);
 
@@ -143,7 +150,13 @@ public class Client {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + r.getSW());
 
-			System.out.println(new BigInteger(1, r.getData()).toString(16));
+			byte[] inc = r.getData();
+
+			System.out.println(new BigInteger(1, inc).toString(16));
+
+			if (simulator) {
+				System.out.println("Na filter.. \n" + new BigInteger(1, filterSimulator(inc, a)).toString(16));
+			}
 
 			/**
 			 * 8024000000374a616e20566f737361657274200a416674616e736520737465656e7765672033200a39303030200a47656e74200a6d616e200a31393837)
@@ -154,7 +167,7 @@ public class Client {
 			 * ^enkel op simulator ;-;
 			 */
 
-			// 4. eigen random shizzle 2.0
+			// 4. get name instruction
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_NAME_INS, 0x00, 0x00, 0xff);
 			r = c.transmit(a);
 
@@ -162,7 +175,12 @@ public class Client {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + r.getSW());
 
-			System.out.println(new BigInteger(1, r.getData()).toString(16));
+			inc = r.getData();
+			System.out.println(new BigInteger(1, inc).toString(16));
+
+			if (simulator) {
+				System.out.println("Na filter.. \n" + new BigInteger(1, filterSimulator(inc, a)).toString(16));
+			}
 
 			/**
 			 * 8026000000044a616e20 die 80 26 000 000 komt van 0x80 (CLA), 0x26
@@ -174,7 +192,7 @@ public class Client {
 			byte[] bytes = new byte[20];
 			random.nextBytes(bytes);
 
-			// 5. new random shizzle
+			// 5. sign iets instruction
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SIGN_INS, 0x00, 0x00, bytes);
 			r = c.transmit(a);
 
@@ -182,9 +200,16 @@ public class Client {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + r.getSW());
 
-			System.out.println(new BigInteger(1, r.getData()).toString(16));
+			byte[] signedChallenge = r.getData();
 
-			// 6. ask length of something..
+			System.out.println(new BigInteger(1, signedChallenge).toString(16));
+
+			if (simulator) {
+				System.out.println(
+						"Na filter.. \n" + new BigInteger(1, filterSimulator(signedChallenge, a)).toString(16));
+			}
+
+			// 6. vraag lengte van certificate <-> hangt samen met 7.
 			a = new CommandAPDU(IDENTITY_CARD_CLA, ASK_LENGTH_INS, 0x00, 0x00, 0xff);
 			r = c.transmit(a);
 
@@ -193,12 +218,19 @@ public class Client {
 				throw new Exception("Exception on the card: " + r.getSW());
 
 			byte[] kappa = r.getData();
+
+			if (simulator) {
+				System.out.println("Na filter.. ");
+				kappa = filterSimulator(kappa, a);
+			}
+
 			int size = 0;
 
 			size += unsignedKK(kappa[0]) * 100;
 			size += unsignedKK(kappa[1]);
 
 			System.out.println("Kappa size: " + size);
+
 			System.out.println("Echte size: " + certificate.length); // debug..
 
 			if (size == certificate.length)
@@ -207,6 +239,7 @@ public class Client {
 			int aantalCalls = (int) Math.ceil((double) size / 240);
 			System.out.println("Aantal calls: " + aantalCalls);
 
+			// 7. haal certificate op, op basis van aantalCalls
 			byte[] finalCertificate = new byte[size];
 
 			byte[] certificate = new byte[0];
@@ -225,7 +258,7 @@ public class Client {
 
 				System.out.println(r.getData().toString());
 
-				byte[] inc = r.getData();
+				inc = r.getData();
 				for (byte b : inc)
 					System.out.print(b);
 
@@ -238,10 +271,31 @@ public class Client {
 				System.out.println("");
 			}
 
-			for (byte b : certificate) {
-				System.out.print(b + " ");
+			for (int i = 0; i < size; i++) {
+				finalCertificate[i] = certificate[i];
 			}
 
+			System.out.println("Certificaat:");
+			for (byte b : finalCertificate) {
+				System.out.print(b + " ");
+			}
+			System.out.println("");
+
+			// 8. vorm certicate om
+			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
+			InputStream is = new ByteArrayInputStream(finalCertificate);
+			X509Certificate cert = (X509Certificate) certFac.generateCertificate(is);
+
+			// gebruik van 5.
+			// --> challenge: var bytes
+			// --> sign response: var signedChallenge
+
+			Signature signature = Signature.getInstance("SHA1withRSA");
+			signature.initVerify(cert.getPublicKey());
+			signature.update(bytes);
+			boolean ok = signature.verify(signedChallenge);
+
+			System.out.println("Signature verification: " + ok);
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -251,5 +305,24 @@ public class Client {
 
 	public static int unsignedKK(byte x) {
 		return (int) (x & 0xFF);
+	}
+
+	public static byte[] filterSimulator(byte[] inc, CommandAPDU a) {
+		System.out.println(inc.length);
+		int abc = 5;
+
+		//if a.. dan moet abc 6 worden. :/ /**TODO**/
+		
+		byte[] rreturn = new byte[inc.length - abc];
+		for (int i = 0; i < inc.length; i++) {
+			if (i < abc) {
+				System.out.println("DUMPING... " + inc[i]);
+			} else {
+				if (i == abc)
+					System.out.println("START... " + inc[i]);
+				rreturn[i - abc] = inc[i];
+			}
+		}
+		return rreturn;
 	}
 }
