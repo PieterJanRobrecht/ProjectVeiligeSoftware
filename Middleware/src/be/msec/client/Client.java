@@ -11,7 +11,6 @@ import java.security.SecureRandom;
 
 import javax.smartcardio.*;
 
-
 public class Client {
 
 	private final static byte IDENTITY_CARD_CLA = (byte) 0x80;
@@ -24,32 +23,32 @@ public class Client {
 	private final static short SW_VERIFICATION_FAILED = 0x6300;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6301;
 
-	private static byte[] certificate = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -67, (byte) 48, (byte) -126,
-			(byte) 1, (byte) 103, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 5, (byte) 0,
-			(byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42,
-			(byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5, (byte) 5, (byte) 0,
-			(byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4,
-			(byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6,
-			(byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12, (byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116,
-			(byte) 49, (byte) 25, (byte) 48, (byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12,
-			(byte) 16, (byte) 75, (byte) 97, (byte) 72, (byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110,
-			(byte) 116, (byte) 45, (byte) 76, (byte) 105, (byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49,
-			(byte) 20, (byte) 48, (byte) 18, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11,
-			(byte) 86, (byte) 97, (byte) 107, (byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32,
-			(byte) 73, (byte) 84, (byte) 49, (byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4,
-			(byte) 3, (byte) 12, (byte) 12, (byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111,
-			(byte) 115, (byte) 115, (byte) 97, (byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 32, (byte) 23,
-			(byte) 13, (byte) 49, (byte) 48, (byte) 48, (byte) 50, (byte) 50, (byte) 52, (byte) 48, (byte) 57,
-			(byte) 52, (byte) 51, (byte) 48, (byte) 50, (byte) 90, (byte) 24, (byte) 15, (byte) 53, (byte) 49,
-			(byte) 55, (byte) 57, (byte) 48, (byte) 49, (byte) 48, (byte) 57, (byte) 49, (byte) 57, (byte) 50,
-			(byte) 57, (byte) 52, (byte) 50, (byte) 90, (byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48,
-			(byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69,
-			(byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12,
-			(byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48, (byte) 23,
-			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97, (byte) 72,
-			(byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76, (byte) 105,
-			(byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18, (byte) 6,
-			(byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107,
+	private static byte[] certificate = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -67, (byte) 48,
+			(byte) -126, (byte) 1, (byte) 103, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 5,
+			(byte) 0, (byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
+			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5,
+			(byte) 5, (byte) 0, (byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3,
+			(byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 13, (byte) 48,
+			(byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12, (byte) 4, (byte) 71, (byte) 101,
+			(byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48, (byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4,
+			(byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97, (byte) 72, (byte) 111, (byte) 32, (byte) 83,
+			(byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76, (byte) 105, (byte) 101, (byte) 118, (byte) 101,
+			(byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11,
+			(byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107, (byte) 103, (byte) 114, (byte) 111, (byte) 101,
+			(byte) 112, (byte) 32, (byte) 73, (byte) 84, (byte) 49, (byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3,
+			(byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 12, (byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86,
+			(byte) 111, (byte) 115, (byte) 115, (byte) 97, (byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 32,
+			(byte) 23, (byte) 13, (byte) 49, (byte) 48, (byte) 48, (byte) 50, (byte) 50, (byte) 52, (byte) 48,
+			(byte) 57, (byte) 52, (byte) 51, (byte) 48, (byte) 50, (byte) 90, (byte) 24, (byte) 15, (byte) 53,
+			(byte) 49, (byte) 55, (byte) 57, (byte) 48, (byte) 49, (byte) 48, (byte) 57, (byte) 49, (byte) 57,
+			(byte) 50, (byte) 57, (byte) 52, (byte) 50, (byte) 90, (byte) 48, (byte) 100, (byte) 49, (byte) 11,
+			(byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66,
+			(byte) 69, (byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7,
+			(byte) 12, (byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48,
+			(byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97,
+			(byte) 72, (byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76,
+			(byte) 105, (byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18,
+			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107,
 			(byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32, (byte) 73, (byte) 84, (byte) 49,
 			(byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 12,
 			(byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111, (byte) 115, (byte) 115, (byte) 97,
@@ -73,8 +72,7 @@ public class Client {
 			(byte) 54, (byte) 71, (byte) 82, (byte) -53, (byte) -78, (byte) -84, (byte) -45, (byte) -83, (byte) 87,
 			(byte) 68, (byte) 124, (byte) -1, (byte) -128, (byte) -49, (byte) 124, (byte) 103, (byte) 28, (byte) 56,
 			(byte) -114, (byte) -10, (byte) 97, (byte) -78, (byte) 54 };
-	
-	
+
 	/**
 	 * @param args
 	 */
@@ -82,11 +80,11 @@ public class Client {
 		IConnection c;
 
 		/* Simulation: */
-		// c = new SimulatedConnection();
+		c = new SimulatedConnection();
 
 		/* Real Card: */
-		c = new Connection();
-		((Connection) c).setTerminal(0);
+		// c = new Connection();
+		// ((Connection) c).setTerminal(0);
 		// depending on which cardreader you use
 
 		c.connect();
@@ -102,26 +100,29 @@ public class Client {
 			CommandAPDU a;
 			ResponseAPDU r;
 
-			/*
-			 * // 0. create applet (only for simulator!!!) a = new
-			 * CommandAPDU(0x00, 0xa4, 0x04, 0x00, new byte[] { (byte) 0xa0,
-			 * 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x08, 0x01 }, 0x7f); r =
-			 * c.transmit(a); System.out.println(r); if (r.getSW() != 0x9000)
-			 * throw new Exception("select installer applet failed");
-			 * 
-			 * a = new CommandAPDU(0x80, 0xB8, 0x00, 0x00, new byte[] { 0xb,
-			 * 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00,
-			 * 0x00 }, 0x7f); r = c.transmit(a); System.out.println(r); if
-			 * (r.getSW() != 0x9000) throw new
-			 * Exception("Applet creation failed");
-			 * 
-			 * // 1. Select applet (not required on a real card, applet is
-			 * selected // by default) a = new CommandAPDU(0x00, 0xa4, 0x04,
-			 * 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-			 * 0x08, 0x09, 0x00, 0x00 }, 0x7f); r = c.transmit(a);
-			 * System.out.println(r); if (r.getSW() != 0x9000) throw new
-			 * Exception("Applet selection failed");
-			 */
+			// 0. create applet (only for simulator!!!)
+			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
+					new byte[] { (byte) 0xa0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x08, 0x01 }, 0x7f);
+			r = c.transmit(a);
+			System.out.println(r);
+			if (r.getSW() != 0x9000)
+				throw new Exception("select installer applet failed");
+
+			a = new CommandAPDU(0x80, 0xB8, 0x00, 0x00,
+					new byte[] { 0xb, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00, 0x00 }, 0x7f);
+			r = c.transmit(a);
+			System.out.println(r);
+			if (r.getSW() != 0x9000)
+				throw new Exception("Applet creation failed");
+
+			// 1. Select applet (not required on a real card, applet is selected
+			// by default)
+			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
+					new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00 }, 0x7f);
+			r = c.transmit(a);
+			System.out.println(r);
+			if (r.getSW() != 0x9000)
+				throw new Exception("Applet selection failed");
 
 			// 2. Send PIN
 			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00, 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04 });
@@ -172,7 +173,7 @@ public class Client {
 			SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
 			byte[] bytes = new byte[20];
 			random.nextBytes(bytes);
-					
+
 			// 5. new random shizzle
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SIGN_INS, 0x00, 0x00, bytes);
 			r = c.transmit(a);
@@ -180,10 +181,9 @@ public class Client {
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + r.getSW());
-			
+
 			System.out.println(new BigInteger(1, r.getData()).toString(16));
 
-			
 			// 6. ask length of something..
 			a = new CommandAPDU(IDENTITY_CARD_CLA, ASK_LENGTH_INS, 0x00, 0x00, 0xff);
 			r = c.transmit(a);
@@ -191,43 +191,56 @@ public class Client {
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + r.getSW());
-			
-			byte[] kappa= r.getData();
+
+			byte[] kappa = r.getData();
 			int size = 0;
-			
+
 			size += unsignedKK(kappa[0]) * 100;
 			size += unsignedKK(kappa[1]);
-			
+
 			System.out.println("Kappa size: " + size);
-			System.out.println("Echte size: " + certificate.length); //debug..
-			
-			if(size == certificate.length) System.out.println("Insert MIMIMI song pls");
-			
-			int aantalCalls = (int) Math.ceil((double) size / 240 );
-			System.out.println("Aantal calls: "+aantalCalls);
-			
+			System.out.println("Echte size: " + certificate.length); // debug..
+
+			if (size == certificate.length)
+				System.out.println("Insert MIMIMI song pls");
+
+			int aantalCalls = (int) Math.ceil((double) size / 240);
+			System.out.println("Aantal calls: " + aantalCalls);
+
 			byte[] finalCertificate = new byte[size];
-			
-			for(int i = 0; i < aantalCalls; i++) {
-				//doe nu uw calls, pleb
+
+			byte[] certificate = new byte[0];
+
+			for (int i = 0; i < aantalCalls; i++) {
+				// doe nu uw calls, pleb
 				a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CERT_INS, (byte) i, 0x00, 0xff);
 				r = c.transmit(a);
-				
+
 				System.out.println(r);
 				if (r.getSW() != 0x9000)
 					throw new Exception("Exception on the card: " + r.getSW());
-				
-			    //finalCertificate.append(r.getData()); --> lukt ni :( voorlopig 1 voor 1 uitschrijven
+
+				// finalCertificate.append(r.getData()); --> lukt ni :(
+				// voorlopig 1 voor 1 uitschrijven
 
 				System.out.println(r.getData().toString());
-				for(byte b: r.getData())
-					System.out.print(b);
-				
 
+				byte[] inc = r.getData();
+				for (byte b : inc)
+					System.out.print(b);
+
+				byte[] certificateTEMP = new byte[certificate.length + inc.length];
+
+				System.arraycopy(certificate, 0, certificateTEMP, 0, certificate.length);
+				System.arraycopy(inc, 0, certificateTEMP, certificate.length, inc.length);
+
+				certificate = certificateTEMP;
 				System.out.println("");
 			}
-			
-			
+
+			for (byte b : certificate) {
+				System.out.print(b + " ");
+			}
 
 		} catch (Exception e) {
 			throw e;
@@ -235,8 +248,8 @@ public class Client {
 			c.close(); // close the connection with the card
 		}
 	}
-	
+
 	public static int unsignedKK(byte x) {
-	    return (int) (x & 0xFF);
+		return (int) (x & 0xFF);
 	}
 }

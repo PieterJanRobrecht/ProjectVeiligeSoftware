@@ -293,11 +293,11 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
-			//certificate.length is short --> bv 240
+			// certificate.length is short --> bv 240
 			// byte 128
 			// 240 / 128 --> 1 // rest: 112
 			// resp[0] = 1 en resp[1] = 112
-			
+
 			byte[] response = new byte[2];
 			response[0] = (byte) (certificate.length / 100);
 			response[1] = (byte) (certificate.length % 100);
@@ -306,7 +306,7 @@ public class IdentityCard extends Applet {
 			apdu.sendBytesLong(response, (short) 0, (short) response.length);
 		}
 	}
-	
+
 	public void askCertificate(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
@@ -314,23 +314,29 @@ public class IdentityCard extends Applet {
 
 			byte[] buffer = apdu.getBuffer();
 			byte[] output = new byte[240];
-			//short siglength = generateSignature(privKey, buffer, ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(), output);
-			
+			// short siglength = generateSignature(privKey, buffer,
+			// ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(), output);
+
 			/**
 			 * TODO: vorm buffer om naar getal (short?) --> steek in teller
 			 */
-			
-			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); //test?
-			
+
+			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
+
 			short hulp = 0;
-			short start = (short) (teller*240);
-			short end = (short) (start + 240);
-			
-			for(short i = start; i < end; i++) {
+			short start = (short) (teller * 240);
+			short end;
+			if ((short) (((short) (teller + 1)) * 240) > (short) certificate.length) {
+				end = (short) certificate.length;
+			} else {
+				end = (short) (start + 240);
+			}
+
+			for (short i = start; i < end; i++) {
 				output[hulp] = certificate[i];
 				hulp++;
 			}
-			
+
 			// This sequence of three methods sends the data contained in
 			// 'serial' with offset '0' and length 'serial.length'
 			// to the host application.
