@@ -3,8 +3,15 @@ package be.msec.client;
 import be.msec.client.connection.Connection;
 import be.msec.client.connection.IConnection;
 import be.msec.client.connection.SimulatedConnection;
+import controller.MiddlewareController;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -16,7 +23,7 @@ import java.security.cert.X509Certificate;
 
 import javax.smartcardio.*;
 
-public class Client {
+public class Client extends Application{
 
 	private final static byte IDENTITY_CARD_CLA = (byte) 0x80;
 	private static final byte VALIDATE_PIN_INS = 0x22;
@@ -78,10 +85,32 @@ public class Client {
 			(byte) 68, (byte) 124, (byte) -1, (byte) -128, (byte) -49, (byte) 124, (byte) 103, (byte) 28, (byte) 56,
 			(byte) -114, (byte) -10, (byte) 97, (byte) -78, (byte) 54 };
 
+	public void start(Stage primaryStage) {
+		try {
+			// Laden van de fxml file waarin alle gui elementen zitten
+			FXMLLoader loader = new FXMLLoader();
+			Parent root = FXMLLoader.load(getClass().getResource("../../../MiddlewareGui.fxml"));
+
+			// Setten van enkele elementen van het hoofdscherm
+			primaryStage.setTitle("Login Screen");
+			primaryStage.setScene(new Scene(root));
+			primaryStage.show();
+
+			// Ophalen van de controller horende bij de view klasse
+			MiddlewareController middlewareController = loader.<MiddlewareController>getController();
+			assert (middlewareController != null);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
+		launch(args);
+		
 		IConnection c;
 
 		/* Simulation: */
