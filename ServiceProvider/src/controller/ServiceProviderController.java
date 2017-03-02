@@ -49,7 +49,7 @@ public class ServiceProviderController {
 		boolean gender = genderCheck.selectedProperty().getValue();
 		boolean birthday = birthDateCheck.selectedProperty().getValue();
 		String output = providerCombo.getSelectionModel().getSelectedItem().toString();
-		String submit = "Selected: " + name + "," + adress + "," + foto + "," + "age" + "," + country + "," + birthday
+		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday
 				+ " for " + output;
 		addText(submit);
 	}
