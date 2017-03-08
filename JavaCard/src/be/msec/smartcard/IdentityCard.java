@@ -19,12 +19,17 @@ public class IdentityCard extends Applet {
 	private static final byte ASK_LENGTH_INS = 0x30;
 	private static final byte GET_CERT_INS = 0x32;
 
+	private static final byte VALIDATE_TIME_INS = 0x34;
+	
 	private final static byte PIN_TRY_LIMIT = (byte) 0x03;
 	private final static byte PIN_SIZE = (byte) 0x04;
 
 	private final static short SW_VERIFICATION_FAILED = 0x6300;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6301;
 
+	// 86400 seconden ofwel 24 uur als threshold
+	private byte[] threshold = new byte[] {(byte) 1, (byte) 81, (byte) -128};
+	
 	private byte[] privModulus = new byte[] { (byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 82, (byte) 25,
 			(byte) -66, (byte) 34, (byte) 5, (byte) -58, (byte) 75, (byte) -39, (byte) -54, (byte) 43, (byte) 25,
 			(byte) -117, (byte) 80, (byte) -62, (byte) 51, (byte) 19, (byte) 59, (byte) -70, (byte) -100, (byte) 85,
@@ -165,6 +170,9 @@ public class IdentityCard extends Applet {
 		case GET_CERT_INS:
 			askCertificate(apdu);
 			break;
+		case VALIDATE_TIME_INS:
+			validateTime(apdu);
+			break;
 		// If no matching instructions are found it is indicated in the status
 		// word of the response.
 		// This can be done by using this method. As an argument a short is
@@ -173,6 +181,32 @@ public class IdentityCard extends Applet {
 		// 'ISO7816' class.
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+		}
+	}
+
+	private void validateTime(APDU apdu) {
+		byte[] buffer = apdu.getBuffer();
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			// Get data from datafield = seconds since epoch >> max value of short
+			// Place data in byte array
+			
+			// Retrieve last time -> wss gehaald uit eeprom? maar hoe wordt deze gedefinieerd?
+			
+			// If current - last > threshold send 0 else 1
+			boolean refresh = true;
+			
+			byte[] response = new byte[1];
+			if(refresh){
+				response[0] = (byte) (1);
+			}else{
+				response[0] = (byte) (0);
+			}
+			
+			apdu.setOutgoing();
+			apdu.setOutgoingLength((short) response.length);
+			apdu.sendBytesLong(response, (short) 0, (short) response.length);
 		}
 	}
 

@@ -1,5 +1,11 @@
 package controller;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -49,9 +55,61 @@ public class ServiceProviderController {
 		boolean gender = genderCheck.selectedProperty().getValue();
 		boolean birthday = birthDateCheck.selectedProperty().getValue();
 		String output = providerCombo.getSelectionModel().getSelectedItem().toString();
+		
+		try {
+			X509Certificate cert = getCertificate(output);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday
 				+ " for " + output;
 		addText(submit);
+	}
+
+	private X509Certificate getCertificate(String output) throws CertificateException, FileNotFoundException {
+	    CertificateFactory fact = CertificateFactory.getInstance("X.509");
+	    String fileName = new String();
+	    // Alle paswoorden zijn gelijk aan password
+	    switch (output) {
+		case "Overheid 1":
+			addText("Overheid 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			fileName = "../gov1_cert.pem";
+			break;
+		case "Overheid 2":
+			addText("Overheid 2 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			fileName = "../gov2_cert.pem";
+			break;
+		case "Sociaal Netwerk 1":
+			addText("Sociaal Netwerk 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			fileName = "../soc1_cert.pem";
+			break;
+		case "Sociaal Netwerk 2":
+			addText("Sociaal Netwerk 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			fileName = "../soc2_cert.pem";
+			break;
+		case "Default 1":
+			addText("Default 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			fileName = "../def1_cert.pem";
+			break;
+		case "Default 2":
+			addText("Default 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			fileName = "../def2_cert.pem";
+			break;
+		case "Keuze 1":
+			addText("Keuze 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			fileName = "../rand1_cert.pem";
+			break;
+		case "Keuze 2":
+			addText("Keuze 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			fileName = "../rand2_cert.pem";
+			break;
+		default:
+			break;
+		}
+	    FileInputStream is = new FileInputStream (fileName);
+	    X509Certificate cer = (X509Certificate) fact.generateCertificate(is);
+		return cer;
 	}
 
 	@FXML

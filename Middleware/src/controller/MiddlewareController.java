@@ -1,5 +1,8 @@
 package controller;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
 
@@ -20,6 +23,7 @@ public class MiddlewareController {
 	private static final byte SIGN_INS = 0x28;
 	private static final byte ASK_LENGTH_INS = 0x30;
 	private static final byte GET_CERT_INS = 0x32;
+	private static final byte VALIDATE_TIME_INS = 0x34;
 	private final static short SW_VERIFICATION_FAILED = 0x6300;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6301;
 
@@ -30,6 +34,45 @@ public class MiddlewareController {
 
 	@FXML
 	void login(ActionEvent event) {
+		sendPin();
+		sendTime();
+	}
+
+	private void sendTime() {
+		try {
+			CommandAPDU a;
+			ResponseAPDU r;
+			// 2. Send Time
+
+			// Seconden sinds epoch
+			int unixTime = (int) (System.currentTimeMillis() / 1000);
+
+			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00, 0x00, intToByteArray(unixTime));
+			addText("Sending time " + Arrays.toString(intToByteArray(unixTime)) + " to card");
+
+			r = connection.transmit(a);
+			addText("Received an answer");
+
+			System.out.println(r);
+			if (r.getSW() == SW_VERIFICATION_FAILED) {
+				addText("PIN INVALID");
+				throw new Exception("PIN INVALID");
+			} else if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + r.getSW());
+
+			byte[] inc = r.getData();
+
+			System.out.println(new BigInteger(1, inc).toString(16));
+			
+			addText("Action performed correctly");
+		} catch (Exception e) {
+			System.out.println("You fucked up ");
+			e.printStackTrace();
+		}
+
+	}
+
+	private void sendPin() {
 		try {
 			IConnection c;
 
@@ -46,16 +89,16 @@ public class MiddlewareController {
 			ResponseAPDU r;
 			// 2. Send PIN
 			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00, 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04 });
-			addText(a.toString());
+			addText("Sending PIN to card");
+
 			r = connection.transmit(a);
-			addText(r.toString());
+			addText("Received response on PIN instruction");
 
 			System.out.println(r);
-			if (r.getSW() == SW_VERIFICATION_FAILED){
+			if (r.getSW() == SW_VERIFICATION_FAILED) {
 				addText("PIN INVALID");
 				throw new Exception("PIN INVALID");
-			}
-			else if (r.getSW() != 0x9000)
+			} else if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + r.getSW());
 			System.out.println("PIN Verified");
 			addText("PIN Verified");
@@ -70,7 +113,6 @@ public class MiddlewareController {
 		try {
 			connection.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -85,6 +127,11 @@ public class MiddlewareController {
 
 	public void setConnection(IConnection c) {
 		this.connection = (Connection) c;
+	}
+
+	private byte[] intToByteArray(final int i) {
+		BigInteger bigInt = BigInteger.valueOf(i);
+		return bigInt.toByteArray();
 	}
 
 }
