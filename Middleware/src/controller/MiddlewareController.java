@@ -46,8 +46,9 @@ public class MiddlewareController {
 
 			// Seconden sinds epoch
 			int unixTime = (int) (System.currentTimeMillis() / 1000);
-
-			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00, 0x00, intToByteArray(unixTime));
+			
+			byte[] bytes = intToByteArray(unixTime);
+			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00, 0x00, bytes, 0xff);
 			addText("Sending time " + Arrays.toString(intToByteArray(unixTime)) + " to card");
 
 			r = connection.transmit(a);
@@ -63,10 +64,9 @@ public class MiddlewareController {
 			byte[] inc = r.getData();
 
 			System.out.println(new BigInteger(1, inc).toString(16));
-			
 			addText("Action performed correctly");
 		} catch (Exception e) {
-			System.out.println("You fucked up ");
+			System.out.println("You fucked up");
 			e.printStackTrace();
 		}
 
