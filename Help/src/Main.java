@@ -16,47 +16,39 @@ import javax.xml.bind.DatatypeConverter;
 
 public class Main {
 	public static void main(String[] args) {
-		// try {
-		// String privKeyFile = "../test_key.pem";
-		// PrivateKey key = null;
-		// InputStream is = new ByteArrayInputStream( privKeyFile.getBytes() );;
-		////
-		//// is = privKeyFile.getClass().getResourceAsStream("/" + privKeyFile);
-		// BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		// StringBuilder builder = new StringBuilder();
-		// boolean inKey = false;
-		// for (String line = br.readLine(); line != null; line = br.readLine())
-		// {
-		// if (!inKey) {
-		// if (line.startsWith("-----BEGIN ") && line.endsWith(" PRIVATE
-		// KEY-----")) {
-		// inKey = true;
-		// }
-		// continue;
-		// } else {
-		// if (line.startsWith("-----END ") && line.endsWith(" PRIVATE
-		// KEY-----")) {
-		// inKey = false;
-		// break;
-		// }
-		// builder.append(line);
-		// }
-		// }
-		// //
-		// byte[] encoded =
-		// DatatypeConverter.parseBase64Binary(builder.toString());
-		// PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-		// KeyFactory kf = KeyFactory.getInstance("RSA");
-		// key = kf.generatePrivate(keySpec);
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		intToByteArray(86400);
-		byte[] test = { (byte) 1, (byte) 81, (byte) -128 };
-		System.out.println(fromByteArray(test));
+//		intToByteArray(86400);
+//		byte[] test = { (byte) 1, (byte) 81, (byte) -128 };
+//		System.out.println(fromByteArray(test).toString());
+		
+//		int unixTime = (int) (System.currentTimeMillis() / 1000);
+//		byte[] bytes = intToByteArray(unixTime);
+//		System.out.println(Arrays.toString(slice(bytes, (short) 2, (short) 3)));
+		
+		System.out.println(Arrays.toString(substractArray(intToByteArray(1489084085), intToByteArray(1489076666))).toString());
+		System.out.println(fromByteArray(substractArray(intToByteArray(1489084085), intToByteArray(1489076666))).toString());
+		int getal = 1489084085 - 1489076666;
+		System.out.println(getal);
+		intToByteArray(getal);
 	}
 
-	private static void intToByteArray(final int i) {
+	private static byte[] substractArray(byte[] time, byte[] lastTime) {
+		short length;
+		if (time.length > lastTime.length) {
+			length = (short) time.length;
+		} else {
+			length = (short) lastTime.length;
+		}
+		
+		// Twee tijden van elkaar aftrekken
+		byte[] result = new byte[length];
+		for (int i = length-1; i > -1; i--) {
+			byte sub = (byte) (time[i] - lastTime[i] );
+			result[i] = sub;
+		}
+		return result;
+	}
+
+	private static byte[] intToByteArray(final int i) {
 		BigInteger bigInt = BigInteger.valueOf(i);
 		String array = Arrays.toString(bigInt.toByteArray());
 		array = array.replace(",", ", (byte)");
@@ -64,10 +56,20 @@ public class Main {
 		array = array.replace("[", "{ ");
 		array = array.replace("]", " }");
 		System.out.println(array);
+		return bigInt.toByteArray();
 	}
 
-	private static String fromByteArray(byte[] bytes) {
+	private static BigInteger fromByteArray(byte[] bytes) {
 		BigInteger n = new BigInteger(bytes);
-		return n.toString();
+		return n;
+	}
+	
+	public static byte[] slice(byte[] original, short offset, short end){
+		byte[] slice = new byte[end - offset];
+		for (short i = offset; i< end; i++){
+			short index = (short) (i - offset);
+			slice[index] = original[i];
+		}
+		return slice;
 	}
 }
