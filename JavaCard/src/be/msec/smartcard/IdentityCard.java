@@ -185,7 +185,7 @@ public class IdentityCard extends Applet {
 	}
 
 	private void validateTime(APDU apdu) {
-		byte[] buffer = apdu.getBuffer();
+//		byte[] buffer = apdu.getBuffer();
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
@@ -195,14 +195,16 @@ public class IdentityCard extends Applet {
 			// Retrieve last time -> wss gehaald uit eeprom? maar hoe wordt deze gedefinieerd?
 			
 			// If current - last > threshold send 0 else 1
-			boolean refresh = true;
-			
-			byte[] response = new byte[1];
-			if(refresh){
-				response[0] = (byte) (1);
-			}else{
-				response[0] = (byte) (0);
-			}
+//			boolean refresh = true;
+//			
+			byte[] response = new byte[2];
+			response[0] = (byte) (1);
+			response[1] = (byte) (1);
+//			if(refresh){
+//				response[0] = (byte) (0x01);
+//			}else{
+//				response[0] = (byte) (0);
+//			}
 			
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) response.length);
