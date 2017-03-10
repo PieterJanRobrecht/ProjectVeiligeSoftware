@@ -72,8 +72,8 @@ public class MiddlewareController {
 			System.out.println(new BigInteger(1, inc).toString(16));
 			*/
 			
-			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, unixTime, 0x00, 0xff);	
-			//a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00, 0x00, bytes);
+			//a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, unixTime, 0x00, 0xff);	
+			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00, 0x00, bytes);
 			r = connection.transmit(a);
 
 			addText("Received an answer");
