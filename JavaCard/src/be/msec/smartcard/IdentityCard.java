@@ -28,7 +28,7 @@ public class IdentityCard extends Applet {
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6301;
 
 	// 86400 seconden ofwel 24 uur als threshold
-	private byte[] threshold = new byte[] { (byte) 1, (byte) 81, (byte) -128 };
+	private byte[] threshold = new byte[] { (byte) 0, (byte) 1, (byte) 81, (byte) -128 };
 
 	private byte[] privModulus = new byte[] { (byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 82, (byte) 25,
 			(byte) -66, (byte) 34, (byte) 5, (byte) -58, (byte) 75, (byte) -39, (byte) -54, (byte) 43, (byte) 25,
@@ -102,6 +102,8 @@ public class IdentityCard extends Applet {
 	private byte[] name = new byte[] { 0x4A, 0x61, 0x6E, 0x20, 0x56, 0x6F, 0x73, 0x73, 0x61, 0x65, 0x72, 0x74 };
 	private OwnerPIN pin;
 
+	private byte[] lastTime;
+
 	private IdentityCard() {
 		/*
 		 * During instantiation of the applet, all objects are created. In this
@@ -109,6 +111,7 @@ public class IdentityCard extends Applet {
 		 */
 		pin = new OwnerPIN(PIN_TRY_LIMIT, PIN_SIZE);
 		pin.update(new byte[] { 0x01, 0x02, 0x03, 0x04 }, (short) 0, PIN_SIZE);
+		lastTime = new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
 		/*
 		 * This method registers the applet with the JCRE on the card.
@@ -188,32 +191,83 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
-
 			// Get data from datafield = seconds since epoch >> max value of
 			// short.. Place data in byte array
 
 			// Retrieve last time -> wss gehaald uit eeprom? maar hoe wordt deze
 			// gedefinieerd?
 
-			boolean refresh = true;
-
+			// Haalt apdu buffer op en met slice haal je enkel de nuttige data
+			// eruit
 			byte[] buffer = apdu.getBuffer();
+			byte[] time = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
+			// Tijd format gaat normaal altijd 4 bytes lang zijn
+			time = slice(time, (short) 0, (short) 4);
 
 			// If current - last(buffer) > threshold send 0 else 1
+			boolean refresh = compareTime(time);
+
+			// Antwoord formuleren in byte array alst gwn in een short terug
+			// kan, moet je het maar aanpassen rhino
 			byte[] response = new byte[2];
-			response[0] = (byte) (1);
-			response[1] = (byte) (1);
 
 			if (refresh) {
-				response[0] = (byte) (0x01);
+				response[0] = (byte) (0x11);
+				response[1] = (byte) (0x11);
 			} else {
-				response[0] = (byte) (0);
+				response[0] = (byte) (0x00);
+				response[1] = (byte) (0x00);
+			}
+
+			for (short i = 0; i < lastTime.length; i++) {
+				lastTime[i] = 0x01;
 			}
 
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) response.length);
 			apdu.sendBytesLong(response, (short) 0, (short) response.length);
+			// apdu.setOutgoing();
+			// apdu.setOutgoingLength((short) time.length);
+			// apdu.sendBytesLong(time, (short) 0, (short) time.length);
 		}
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Slechte Functie!!!! Doet nog geen juiste vergelijking!!! Moet nog correct geimplementeerd worden //
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	private boolean compareTime(byte[] time) {
+		short length;
+		if (time.length > lastTime.length) {
+			length = (short) time.length;
+		} else {
+			length = (short) lastTime.length;
+		}
+
+		// Twee tijden van elkaar aftrekken
+		byte[] result = new byte[length];
+		for (short i = 0; i < length; i++) {
+			result[i] = (byte) (time[i] - lastTime[i]);
+		}
+
+		boolean refresh = false;
+		// Vergelijken met threshold
+		for (short i = 0; i < length; i++) {
+			if (result[i] < threshold[i])
+				refresh = true;
+		}
+
+		return refresh;
+	}
+
+	public byte[] slice(byte[] original, short offset, short end) {
+		short length = (short) (end - offset);
+		byte[] slice = new byte[length];
+
+		for (short i = offset; i < end; i++) {
+			short index = (short) (i - offset);
+			slice[index] = original[i];
+		}
+		return slice;
 	}
 
 	/*
