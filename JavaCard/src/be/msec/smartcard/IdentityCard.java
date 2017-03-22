@@ -5,9 +5,13 @@ import javacard.framework.Applet;
 import javacard.framework.ISO7816;
 import javacard.framework.ISOException;
 import javacard.framework.OwnerPIN;
+import javacard.framework.Util;
 import javacard.security.KeyBuilder;
 import javacard.security.RSAPrivateKey;
+import javacard.security.RSAPublicKey;
+import javacard.security.RandomData;
 import javacard.security.Signature;
+import javacardx.crypto.Cipher;
 
 public class IdentityCard extends Applet {
 	private final static byte IDENTITY_CARD_CLA = (byte) 0x80;
@@ -19,103 +23,91 @@ public class IdentityCard extends Applet {
 	private static final byte ASK_LENGTH_INS = 0x30;
 	private static final byte GET_CERT_INS = 0x32;
 
-	private static final byte VALIDATE_TIME_INS = 0x34;
+	private static final byte SET_TEMPTIME_INS = 0x40;
+	private static final byte VALIDATE_TIME_INS = 0x42;
+	private static final byte UPDATE_TIME_INS = 0x44;
 
 	private final static byte PIN_TRY_LIMIT = (byte) 0x03;
 	private final static byte PIN_SIZE = (byte) 0x04;
 
-	private final static short SW_VERIFICATION_FAILED = 0x6300;
-	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6301;
+	private final static short SW_VERIFICATION_FAILED = 0x6322;
+	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
+	private final static short KAPPA = 0x6337;
+
+	private RSAPublicKey pkMiddleware;
+	private RSAPrivateKey secretKey;
 
 	// 86400 seconden ofwel 24 uur als threshold
 	private byte[] threshold = new byte[] { (byte) 0, (byte) 1, (byte) 81, (byte) -128 };
-
-	private byte[] privModulus = new byte[] { (byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 82, (byte) 25,
-			(byte) -66, (byte) 34, (byte) 5, (byte) -58, (byte) 75, (byte) -39, (byte) -54, (byte) 43, (byte) 25,
-			(byte) -117, (byte) 80, (byte) -62, (byte) 51, (byte) 19, (byte) 59, (byte) -70, (byte) -100, (byte) 85,
-			(byte) 24, (byte) -57, (byte) 108, (byte) -98, (byte) -2, (byte) 1, (byte) -80, (byte) -39, (byte) 63,
-			(byte) 93, (byte) 112, (byte) 7, (byte) 4, (byte) 18, (byte) -11, (byte) -98, (byte) 17, (byte) 126,
-			(byte) -54, (byte) 27, (byte) -56, (byte) 33, (byte) 77, (byte) -111, (byte) -74, (byte) -78, (byte) 88,
-			(byte) 70, (byte) -22, (byte) -3, (byte) 15, (byte) 16, (byte) 37, (byte) -18, (byte) 92, (byte) 74,
-			(byte) 124, (byte) -107, (byte) -116, (byte) -125 };
-
-	private byte[] privExponent = new byte[] { (byte) 24, (byte) 75, (byte) 93, (byte) -79, (byte) 62, (byte) 33,
-			(byte) 98, (byte) -52, (byte) 50, (byte) 65, (byte) 43, (byte) -125, (byte) 3, (byte) -63, (byte) -64,
-			(byte) 101, (byte) 117, (byte) -19, (byte) -60, (byte) 60, (byte) 53, (byte) 119, (byte) -118, (byte) -13,
-			(byte) -128, (byte) 11, (byte) -46, (byte) -30, (byte) 12, (byte) 37, (byte) -125, (byte) 14, (byte) 104,
-			(byte) -5, (byte) -15, (byte) -120, (byte) -113, (byte) -49, (byte) -70, (byte) -78, (byte) 114, (byte) 122,
-			(byte) 34, (byte) 114, (byte) -99, (byte) -102, (byte) 43, (byte) -43, (byte) -102, (byte) 71, (byte) 115,
-			(byte) 116, (byte) -105, (byte) -48, (byte) -80, (byte) 109, (byte) 117, (byte) 106, (byte) 88, (byte) 6,
-			(byte) -69, (byte) -42, (byte) -83, (byte) 25 };
-
-	private byte[] certificate = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -67, (byte) 48, (byte) -126,
-			(byte) 1, (byte) 103, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 5, (byte) 0,
-			(byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42,
-			(byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5, (byte) 5, (byte) 0,
-			(byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4,
-			(byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6,
-			(byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12, (byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116,
-			(byte) 49, (byte) 25, (byte) 48, (byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12,
-			(byte) 16, (byte) 75, (byte) 97, (byte) 72, (byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110,
-			(byte) 116, (byte) 45, (byte) 76, (byte) 105, (byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49,
-			(byte) 20, (byte) 48, (byte) 18, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11,
-			(byte) 86, (byte) 97, (byte) 107, (byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32,
-			(byte) 73, (byte) 84, (byte) 49, (byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4,
-			(byte) 3, (byte) 12, (byte) 12, (byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111,
-			(byte) 115, (byte) 115, (byte) 97, (byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 32, (byte) 23,
-			(byte) 13, (byte) 49, (byte) 48, (byte) 48, (byte) 50, (byte) 50, (byte) 52, (byte) 48, (byte) 57,
-			(byte) 52, (byte) 51, (byte) 48, (byte) 50, (byte) 90, (byte) 24, (byte) 15, (byte) 53, (byte) 49,
-			(byte) 55, (byte) 57, (byte) 48, (byte) 49, (byte) 48, (byte) 57, (byte) 49, (byte) 57, (byte) 50,
-			(byte) 57, (byte) 52, (byte) 50, (byte) 90, (byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48,
-			(byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69,
-			(byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12,
-			(byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48, (byte) 23,
-			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97, (byte) 72,
-			(byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76, (byte) 105,
-			(byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18, (byte) 6,
-			(byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107,
-			(byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32, (byte) 73, (byte) 84, (byte) 49,
-			(byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 12,
-			(byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111, (byte) 115, (byte) 115, (byte) 97,
-			(byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
-			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1,
-			(byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0,
-			(byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 82, (byte) 25, (byte) -66, (byte) 34, (byte) 5,
-			(byte) -58, (byte) 75, (byte) -39, (byte) -54, (byte) 43, (byte) 25, (byte) -117, (byte) 80, (byte) -62,
-			(byte) 51, (byte) 19, (byte) 59, (byte) -70, (byte) -100, (byte) 85, (byte) 24, (byte) -57, (byte) 108,
-			(byte) -98, (byte) -2, (byte) 1, (byte) -80, (byte) -39, (byte) 63, (byte) 93, (byte) 112, (byte) 7,
-			(byte) 4, (byte) 18, (byte) -11, (byte) -98, (byte) 17, (byte) 126, (byte) -54, (byte) 27, (byte) -56,
-			(byte) 33, (byte) 77, (byte) -111, (byte) -74, (byte) -78, (byte) 88, (byte) 70, (byte) -22, (byte) -3,
-			(byte) 15, (byte) 16, (byte) 37, (byte) -18, (byte) 92, (byte) 74, (byte) 124, (byte) -107, (byte) -116,
-			(byte) -125, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
-			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5,
-			(byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 33, (byte) 97, (byte) 121, (byte) -25, (byte) 43,
-			(byte) -47, (byte) 113, (byte) -104, (byte) -11, (byte) -42, (byte) -46, (byte) -17, (byte) 1, (byte) -38,
-			(byte) 50, (byte) 59, (byte) -63, (byte) -74, (byte) -33, (byte) 90, (byte) 92, (byte) -59, (byte) 99,
-			(byte) -17, (byte) -60, (byte) 17, (byte) 25, (byte) 79, (byte) 68, (byte) 68, (byte) -57, (byte) -8,
-			(byte) -64, (byte) 35, (byte) -19, (byte) -114, (byte) 110, (byte) -116, (byte) 31, (byte) -126, (byte) -24,
-			(byte) 54, (byte) 71, (byte) 82, (byte) -53, (byte) -78, (byte) -84, (byte) -45, (byte) -83, (byte) 87,
-			(byte) 68, (byte) 124, (byte) -1, (byte) -128, (byte) -49, (byte) 124, (byte) 103, (byte) 28, (byte) 56,
-			(byte) -114, (byte) -10, (byte) 97, (byte) -78, (byte) 54 };
+	private byte[] certificate = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -67, (byte) 48, (byte) -126, (byte) 1, (byte) 103, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 5, (byte) 0, (byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5, (byte) 5, (byte) 0, (byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12, (byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48, (byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97, (byte) 72, (byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76, (byte) 105, (byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107, (byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32, (byte) 73, (byte) 84, (byte) 49, (byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 12, (byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111, (byte) 115, (byte) 115, (byte) 97, (byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 32, (byte) 23, (byte) 13, (byte) 49, (byte) 48, (byte) 48, (byte) 50, (byte) 50, (byte) 52, (byte) 48, (byte) 57, (byte) 52, (byte) 51, (byte) 48, (byte) 50, (byte) 90, (byte) 24, (byte) 15, (byte) 53, (byte) 49, (byte) 55, (byte) 57, (byte) 48, (byte) 49, (byte) 48, (byte) 57, (byte) 49, (byte) 57, (byte) 50, (byte) 57, (byte) 52, (byte) 50, (byte) 90, (byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12, (byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48, (byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97, (byte) 72, (byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76, (byte) 105, (byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107, (byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32, (byte) 73, (byte) 84, (byte) 49, (byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 12, (byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111, (byte) 115, (byte) 115, (byte) 97, (byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 82, (byte) 25, (byte) -66, (byte) 34, (byte) 5, (byte) -58, (byte) 75, (byte) -39, (byte) -54, (byte) 43, (byte) 25, (byte) -117, (byte) 80, (byte) -62, (byte) 51, (byte) 19, (byte) 59, (byte) -70, (byte) -100, (byte) 85, (byte) 24, (byte) -57, (byte) 108, (byte) -98, (byte) -2, (byte) 1, (byte) -80, (byte) -39, (byte) 63, (byte) 93, (byte) 112, (byte) 7, (byte) 4, (byte) 18, (byte) -11, (byte) -98, (byte) 17, (byte) 126, (byte) -54, (byte) 27, (byte) -56, (byte) 33, (byte) 77, (byte) -111, (byte) -74, (byte) -78, (byte) 88, (byte) 70, (byte) -22, (byte) -3, (byte) 15, (byte) 16, (byte) 37, (byte) -18, (byte) 92, (byte) 74, (byte) 124, (byte) -107, (byte) -116, (byte) -125, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5, (byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 33, (byte) 97, (byte) 121, (byte) -25, (byte) 43, (byte) -47, (byte) 113, (byte) -104, (byte) -11, (byte) -42, (byte) -46, (byte) -17, (byte) 1, (byte) -38, (byte) 50, (byte) 59, (byte) -63, (byte) -74, (byte) -33, (byte) 90, (byte) 92, (byte) -59, (byte) 99, (byte) -17, (byte) -60, (byte) 17, (byte) 25, (byte) 79, (byte) 68, (byte) 68, (byte) -57, (byte) -8, (byte) -64, (byte) 35, (byte) -19, (byte) -114, (byte) 110, (byte) -116, (byte) 31, (byte) -126, (byte) -24, (byte) 54, (byte) 71, (byte) 82, (byte) -53, (byte) -78, (byte) -84, (byte) -45, (byte) -83, (byte) 87, (byte) 68, (byte) 124, (byte) -1, (byte) -128, (byte) -49, (byte) 124, (byte) 103, (byte) 28, (byte) 56, (byte) -114, (byte) -10, (byte) 97, (byte) -78, (byte) 54 };
 
 	private byte[] serial = new byte[] { (byte) 0x4A, (byte) 0x61, (byte) 0x6e };
 	private byte[] name = new byte[] { 0x4A, 0x61, 0x6E, 0x20, 0x56, 0x6F, 0x73, 0x73, 0x61, 0x65, 0x72, 0x74 };
+	// private byte[] name = new byte[] { 0x00, 0x00 };
+
+	// eigen
+	// private byte[] privModulus = new byte[] { (byte) -73, (byte) -43, (byte)
+	// 96, (byte) -107, (byte) 82, (byte) 25, (byte) -66, (byte) 34, (byte) 5,
+	// (byte) -58, (byte) 75, (byte) -39, (byte) -54, (byte) 43, (byte) 25,
+	// (byte) -117, (byte) 80, (byte) -62, (byte) 51, (byte) 19, (byte) 59,
+	// (byte) -70, (byte) -100, (byte) 85, (byte) 24, (byte) -57, (byte) 108,
+	// (byte) -98, (byte) -2, (byte) 1, (byte) -80, (byte) -39, (byte) 63,
+	// (byte) 93, (byte) 112, (byte) 7, (byte) 4, (byte) 18, (byte) -11, (byte)
+	// -98, (byte) 17, (byte) 126, (byte) -54, (byte) 27, (byte) -56, (byte) 33,
+	// (byte) 77, (byte) -111, (byte) -74, (byte) -78, (byte) 88, (byte) 70,
+	// (byte) -22, (byte) -3, (byte) 15, (byte) 16, (byte) 37, (byte) -18,
+	// (byte) 92, (byte) 74, (byte) 124, (byte) -107, (byte) -116, (byte) -125
+	// };
+	// private byte[] privExponent = new byte[] { (byte) 24, (byte) 75, (byte)
+	// 93, (byte) -79, (byte) 62, (byte) 33, (byte) 98, (byte) -52, (byte) 50,
+	// (byte) 65, (byte) 43, (byte) -125, (byte) 3, (byte) -63, (byte) -64,
+	// (byte) 101, (byte) 117, (byte) -19, (byte) -60, (byte) 60, (byte) 53,
+	// (byte) 119, (byte) -118, (byte) -13, (byte) -128, (byte) 11, (byte) -46,
+	// (byte) -30, (byte) 12, (byte) 37, (byte) -125, (byte) 14, (byte) 104,
+	// (byte) -5, (byte) -15, (byte) -120, (byte) -113, (byte) -49, (byte) -70,
+	// (byte) -78, (byte) 114, (byte) 122, (byte) 34, (byte) 114, (byte) -99,
+	// (byte) -102, (byte) 43, (byte) -43, (byte) -102, (byte) 71, (byte) 115,
+	// (byte) 116, (byte) -105, (byte) -48, (byte) -80, (byte) 109, (byte) 117,
+	// (byte) 106, (byte) 88, (byte) 6, (byte) -69, (byte) -42, (byte) -83,
+	// (byte) 25 };
+
+	// getjoept.. moet nog aangepast worden aan eigen certificaten
+	// gebruik momenteel overal dezelfde :') 
+	private byte[] dummyPrivExponent = new byte[]{(byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1, (byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad, (byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9, (byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9, (byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60, (byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11, (byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65, (byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff, (byte) 0xc3, (byte) 0x18, (byte) 0x81};
+	private byte[] dummyPrivModulus = new byte[]{(byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69};
+	private byte[] dummyPubExponent = new byte[]{(byte) 0x01, (byte) 0x00, (byte) 0x01};
+	private byte[] dummyPubModulus = new byte[]{(byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69};
+
 	private OwnerPIN pin;
 
 	private byte[] lastTime;
+	private byte[] tempTime;
 
 	private IdentityCard() {
-		/*
-		 * During instantiation of the applet, all objects are created. In this
-		 * example, this is the 'pin' object.
-		 */
+		/* During instantiation of the applet, all objects are created. */
 		pin = new OwnerPIN(PIN_TRY_LIMIT, PIN_SIZE);
 		pin.update(new byte[] { 0x01, 0x02, 0x03, 0x04 }, (short) 0, PIN_SIZE);
-		lastTime = new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
-		/*
-		 * This method registers the applet with the JCRE on the card.
-		 */
+		// initial time
+		lastTime = new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
+
+		/* Build private RSA Key */
+		short offset = 0;
+		short keySizeInBytes = 64;
+		short keySizeInBits = 512;
+		secretKey = (RSAPrivateKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits, false);
+		secretKey.setExponent(dummyPrivExponent, offset, keySizeInBytes);
+		secretKey.setModulus(dummyPrivModulus, offset, keySizeInBytes);
+
+		/* Build public RSA Key of Middleware */
+		offset = 0;
+		keySizeInBytes = 256;
+		keySizeInBits = (short) (keySizeInBytes * 8);
+		pkMiddleware = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
+		pkMiddleware.setExponent(dummyPubExponent, offset, (short) 3);
+		pkMiddleware.setModulus(dummyPubModulus, offset, keySizeInBytes);
+
+		/* This method registers the applet with the JCRE on the card. */
 		register();
 	}
 
@@ -173,89 +165,46 @@ public class IdentityCard extends Applet {
 		case GET_CERT_INS:
 			askCertificate(apdu);
 			break;
+		case SET_TEMPTIME_INS:
+			setTempTime(apdu);
+			break;
 		case VALIDATE_TIME_INS:
 			validateTime(apdu);
 			break;
-		// If no matching instructions are found it is indicated in the status
-		// word of the response.
-		// This can be done by using this method. As an argument a short is
-		// given that indicates
-		// the type of warning. There are several predefined warnings in the
-		// 'ISO7816' class.
+		case UPDATE_TIME_INS:
+			updateTime(apdu);
+			break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 		}
 	}
 
-	public void validateTime(APDU apdu) {
-		if (!pin.isValidated())
-			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
-		else {
-			// Get data from datafield = seconds since epoch >> max value of
-			// short.. Place data in byte array
-
-			// Retrieve last time -> wss gehaald uit eeprom? maar hoe wordt deze
-			// gedefinieerd?
-
-			// Haalt apdu buffer op en met slice haal je enkel de nuttige data
-			// eruit
-			byte[] buffer = apdu.getBuffer();
-			byte[] time = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
-			// Tijd format gaat normaal altijd 4 bytes lang zijn
-			time = slice(time, (short) 0, (short) 4);
-
-			// If current - last(buffer) > threshold send 0 else 1
-			boolean refresh = compareTime(time);
-
-			// Antwoord formuleren in byte array alst gwn in een short terug
-			// kan, moet je het maar aanpassen rhino
-			byte[] response = new byte[2];
-
-			if (refresh) {
-				response[0] = (byte) (0x11);
-				response[1] = (byte) (0x11);
-			} else {
-				response[0] = (byte) (0x00);
-				response[1] = (byte) (0x00);
-			}
-
-			for (short i = 0; i < lastTime.length; i++) {
-				lastTime[i] = 0x01;
-			}
-
-			apdu.setOutgoing();
-			apdu.setOutgoingLength((short) response.length);
-			apdu.sendBytesLong(response, (short) 0, (short) response.length);
-			// apdu.setOutgoing();
-			// apdu.setOutgoingLength((short) time.length);
-			// apdu.sendBytesLong(time, (short) 0, (short) time.length);
-		}
-	}
-	
-	//////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Slechte Functie!!!! Doet nog geen juiste vergelijking!!! Moet nog correct geimplementeerd worden //
-	//////////////////////////////////////////////////////////////////////////////////////////////////////
-	private boolean compareTime(byte[] time) {
-		short length;
-		if (time.length > lastTime.length) {
-			length = (short) time.length;
-		} else {
-			length = (short) lastTime.length;
-		}
-
+	private boolean compareTime() {
 		// Twee tijden van elkaar aftrekken
-		byte[] result = new byte[length];
-		for (short i = 0; i < length; i++) {
-			result[i] = (byte) (time[i] - lastTime[i]);
+		byte[] threshold = new byte[] { (byte) 0, (byte) 1, (byte) 81, (byte) -128 };
+
+		byte[] result = new byte[4];
+		for (short i = 0; i < 4; i++) {
+			result[i] = (byte) (tempTime[i] - lastTime[i]);
 		}
 
 		boolean refresh = false;
 		// Vergelijken met threshold
-		for (short i = 0; i < length; i++) {
-			if (result[i] < threshold[i])
-				refresh = true;
+		for (short i = 0; i < 4; i++) {
+			if (i == 0) {
+				if (tempTime[0] != lastTime[0]) {
+					refresh = true;
+					break;
+				}
+			} else if (result[i] != (short) threshold[i])
+				if (result[i] < (short) threshold[i]) {
+					refresh = true;
+					break;
+				} else {
+					refresh = false;
+					break;
+				}
 		}
-
 		return refresh;
 	}
 
@@ -274,40 +223,21 @@ public class IdentityCard extends Applet {
 	 * This method is used to authenticate the owner of the card using a PIN
 	 * code.
 	 */
+
 	private void validatePIN(APDU apdu) {
+		// shizzle in commentaar is om te werken adhv encrypted communication
+
+		// byte[] pinBytesWithNull = receiveBytesEncryptedByMW(apdu);
+		// byte[] pinBytes = removeNullBytes(pinBytesWithNull);
 		byte[] buffer = apdu.getBuffer();
-		// The input data needs to be of length 'PIN_SIZE'.
-		// Note that the byte values in the Lc and Le fields represent values
-		// between
-		// 0 and 255. Therefore, if a short representation is required, the
-		// following
-		// code needs to be used: short Lc = (short) (buffer[ISO7816.OFFSET_LC]
-		// & 0x00FF);
+
+		// if (pinBytes.length == PIN_SIZE) {
+		// if (pin.check(pinBytes, (short) 0, PIN_SIZE) == false)
+		// ISOException.throwIt(SW_VERIFICATION_FAILED);
+		// } else1515
+		// ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 		if (buffer[ISO7816.OFFSET_LC] == PIN_SIZE) {
-			// This method is used to copy the incoming data in the APDU buffer.
 			apdu.setIncomingAndReceive();
-			// Note that the incoming APDU data size may be bigger than the APDU
-			// buffer
-			// size and may, therefore, need to be read in portions by the
-			// applet.
-			// Most recent smart cards, however, have buffers that can contain
-			// the maximum
-			// data size. This can be found in the smart card specifications.
-			// If the buffer is not large enough, the following method can be
-			// used:
-			//
-			// byte[] buffer = apdu.getBuffer();
-			// short bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
-			// Util.arrayCopy(buffer, START, storage, START, (short)5);
-			// short readCount = apdu.setIncomingAndReceive();
-			// short i = ISO7816.OFFSET_CDATA;
-			// while ( bytesLeft > 0){
-			// Util.arrayCopy(buffer, ISO7816.OFFSET_CDATA, storage, i,
-			// readCount);
-			// bytesLeft -= readCount;
-			// i+=readCount;
-			// readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
-			// }
 			if (pin.check(buffer, ISO7816.OFFSET_CDATA, PIN_SIZE) == false)
 				ISOException.throwIt(SW_VERIFICATION_FAILED);
 		} else
@@ -324,12 +254,23 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
-			// This sequence of three methods sends the data contained in
-			// 'serial' with offset '0' and length 'serial.length'
-			// to the host application.
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) serial.length);
 			apdu.sendBytesLong(serial, (short) 0, (short) serial.length);
+		}
+	}
+
+	private void updateTime(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			/** TODO: add verifySig en lastValidationTime < time? **/
+			byte[] buffer = apdu.getBuffer();
+			byte[] time = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
+			// Tijd format gaat normaal altijd 4 bytes lang zijn
+			time = slice(time, (short) 0, (short) 4);
+
+			lastTime = time;
 		}
 	}
 
@@ -339,9 +280,6 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
-			// This sequence of three methods sends the data contained in
-			// 'serial' with offset '0' and length 'serial.length'
-			// to the host application.
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) name.length);
 			apdu.sendBytesLong(name, (short) 0, (short) name.length);
@@ -353,23 +291,10 @@ public class IdentityCard extends Applet {
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
 
-			short offset = 0;
-			short keySizeInBytes = 64;
-			short keySizeInBits = 512;
-			RSAPrivateKey privKey = (RSAPrivateKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits,
-					false);
-
-			privKey.setExponent(privExponent, offset, keySizeInBytes);
-			privKey.setModulus(privModulus, offset, keySizeInBytes);
-
 			byte[] buffer = apdu.getBuffer();
 			byte[] output = new byte[240];
-			short siglength = generateSignature(privKey, buffer, ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(),
-					output);
+			short siglength = generateSignature(secretKey, buffer, ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(), output);
 
-			// This sequence of three methods sends the data contained in
-			// 'serial' with offset '0' and length 'serial.length'
-			// to the host application.
 			apdu.setOutgoing();
 			apdu.setOutgoingLength(siglength);
 			apdu.sendBytesLong(output, (short) 0, (short) siglength);
@@ -381,6 +306,43 @@ public class IdentityCard extends Applet {
 		signature.init(privKey, Signature.MODE_SIGN);
 		short sigLength = signature.sign(input, offset, length, output, (short) 0);
 		return sigLength;
+	}
+
+	public void setTempTime(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			byte[] buffer = apdu.getBuffer();
+
+			if (tempTime == null) {
+				tempTime = new byte[4];
+
+				tempTime[0] = (byte) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
+				tempTime[1] = (byte) (buffer[ISO7816.OFFSET_P2] & (short) 0xFF); // test?
+			} else {
+				tempTime[2] = (byte) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
+				tempTime[3] = (byte) (buffer[ISO7816.OFFSET_P2] & (short) 0xFF); // test?
+			}
+		}
+	}
+
+	public void validateTime(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		// If current - last(buffer) > threshold send 0 else 1
+		boolean refresh = compareTime();
+
+		byte[] answer;
+
+		if (refresh) {
+			answer = new byte[] { (byte) 0 };
+		} else {
+			answer = new byte[] { (byte) 1 };
+		}
+
+		apdu.setOutgoing();
+		apdu.setOutgoingLength((short) answer.length);
+		apdu.sendBytesLong(answer, (short) 0, (short) answer.length);
 	}
 
 	public void askLength(APDU apdu) {
@@ -408,12 +370,6 @@ public class IdentityCard extends Applet {
 
 			byte[] buffer = apdu.getBuffer();
 			byte[] output = new byte[240];
-			// short siglength = generateSignature(privKey, buffer,
-			// ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(), output);
-
-			/**
-			 * TODO: vorm buffer om naar getal (short?) --> steek in teller
-			 */
 
 			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
@@ -431,12 +387,56 @@ public class IdentityCard extends Applet {
 				hulp++;
 			}
 
-			// This sequence of three methods sends the data contained in
-			// 'serial' with offset '0' and length 'serial.length'
-			// to the host application.
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) output.length);
 			apdu.sendBytesLong(output, (short) 0, (short) output.length);
 		}
+	}
+
+	private void sendBytesEncryptedForMW(APDU apdu, byte[] data, short dataLen) {
+		Cipher asymCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
+		asymCipher.init(pkMiddleware, Cipher.MODE_ENCRYPT);
+		byte[] encryptedData = new byte[256];
+
+		byte[] dataToEncrypt = new byte[64];
+
+		Util.arrayCopy(data, (short) 0, dataToEncrypt, (short) 0, (short) data.length);
+
+		asymCipher.doFinal(data, (short) 0, (short) data.length, encryptedData, (short) 0);
+
+		apdu.setOutgoing();
+		apdu.setOutgoingLength((short) encryptedData.length);
+		apdu.sendBytesLong(encryptedData, (short) 0, (short) encryptedData.length);
+	}
+
+	private byte[] receiveBytesEncryptedByMW(APDU apdu) {
+		byte[] buffer = apdu.getBuffer();
+		apdu.setIncomingAndReceive();
+		short inc = apdu.getIncomingLength();
+		byte[] encryptedData = new byte[inc];
+		Util.arrayCopy(buffer, (short) ISO7816.OFFSET_CDATA, encryptedData, (short) 0, inc);
+
+		Cipher asymCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
+		asymCipher.init(secretKey, Cipher.MODE_DECRYPT);
+
+		byte[] decryptedData = new byte[256];
+		short length = asymCipher.doFinal(encryptedData, (short) 0, (short) inc, decryptedData, (short) 0);
+
+		byte[] returnData = new byte[length];
+		Util.arrayCopy(decryptedData, (short) 0, returnData, (short) 0, length);
+
+		return decryptedData;
+	}
+
+	private byte[] cutOffNulls(byte[] data) {
+		short length = (short) data.length;
+		short i;
+		for (i = 0; i < length; i++) {
+			if (data[i] == (byte) 0)
+				break;
+		}
+		byte[] cleanedData = new byte[i];
+		Util.arrayCopy(data, (short) 0, cleanedData, (short) 0, i);
+		return cleanedData;
 	}
 }

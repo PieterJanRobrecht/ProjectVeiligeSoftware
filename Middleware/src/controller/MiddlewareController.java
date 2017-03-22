@@ -1,11 +1,37 @@
 package controller;
 
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.smartcardio.CommandAPDU;
+import javax.smartcardio.ResponseAPDU;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
 
+import be.msec.client.Keys;
 import be.msec.client.connection.Connection;
 import be.msec.client.connection.IConnection;
 import be.msec.client.connection.SimulatedConnection;
@@ -13,41 +39,80 @@ import be.msec.client.connection.SimulatedConnection;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
+import ssl.Client;
 
 public class MiddlewareController {
 
 	private final static byte IDENTITY_CARD_CLA = (byte) 0x80;
-	private static final byte VALIDATE_PIN_INS = 0x22;
-	private static final byte GET_IDENTITY_INS = 0x26;
-	private static final byte GET_NAME_INS = 0x24;
-	private static final byte SIGN_INS = 0x28;
-	private static final byte ASK_LENGTH_INS = 0x30;
-	private static final byte GET_CERT_INS = 0x32;
-	private static final byte VALIDATE_TIME_INS = 0x34;
-	private final static short SW_VERIFICATION_FAILED = 0x6300;
-	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6301;
+	private static final byte VALIDATE_PIN_INS = 0x22; // 34
+	private static final byte GET_IDENTITY_INS = 0x26; // 38
+	private static final byte GET_NAME_INS = 0x24; // 36
+	private static final byte SIGN_INS = 0x28; // 40
+	private static final byte ASK_LENGTH_INS = 0x30; // 48
+	private static final byte GET_CERT_INS = 0x32; // 50
+
+	private static final byte SET_TEMPTIME_INS = 0x40;
+	private static final byte VALIDATE_TIME_INS = 0x42;
+	private static final byte UPDATE_TIME_INS = 0x44;
+
+	private final static short SW_VERIFICATION_FAILED = 0x6300; // 25344
+	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6301; // 25345
+	private final static short KAPPA = 0x6337; // 25399
+
+	// getjoept.. moet nog aangepast worden aan eigen certificaten
+	// gebruik momenteel overal dezelfde :')
+	private byte[] dummyPrivExponent = new byte[] { (byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1, (byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad, (byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9, (byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9, (byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60, (byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11, (byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65, (byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff, (byte) 0xc3, (byte) 0x18, (byte) 0x81 };
+	private byte[] dummyPrivModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
+	private byte[] dummyPubExponent = new byte[] { (byte) 0x01, (byte) 0x00, (byte) 0x01 };
+	private byte[] dummyPubModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
 
 	@FXML
 	private TextArea communicationArea;
 
-	private IConnection connection;
+	private static IConnection connection;
 
 	@FXML
 	void loginSimulator(ActionEvent event) {
 		startSimulator();
 		System.out.print("Sending Time..");
-		sendTime();
-		System.out.println(" Complete!");
+		getName();
+		System.out.println("LoginSimulator Complete!");
 	}
 
 	@FXML
 	void login(ActionEvent event) {
-		System.out.print("Sending Pin..");
+
+		try {
+			/* Real Card: */
+			connection = new Connection();
+			((Connection) connection).setTerminal(0);
+			// depending on which cardreader you use
+			connection.connect();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		System.out.println("Sending Pin..");
 		sendPin();
-		System.out.println(" Complete!");
-		System.out.print("Sending Time..");
-		sendTime();
-		System.out.println(" Complete!");
+		System.out.println("Complete! \n");
+
+		// System.out.println("Getting Name..");
+		// getName();
+		// System.out.println("Complete! \n");
+		//
+		// System.out.println("Signing test..");
+		// signTest();
+		// System.out.println("Complete! \n");
+
+		System.out.println("Sending Time..");
+		boolean isValid = isValid();
+		System.out.println("revalidation needed: " + !isValid);
+		System.out.println("Complete! \n");
+
+		if (!isValid) {
+			sendNewTime(fetchNewTime());
+		}
 	}
 
 	private void startSimulator() {
@@ -62,15 +127,13 @@ public class MiddlewareController {
 			this.connection.connect();
 
 			// 0. create applet (only for simulator!!!)
-			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
-					new byte[] { (byte) 0xa0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x08, 0x01 }, 0x7f);
+			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00, new byte[] { (byte) 0xa0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x08, 0x01 }, 0x7f);
 			r = this.connection.transmit(a);
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
 				throw new Exception("select installer applet failed");
 
-			a = new CommandAPDU(0x80, 0xB8, 0x00, 0x00,
-					new byte[] { 0xb, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00, 0x00 }, 0x7f);
+			a = new CommandAPDU(0x80, 0xB8, 0x00, 0x00, new byte[] { 0xb, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00, 0x00 }, 0x7f);
 			r = this.connection.transmit(a);
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
@@ -78,102 +141,49 @@ public class MiddlewareController {
 
 			// 1. Select applet (not required on a real card, applet is selected
 			// by default)
-			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
-					new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00 }, 0x7f);
+			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00 }, 0x7f);
 			r = this.connection.transmit(a);
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
 				throw new Exception("Applet selection failed");
 
 			// 2. Send PIN
-			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00, 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04 });
-			r = this.connection.transmit(a);
-
-			System.out.println(r);
-			if (r.getSW() == SW_VERIFICATION_FAILED)
-				throw new Exception("PIN INVALID");
-			else if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + r.getSW());
-			System.out.println("PIN Verified");
+			// a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00,
+			// 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04 });
+			// r = this.connection.transmit(a);
+			//
+			// System.out.println(r);
+			// if (r.getSW() == SW_VERIFICATION_FAILED)
+			// throw new Exception("PIN INVALID");
+			// else if (r.getSW() != 0x9000)
+			// throw new Exception("Exception on the card: " + r.getSW());
+			// System.out.println("PIN Verified");
+			sendPin();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	private void sendTime() {
-		try {
-			CommandAPDU a;
-			ResponseAPDU r;
-			// 2. Send Time
-
-			// Seconden sinds epoch
-			int unixTime = (int) (System.currentTimeMillis() / 1000);
-
-			byte[] bytes = intToByteArray(unixTime);
-
-			/*
-			 * a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00,
-			 * 0x00, bytes, 0xff); addText("Sending time " +
-			 * Arrays.toString(intToByteArray(unixTime)) + " to card");
-			 * 
-			 * r = connection.transmit(a); addText("Received an answer");
-			 * 
-			 * System.out.println(r); if (r.getSW() == SW_VERIFICATION_FAILED) {
-			 * addText("PIN INVALID"); throw new Exception("PIN INVALID"); }
-			 * else if (r.getSW() != 0x9000) throw new
-			 * Exception("Exception on the card: " + r.getSW());
-			 * 
-			 * byte[] inc = r.getData();
-			 * 
-			 * System.out.println(new BigInteger(1, inc).toString(16));
-			 */
-
-			// a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS,
-			// unixTime, 0x00, 0xff);
-			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00, 0x00, bytes);
-			r = connection.transmit(a);
-
-			addText("Received an answer");
-
-			System.out.println(r);
-			addText(Arrays.toString(r.getData()));
-			if (r.getSW() == SW_VERIFICATION_FAILED) {
-				addText("PIN INVALID");
-				throw new Exception("PIN INVALID");
-			} else if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + r.getSW());
-
-			byte[] inc = r.getData();
-
-			System.out.println(new BigInteger(1, inc).toString(16));
-
-			addText("Action performed correctly");
-		} catch (Exception e) {
-			System.out.println("You fucked up");
-			e.printStackTrace();
-		}
-
 	}
 
 	private void sendPin() {
 		try {
-			/* Real Card: */
-			connection = new Connection();
-			((Connection) connection).setTerminal(0);
-			// depending on which cardreader you use
-			connection.connect();
+			// authenticate();
+			// byte[] encryptedPin = encryptWithPublicKeySC(new byte[] { 0x01,
+			// 0x02, 0x03, 0x04 });
 
 			CommandAPDU a;
 			ResponseAPDU r;
 			// 2. Send PIN
+			// a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00,
+			// 0x00, encryptedPin);
 			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00, 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04 });
-			addText("Sending PIN to card");
 
+			addText("Sending PIN to card");
 			r = connection.transmit(a);
 			addText("Received response on PIN instruction");
 
-			System.out.println(r);
+			System.out.println("\t Response: " + r);
+			System.out.println("\t Response: " + Arrays.toString(r.getData()));
 			if (r.getSW() == SW_VERIFICATION_FAILED) {
 				addText("PIN INVALID");
 				throw new Exception("PIN INVALID");
@@ -185,6 +195,173 @@ public class MiddlewareController {
 			System.out.println("You fucked up the pin");
 			e.printStackTrace();
 		}
+	}
+
+	private boolean isValid() {
+		try {
+			CommandAPDU a;
+			ResponseAPDU r;
+			// 2. Send Time
+
+			// Seconden sinds epoch
+			int unixTime = (int) (System.currentTimeMillis() / 1000);
+			byte[] bytes = intToByteArray(unixTime);
+
+			// System.out.println("\t \t DEBUG - current epoch " +
+			// Arrays.toString(bytes) + " (" + unixTime + ")");
+
+			// byte[] bytes1 = intToByteArray((int) (1483228800));
+			// System.out.println("\t \t DEBUG - 1 jan 2017 " +
+			// Arrays.toString(bytes1) + " (" + 1483228800 + ")");
+
+			// byte[] bytes2 = intToByteArray((int) (1512086400));
+			// System.out.println("\t \t DEBUG - 1 dec 2017 " +
+			// Arrays.toString(bytes2) + " (" + 1512086400 + ")");
+
+			intToByteArray(unixTime + 200000);
+			intToByteArray(unixTime - 90000);
+
+			for (int i = 0; i < 3; i += 2) {
+				a = new CommandAPDU(IDENTITY_CARD_CLA, SET_TEMPTIME_INS, bytes[i], bytes[i + 1], 0xff);
+				r = connection.transmit(a);
+
+				if (r.getSW() == SW_VERIFICATION_FAILED) {
+					addText("PIN INVALID");
+					throw new Exception("PIN INVALID");
+				} else if (r.getSW() != 0x9000)
+					throw new Exception("Exception on the card: " + r.getSW());
+
+				addText("Receive an answer regarding time (" + i + ")");
+				System.out.println("\t Response: " + r);
+			}
+
+			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00, 0x00, 0xff);
+			r = connection.transmit(a);
+
+			addText("Received final answer regarding time");
+
+			System.out.println("\t Response: " + r);
+			addText(Arrays.toString(r.getData()));
+			if (r.getSW() == SW_VERIFICATION_FAILED) {
+				addText("PIN INVALID");
+				throw new Exception("PIN INVALID");
+			} else if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + r.getSW());
+
+			byte[] inc = r.getData();
+
+			System.out.println("\t Payload: " + Arrays.toString(inc));
+			System.out.println("\t Payload: " + new BigInteger(1, inc).toString(16));
+
+			addText("Action performed correctly");
+
+			if (inc[0] == (byte) 1)
+				return true;
+		} catch (Exception e) {
+			System.out.println("You fucked up");
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+	private int fetchNewTime() {
+		Client c = new Client();
+		return c.fetchTime();
+	}
+
+	private void sendNewTime(int time) {
+		try {
+			CommandAPDU a;
+			ResponseAPDU r;
+
+			byte[] bytes = intToByteArray(time);
+
+			a = new CommandAPDU(IDENTITY_CARD_CLA, UPDATE_TIME_INS, 0x00, 0x00, bytes);
+			r = connection.transmit(a);
+
+			addText(Arrays.toString(r.getData()));
+			if (r.getSW() == SW_VERIFICATION_FAILED) {
+				addText("PIN INVALID");
+				throw new Exception("PIN INVALID");
+			} else if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + r.getSW());
+
+			addText("sendNewTime performed correctly");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void signTest() {
+		/**
+		 * 8026000000044a616e20 die 80 26 000 000 komt van 0x80 (CLA), 0x26
+		 * (INS) en dan die 2x 000 door 0x00 (p1 en p2) wat volgt is dan die
+		 * ins_file uit IDcard.java
+		 */
+		try {
+			CommandAPDU a;
+			ResponseAPDU r;
+
+			SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+			byte[] bytes = new byte[20];
+			random.nextBytes(bytes);
+
+			// 5. sign iets instruction
+			System.out.println("Original data: " + Arrays.toString(bytes));
+			a = new CommandAPDU(IDENTITY_CARD_CLA, SIGN_INS, 0x00, 0x00, bytes);
+			r = connection.transmit(a);
+
+			System.out.println(r);
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + r.getSW());
+
+			byte[] signedChallenge = r.getData();
+
+			System.out.println("\t Payload: " + Arrays.toString(signedChallenge));
+			System.out.println("\t Payload: " + new BigInteger(1, signedChallenge).toString(16));
+		} catch (Exception e) {
+			System.out.println("You fucked up");
+			e.printStackTrace();
+		}
+	}
+
+	private void getName() {
+		try {
+			CommandAPDU a;
+			ResponseAPDU r;
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_NAME_INS, 0x00, 0x00, 0xff);
+			r = connection.transmit(a);
+
+			System.out.println(r);
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + r.getSW());
+
+			byte[] inc = r.getData();
+			System.out.println("\t Payload: " + Arrays.toString(inc));
+			System.out.println("\t Payload: " + new BigInteger(1, inc).toString(16));
+
+			/**
+			 * 8026000000044a616e20 die 80 26 000 000 komt van 0x80 (CLA), 0x26
+			 * (INS) en dan die 2x 000 door 0x00 (p1 en p2) wat volgt is dan die
+			 * ins_file uit IDcard.java
+			 */
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void sendData(byte command, byte p1, byte p2, byte[] data) throws Exception {
+		System.out.println("Send data (length " + data.length + "): ");
+
+		CommandAPDU a;
+		ResponseAPDU r;
+
+		a = new CommandAPDU(IDENTITY_CARD_CLA, command, p1, p2, data, 0xff);
+		r = connection.transmit(a);
+		if (r.getSW() != 0x9000)
+			throw new Exception(command + " failed " + r);
 	}
 
 	@FXML
@@ -211,8 +388,61 @@ public class MiddlewareController {
 
 	private byte[] intToByteArray(final int i) {
 		BigInteger bigInt = BigInteger.valueOf(i);
-		System.out.println("Sending " + Arrays.toString(bigInt.toByteArray()));
+		System.out.print("\t Converting " + i + " ...");
+		System.out.println(" converted to " + Arrays.toString(bigInt.toByteArray()));
 		return bigInt.toByteArray();
+	}
+
+	private BigInteger byteArrayToInt(final byte[] b) {
+		return new BigInteger(b);
+	}
+
+	private static byte[] sendInsAndReceive(byte command, boolean encryptedMW) throws Exception {
+		return sendInsAndReceive(command, (byte) 0x00, (byte) 0x00, encryptedMW);
+	}
+
+	private static byte[] sendInsAndReceive(byte command, byte p1, byte p2, boolean encryptedMW) throws Exception {
+		CommandAPDU a;
+		ResponseAPDU r;
+
+		// System.out.println("Send instruction: [command "+command+" p1 "+p1+"
+		// p2
+		// "+p2+"]");
+		a = new CommandAPDU(IDENTITY_CARD_CLA, command, p1, p2, 0xff);
+		r = connection.transmit(a);
+		if (r.getSW() != 0x9000)
+			throw new Exception(command + " failed " + r + " SW: " + r.getSW());
+
+		// System.out.println("Received encrypted data (length
+		// "+r.getData().length+"): "); Util.printBytes(r.getData());
+		if (encryptedMW)
+			return decryptWithPrivateKey(r.getData());
+		else
+			return r.getData();
+	}
+
+	public static byte[] decryptWithPrivateKey(byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		Cipher asymCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
+
+		asymCipher.init(Cipher.DECRYPT_MODE, Keys.getMyPrivateRSAKey());
+		return asymCipher.doFinal(data);
+	}
+
+	public static byte[] encryptWithPublicKeySC(byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+		System.out.println("\n \t Data to encrypt: " + Arrays.toString(data));
+
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		Cipher asymCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
+
+		asymCipher.init(Cipher.ENCRYPT_MODE, Keys.getPublicSCKey());
+
+		byte[] encryptedData = asymCipher.doFinal(data);
+
+		System.out.println("\t Data encrypted (length " + encryptedData.length + "): ");
+		System.out.println("\t " + Arrays.toString(encryptedData));
+
+		return encryptedData;
 	}
 
 	// try {

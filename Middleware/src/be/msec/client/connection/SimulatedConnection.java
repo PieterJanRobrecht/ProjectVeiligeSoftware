@@ -15,19 +15,17 @@ import com.sun.javacard.apduio.CadT1Client;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
 
-
-
 public class SimulatedConnection implements IConnection {
 	private CadT1Client cad;
 	private Socket sock;
 	private int port;
 
-	public SimulatedConnection(){
-		port=9025;
+	public SimulatedConnection() {
+		port = 9025;
 	}
 
-	public void setPort(int i){
-		port=i;
+	public void setPort(int i) {
+		port = i;
 	}
 
 	public void connect() throws Exception {
@@ -35,7 +33,7 @@ public class SimulatedConnection implements IConnection {
 		sock.setTcpNoDelay(true);
 		BufferedInputStream is = new BufferedInputStream(sock.getInputStream());
 		BufferedOutputStream os = new BufferedOutputStream(sock.getOutputStream());
-		cad = new CadT1Client(is,os);
+		cad = new CadT1Client(is, os);
 		cad.powerUp();
 	}
 
@@ -47,10 +45,10 @@ public class SimulatedConnection implements IConnection {
 
 	public ResponseAPDU transmit(CommandAPDU apdu) throws Exception {
 		Apdu a = new Apdu();
-		a.command[0] = (byte)apdu.getCLA();
-		a.command[1] = (byte)apdu.getINS();
-		a.command[2] = (byte)apdu.getP1();
-		a.command[3] = (byte)apdu.getP2();
+		a.command[0] = (byte) apdu.getCLA();
+		a.command[1] = (byte) apdu.getINS();
+		a.command[2] = (byte) apdu.getP1();
+		a.command[3] = (byte) apdu.getP2();
 		a.setDataIn(apdu.getData());
 		a.Le = apdu.getNe();
 		cad.exchangeApdu(a);
@@ -58,4 +56,3 @@ public class SimulatedConnection implements IConnection {
 	}
 
 }
-

@@ -9,10 +9,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-
-public class Client extends Application{
-
-
+public class Client extends Application {
 	public void start(Stage primaryStage) {
 		try {
 			// Laden van de fxml file waarin alle gui elementen zitten
@@ -26,13 +23,13 @@ public class Client extends Application{
 
 			// Ophalen van de controller horende bij de view klasse
 			MiddlewareController middlewareController = loader.<MiddlewareController>getController();
-			assert (middlewareController != null);			
-			
+			assert (middlewareController != null);
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * @param args
 	 */

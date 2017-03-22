@@ -13,13 +13,10 @@ import javax.smartcardio.ResponseAPDU;
  * @author Jorn
  */
 
-
 public interface IConnection {
+	abstract void connect() throws Exception;
 
-        abstract void connect() throws Exception;
-        abstract void close() throws Exception;
-        
-	abstract ResponseAPDU transmit(CommandAPDU apdu)  throws Exception;
+	abstract void close() throws Exception;
 
+	abstract ResponseAPDU transmit(CommandAPDU apdu) throws Exception;
 }
-
