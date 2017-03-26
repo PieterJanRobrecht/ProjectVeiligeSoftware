@@ -17,8 +17,11 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.util.Arrays;
 
 /**
- * TODO evt nakijken of we dit niet kunnen gebruiken ipv public keys (dus die certs):
+ * TODO evt nakijken of we dit niet kunnen gebruiken ipv public keys (dus die
+ * certs):
  * http://stackoverflow.com/questions/36303236/verify-a-signature-in-java-using-openssl-generated-key-and-certificate
+ * 
+ * TODO vervang getjoepte exponenten/moduluss
  * 
  * @author rhino
  *
@@ -39,8 +42,6 @@ public class Server extends Communicator {
 		try {
 			String mod = bytesToHex(dummyPrivModulus);
 			String exp = bytesToHex(dummyPrivExponent);
-
-			System.out.println(mod + "\n\n" + exp);
 			secretKey = (RSAPrivateKey) bigIntegerToPrivateKey(mod, exp);
 
 		} catch (NoSuchAlgorithmException e1) {
@@ -61,7 +62,7 @@ public class Server extends Communicator {
 		SSLServerSocket sslServerSocket = null;
 
 		try {
-			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(1337);
+			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(1336);
 		} catch (IOException e) {
 			System.err.println("Unable to initiate SSLServerSocket.");
 			e.printStackTrace();
@@ -87,10 +88,7 @@ public class Server extends Communicator {
 
 				System.out.println("Client connected to fetch time, returning " + unixTime);
 
-				String test = bytesToHex(generateSignatureForMessage(secretKey, ""+unixTime));
-				System.out.println(test);
-				System.out.println(test.substring(0, 80));
-				System.out.println(test.substring(80, 128));
+				String test = bytesToHex(generateSignatureForMessage(secretKey, "" + unixTime));
 				send(test.substring(0, 80), outputStream);
 				send(test.substring(80, 128), outputStream);
 				send("" + unixTime, outputStream);
@@ -115,14 +113,8 @@ public class Server extends Communicator {
 	}
 
 	public byte[] generateSignatureForMessage(RSAPrivateKey privKey, String message) throws Exception {
-		// Signature s = Signature.getInstance("SHA256withRSA");
-		// s.initSign(privKey);
-		// s.update(ByteBuffer.wrap(message.getBytes()));
-		// byte[] signature = s.sign();
-
 		Signature rsa = Signature.getInstance("SHA1withRSA");
 		rsa.initSign(privKey);
-
 		rsa.update(message.getBytes());
 		return rsa.sign();
 	}

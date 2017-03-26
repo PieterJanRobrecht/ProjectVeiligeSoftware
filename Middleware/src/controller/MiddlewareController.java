@@ -39,25 +39,33 @@ import be.msec.client.connection.SimulatedConnection;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
-import ssl.Client;
+import ssl.SSLConnectionServiceProvider;
+import ssl.SSLConnectionTimeServer;
 
 public class MiddlewareController {
 
 	private final static byte IDENTITY_CARD_CLA = (byte) 0x80;
-	private static final byte VALIDATE_PIN_INS = 0x22; // 34
-	private static final byte GET_IDENTITY_INS = 0x26; // 38
-	private static final byte GET_NAME_INS = 0x24; // 36
-	private static final byte SIGN_INS = 0x28; // 40
-	private static final byte ASK_LENGTH_INS = 0x30; // 48
-	private static final byte GET_CERT_INS = 0x32; // 50
+	private static final byte VALIDATE_PIN_INS = 0x22;
+	private static final byte GET_IDENTITY_INS = 0x26;
+	private static final byte GET_NAME_INS = 0x24;
+	private static final byte SIGN_INS = 0x28;
+	private static final byte ASK_LENGTH_INS = 0x30;
+	private static final byte GET_CERT_INS = 0x32;
 
 	private static final byte SET_TEMPTIME_INS = 0x40;
 	private static final byte VALIDATE_TIME_INS = 0x42;
 	private static final byte UPDATE_TIME_INS = 0x44;
 
-	private final static short SW_VERIFICATION_FAILED = 0x6300; // 25344
-	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6301; // 25345
-	private final static short KAPPA = 0x6337; // 25399
+	private static final byte SEND_SIG_INS = 0x46;
+	private static final byte SEND_SIG_TIME_INS = 0x48;
+
+	private static final byte SEND_CERT_INS = 0x41;
+
+	private final static short SW_VERIFICATION_FAILED = 0x6322;
+	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
+	private final static short KAPPA = 0x6337;
+	private final static short VERIFY_FAILED = 0x6338;
+	private final static short VERIFY_EXCEPTION_THROWN = 0x6339;
 
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
 	// gebruik momenteel overal dezelfde :')
@@ -74,9 +82,29 @@ public class MiddlewareController {
 	@FXML
 	void loginSimulator(ActionEvent event) {
 		startSimulator();
-		System.out.print("Sending Time..");
-		getName();
-		System.out.println("LoginSimulator Complete!");
+		System.out.println("Sending Pin..");
+		sendPin();
+		System.out.println("Complete! \n");
+
+		System.out.println("Sending Time..");
+		boolean isValid = isValid();
+		System.out.println("revalidation needed: " + !isValid);
+		System.out.println("Complete! \n");
+
+		if (!isValid) {
+			System.out.println("Sending Revalidation..");
+			sendNewTime(fetchNewTime());
+			System.out.println("Complete! \n");
+		}
+
+		/*** STAP 2 ***/
+		System.out.println("Fetching SP certificate and passing it to SC..");
+		authenticateServiceProvider( /**
+										 * steek hier nog waarde in voor wie
+										 * willen we auth?
+										 **/
+		);
+
 	}
 
 	@FXML
@@ -89,7 +117,6 @@ public class MiddlewareController {
 			// depending on which cardreader you use
 			connection.connect();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -105,6 +132,7 @@ public class MiddlewareController {
 		// signTest();
 		// System.out.println("Complete! \n");
 
+		/*** STAP 1 ***/
 		System.out.println("Sending Time..");
 		boolean isValid = isValid();
 		System.out.println("revalidation needed: " + !isValid);
@@ -113,6 +141,14 @@ public class MiddlewareController {
 		if (!isValid) {
 			sendNewTime(fetchNewTime());
 		}
+
+		/*** STAP 2 ***/
+		System.out.println("Fetching SP certificate and passing it to SC..");
+		authenticateServiceProvider( /**
+										 * steek hier nog waarde in voor wie
+										 * willen we auth?
+										 **/
+		);
 	}
 
 	private void startSimulator() {
@@ -156,7 +192,8 @@ public class MiddlewareController {
 			// if (r.getSW() == SW_VERIFICATION_FAILED)
 			// throw new Exception("PIN INVALID");
 			// else if (r.getSW() != 0x9000)
-			// throw new Exception("Exception on the card: " + r.getSW());
+			// throw new Exception("Exception on the card: " +
+			// Integer.toHexString(r.getSW()));
 			// System.out.println("PIN Verified");
 			sendPin();
 
@@ -188,12 +225,13 @@ public class MiddlewareController {
 				addText("PIN INVALID");
 				throw new Exception("PIN INVALID");
 			} else if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + r.getSW());
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 			System.out.println("PIN Verified");
 			addText("PIN Verified");
 		} catch (Exception e) {
 			System.out.println("You fucked up the pin");
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 
@@ -229,7 +267,7 @@ public class MiddlewareController {
 					addText("PIN INVALID");
 					throw new Exception("PIN INVALID");
 				} else if (r.getSW() != 0x9000)
-					throw new Exception("Exception on the card: " + r.getSW());
+					throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 				addText("Receive an answer regarding time (" + i + ")");
 				System.out.println("\t Response: " + r);
@@ -246,7 +284,7 @@ public class MiddlewareController {
 				addText("PIN INVALID");
 				throw new Exception("PIN INVALID");
 			} else if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + r.getSW());
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
 
@@ -260,36 +298,57 @@ public class MiddlewareController {
 		} catch (Exception e) {
 			System.out.println("You fucked up");
 			e.printStackTrace();
+			System.exit(-1);
 		}
 
 		return false;
 	}
 
-	private int fetchNewTime() {
-		Client c = new Client();
+	private String[] fetchNewTime() {
+		SSLConnectionTimeServer c = new SSLConnectionTimeServer();
 		return c.fetchTime();
 	}
 
-	private void sendNewTime(int time) {
+	private void sendNewTime(String[] time) {
 		try {
 			CommandAPDU a;
 			ResponseAPDU r;
 
-			byte[] bytes = intToByteArray(time);
+			/** send signature to JC **/
+			byte[] bytes = intToByteArray(Integer.parseInt(time[1]));
 
-			a = new CommandAPDU(IDENTITY_CARD_CLA, UPDATE_TIME_INS, 0x00, 0x00, bytes);
+			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_SIG_TIME_INS, 0x00, 0x00, bytes);
 			r = connection.transmit(a);
 
-			addText(Arrays.toString(r.getData()));
 			if (r.getSW() == SW_VERIFICATION_FAILED) {
 				addText("PIN INVALID");
 				throw new Exception("PIN INVALID");
 			} else if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + r.getSW());
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			System.out.println("\tTime was sent to card, no exceptions met");
+
+			/** send time to JC **/
+			bytes = SSLConnectionTimeServer.hexStringToByteArray(time[0]);
+
+			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_SIG_INS, 0x00, 0x00, bytes);
+			r = connection.transmit(a);
+
+			if (r.getSW() == SW_VERIFICATION_FAILED) {
+				addText("PIN INVALID");
+				throw new Exception("PIN INVALID");
+			} else if (r.getSW() == VERIFY_EXCEPTION_THROWN) {
+				addText("VERIFY EXCEPTION WAS THROWN, RIP ALGORITHM?");
+				throw new Exception("VERIFY EXCEPTION WAS THROWN, RIP ALGORITHM?");
+			} else if (r.getSW() == VERIFY_FAILED) {
+				addText("SIGNATURE INVALID");
+				throw new Exception("SIGNATURE INVALID");
+			} else if (r.getSW() != 0x9000)
+				throw new Exception("\tException on the card: " + Integer.toHexString(r.getSW()));
 
 			addText("sendNewTime performed correctly");
 		} catch (Exception e) {
-			e.printStackTrace();
+			// do nothing... TODO fix deze shit
 		}
 	}
 
@@ -314,7 +373,7 @@ public class MiddlewareController {
 
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + r.getSW());
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] signedChallenge = r.getData();
 
@@ -335,7 +394,7 @@ public class MiddlewareController {
 
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + r.getSW());
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
 			System.out.println("\t Payload: " + Arrays.toString(inc));
@@ -347,9 +406,118 @@ public class MiddlewareController {
 			 * ins_file uit IDcard.java
 			 */
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void authenticateServiceProvider() {
+		byte[] cert = fetchCert();
+
+		CommandAPDU a;
+		ResponseAPDU r;
+
+		/** send cert part 1 to JC **/
+		try {
+			byte[] send = new byte[250];
+			for (int i = 0; i < 250; i++) {
+				send[i] = cert[i];
+			}
+
+			System.out.println("\tSending (" + send.length + "): " + Arrays.toString(send));
+			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, (byte) 1, 0x00, send);
+			r = connection.transmit(a);
+
+			if (r.getSW() == SW_VERIFICATION_FAILED) {
+				addText("PIN INVALID");
+				throw new Exception("PIN INVALID");
+			} else if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			send = new byte[cert.length - 250];
+			for (int i = 0; i < cert.length - 250; i++) {
+				send[i] = cert[i + 250];
+			}
+
+			System.out.println("\tSending (" + send.length + "): " + Arrays.toString(send));
+			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, (byte) 2, 0x00, send);
+			r = connection.transmit(a);
+
+			if (r.getSW() == SW_VERIFICATION_FAILED) {
+				addText("PIN INVALID");
+				throw new Exception("PIN INVALID");
+			} else if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			System.out.println("\tCert was sent to card, no exceptions met");
+
+			/** DEBUG GET CERT IN ORDER TO VERIFY **/
+			// // 6. vraag lengte van certificate <-> hangt samen met 7.
+			// a = new CommandAPDU(IDENTITY_CARD_CLA, ASK_LENGTH_INS, 0x00,
+			// 0x00, 0xff);
+			// r = connection.transmit(a);
+			//
+			// if (r.getSW() != 0x9000)
+			// throw new Exception("Exception on the card: " +
+			// Integer.toHexString(r.getSW()));
+			//
+			// byte[] kappa = r.getData();
+			//
+			// int size = 0;
+			//
+			// size += unsigned(kappa[0]) * 100;
+			// size += unsigned(kappa[1]);
+			//
+			// System.out.println("Kappa size: " + size);
+			//
+			// int aantalCalls = (int) Math.ceil((double) size / 240);
+			// System.out.println("Aantal calls: " + aantalCalls);
+			//
+			// // 7. haal certificate op, op basis van aantalCalls
+			// byte[] finalCertificate = new byte[size];
+			//
+			// byte[] certificate = new byte[0];
+			//
+			// for (int i = 0; i < aantalCalls; i++) {
+			// // doe nu uw calls, pleb
+			// a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CERT_INS, (byte) i,
+			// 0x00, 0xff);
+			// r = connection.transmit(a);
+			//
+			// System.out.println(r);
+			// if (r.getSW() != 0x9000)
+			// throw new Exception("Exception on the card: " +
+			// Integer.toHexString(r.getSW()));
+			//
+			// byte[] inc = r.getData();
+			// byte[] certificateTEMP = new byte[certificate.length +
+			// inc.length];
+			//
+			// System.arraycopy(certificate, 0, certificateTEMP, 0,
+			// certificate.length);
+			// System.arraycopy(inc, 0, certificateTEMP, certificate.length,
+			// inc.length);
+			//
+			// certificate = certificateTEMP;
+			// System.out.println("");
+			// }
+			//
+			// for (int i = 0; i < size; i++) {
+			// finalCertificate[i] = certificate[i];
+			// }
+			//
+			// System.out.println("Certificaat: " +
+			// Arrays.toString(finalCertificate));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private byte[] fetchCert() {
+		SSLConnectionServiceProvider c = new SSLConnectionServiceProvider();
+		return c.fetchCert(/** hier waarde in meegeven? **/
+		);
 	}
 
 	public static void sendData(byte command, byte p1, byte p2, byte[] data) throws Exception {
@@ -388,7 +556,7 @@ public class MiddlewareController {
 
 	private byte[] intToByteArray(final int i) {
 		BigInteger bigInt = BigInteger.valueOf(i);
-		System.out.print("\t Converting " + i + " ...");
+		System.out.print("\tConverting " + i + " ...");
 		System.out.println(" converted to " + Arrays.toString(bigInt.toByteArray()));
 		return bigInt.toByteArray();
 	}
@@ -411,7 +579,7 @@ public class MiddlewareController {
 		a = new CommandAPDU(IDENTITY_CARD_CLA, command, p1, p2, 0xff);
 		r = connection.transmit(a);
 		if (r.getSW() != 0x9000)
-			throw new Exception(command + " failed " + r + " SW: " + r.getSW());
+			throw new Exception(command + " failed " + r + " SW: " + Integer.toHexString(r.getSW()));
 
 		// System.out.println("Received encrypted data (length
 		// "+r.getData().length+"): "); Util.printBytes(r.getData());
@@ -445,6 +613,9 @@ public class MiddlewareController {
 		return encryptedData;
 	}
 
+	public int unsigned(byte x) {
+		return (x & 0xFF);
+	}
 	// try {
 	//
 	// /*
@@ -494,7 +665,8 @@ public class MiddlewareController {
 	// if (r.getSW() == SW_VERIFICATION_FAILED)
 	// throw new Exception("PIN INVALID");
 	// else if (r.getSW() != 0x9000)
-	// throw new Exception("Exception on the card: " + r.getSW());
+	// throw new Exception("Exception on the card: " +
+	// Integer.toHexString(r.getSW()));
 	// System.out.println("PIN Verified");
 	//
 	// // 3. Get identity instruction
@@ -504,7 +676,8 @@ public class MiddlewareController {
 	//
 	// System.out.println(r);
 	// if (r.getSW() != 0x9000)
-	// throw new Exception("Exception on the card: " + r.getSW());
+	// throw new Exception("Exception on the card: " +
+	// Integer.toHexString(r.getSW()));
 	//
 	// byte[] inc = r.getData();
 	//
@@ -531,7 +704,8 @@ public class MiddlewareController {
 	//
 	// System.out.println(r);
 	// if (r.getSW() != 0x9000)
-	// throw new Exception("Exception on the card: " + r.getSW());
+	// throw new Exception("Exception on the card: " +
+	// Integer.toHexString(r.getSW()));
 	//
 	// inc = r.getData();
 	// System.out.println(new BigInteger(1, inc).toString(16));
@@ -557,7 +731,8 @@ public class MiddlewareController {
 	//
 	// System.out.println(r);
 	// if (r.getSW() != 0x9000)
-	// throw new Exception("Exception on the card: " + r.getSW());
+	// throw new Exception("Exception on the card: " +
+	// Integer.toHexString(r.getSW()));
 	//
 	// byte[] signedChallenge = r.getData();
 	//
@@ -575,7 +750,8 @@ public class MiddlewareController {
 	//
 	// System.out.println(r);
 	// if (r.getSW() != 0x9000)
-	// throw new Exception("Exception on the card: " + r.getSW());
+	// throw new Exception("Exception on the card: " +
+	// Integer.toHexString(r.getSW()));
 	//
 	// byte[] kappa = r.getData();
 	//
@@ -612,7 +788,8 @@ public class MiddlewareController {
 	//
 	// System.out.println(r);
 	// if (r.getSW() != 0x9000)
-	// throw new Exception("Exception on the card: " + r.getSW());
+	// throw new Exception("Exception on the card: " +
+	// Integer.toHexString(r.getSW()));
 	//
 	// // finalCertificate.append(r.getData()); --> lukt ni :(
 	// // voorlopig 1 voor 1 uitschrijven

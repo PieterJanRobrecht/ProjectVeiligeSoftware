@@ -21,14 +21,20 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 
-/** TODO fix deze shizzle....? **/
+/**
+ * TEST CLASS FOR INTERPRETATING .PEM FILES
+ * 
+ * TODO fix deze shizzle....? (rip private keys)
+ * 
+ * @author rhino
+ *
+ */
 public class MainPrivate {
 	public static void main(String[] args) {
 		try {
 			RSAPrivateKey privKey = getPrivateKey("C:\\Users\\rhino\\Documents\\GitHub\\ProjectVeiligeSoftware\\PEMParser\\files\\time_key.pem");
 			System.out.println(privKey.toString());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -1,7 +1,5 @@
 package ssl;
 
-/** TEST CLASS **/
-
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
@@ -12,23 +10,17 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 
 /**
- * TODO belangrijke url
- * http://stackoverflow.com/questions/3151407/signature-verify-always-returns-false
- * 
- * TODO evt nakijken of we dit niet kunnen gebruiken ipv public keys (dus die
- * certs):
- * http://stackoverflow.com/questions/36303236/verify-a-signature-in-java-using-openssl-generated-key-and-certificate
+ * TODO getjoepte shizzle vervangen
  * 
  * @author rhino
  *
  */
-public class Test extends Communicator {
+public class SSLConnectionTimeServer extends Communicator {
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
 	// gebruik momenteel overal dezelfde :')
 	private byte[] dummyPrivExponent = new byte[] { (byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1, (byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad, (byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9, (byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9, (byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60, (byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11, (byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65, (byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff, (byte) 0xc3, (byte) 0x18, (byte) 0x81 };
@@ -38,8 +30,10 @@ public class Test extends Communicator {
 
 	private RSAPublicKey pubKey;
 
-	public Test() {
+	SSLSocketFactory sslSocketFactory;
+	SSLSocket sslSocket;
 
+	public SSLConnectionTimeServer() {
 		try {
 			String mod = bytesToHex(dummyPubModulus);
 			String exp = bytesToHex(dummyPubExponent);
@@ -55,9 +49,12 @@ public class Test extends Communicator {
 		System.setProperty("javax.net.ssl.trustStore", "ssl/client_truststore");
 		System.setProperty("javax.net.ssl.trustStorePassword", "client_truststore");
 
-		SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-		SSLSocket sslSocket = null;
+		sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+		sslSocket = null;
+	}
 
+	public String[] fetchTime() {
+		String[] returnValue = new String[2];
 		try {
 			sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1337);
 			sslSocket.startHandshake();
@@ -72,10 +69,12 @@ public class Test extends Communicator {
 			System.out.println("Signature: " + sig);
 			System.out.println("Timestamp: " + time);
 
-			System.out.println("Verified: " + verifySignatureForMessage(pubKey, hexStringToByteArray(sig), time));
+			System.out.println("Verified by MW: " + verifySignatureForMessage(pubKey, hexStringToByteArray(sig), time));
 			inputStream.close();
 			outputStream.close();
 
+			returnValue[0] = sig;
+			returnValue[1] = time;
 		} catch (IOException e) {
 			System.err.println(e.toString());
 		} catch (Exception e) {
@@ -89,6 +88,8 @@ public class Test extends Communicator {
 				}
 			}
 		}
+
+		return returnValue;
 	}
 
 	public boolean verifySignatureForMessage(RSAPublicKey pubKey, byte[] sig, String message) throws Exception {
@@ -122,7 +123,4 @@ public class Test extends Communicator {
 		return data;
 	}
 
-	public static void main(String[] args) {
-		new Test();
-	}
 }

@@ -4,6 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Support class for SSLConnectionXXXX classes, This class needs to be extended.
+ * 
+ * @author rhino
+ *
+ */
 public abstract class Communicator {
 	byte[] data = new byte[100];
 	int bytesLeft, bytesExpected, chunkReceived;

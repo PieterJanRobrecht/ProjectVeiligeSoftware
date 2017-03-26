@@ -4,6 +4,7 @@ import javacard.framework.APDU;
 import javacard.framework.Applet;
 import javacard.framework.ISO7816;
 import javacard.framework.ISOException;
+import javacard.framework.JCSystem;
 import javacard.framework.OwnerPIN;
 import javacard.framework.Util;
 import javacard.security.KeyBuilder;
@@ -25,7 +26,11 @@ public class IdentityCard extends Applet {
 
 	private static final byte SET_TEMPTIME_INS = 0x40;
 	private static final byte VALIDATE_TIME_INS = 0x42;
-	private static final byte UPDATE_TIME_INS = 0x44;
+
+	private static final byte SEND_SIG_INS = 0x46;
+	private static final byte SEND_SIG_TIME_INS = 0x48;
+
+	private static final byte SEND_CERT_INS = 0x41;
 
 	private final static byte PIN_TRY_LIMIT = (byte) 0x03;
 	private final static byte PIN_SIZE = (byte) 0x04;
@@ -33,9 +38,14 @@ public class IdentityCard extends Applet {
 	private final static short SW_VERIFICATION_FAILED = 0x6322;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
 	private final static short KAPPA = 0x6337;
+	private final static short VERIFY_FAILED = 0x6338;
+	private final static short VERIFY_EXCEPTION_THROWN = 0x6339;
 
 	private RSAPublicKey pkMiddleware;
 	private RSAPrivateKey secretKey;
+	private RSAPublicKey publicKey;
+
+	private byte[] certServiceProvider;
 
 	// 86400 seconden ofwel 24 uur als threshold
 	private byte[] threshold = new byte[] { (byte) 0, (byte) 1, (byte) 81, (byte) -128 };
@@ -72,16 +82,18 @@ public class IdentityCard extends Applet {
 	// (byte) 25 };
 
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
-	// gebruik momenteel overal dezelfde :') 
-	private byte[] dummyPrivExponent = new byte[]{(byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1, (byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad, (byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9, (byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9, (byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60, (byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11, (byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65, (byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff, (byte) 0xc3, (byte) 0x18, (byte) 0x81};
-	private byte[] dummyPrivModulus = new byte[]{(byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69};
-	private byte[] dummyPubExponent = new byte[]{(byte) 0x01, (byte) 0x00, (byte) 0x01};
-	private byte[] dummyPubModulus = new byte[]{(byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69};
+	// gebruik momenteel overal dezelfde :')
+	private byte[] dummyPrivExponent = new byte[] { (byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1, (byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad, (byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9, (byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9, (byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60, (byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11, (byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65, (byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff, (byte) 0xc3, (byte) 0x18, (byte) 0x81 };
+	private byte[] dummyPrivModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
+	private byte[] dummyPubExponent = new byte[] { (byte) 0x01, (byte) 0x00, (byte) 0x01 };
+	private byte[] dummyPubModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
 
 	private OwnerPIN pin;
 
 	private byte[] lastTime;
 	private byte[] tempTime;
+
+	private byte[] tempTimeUpdate;
 
 	private IdentityCard() {
 		/* During instantiation of the applet, all objects are created. */
@@ -91,17 +103,25 @@ public class IdentityCard extends Applet {
 		// initial time
 		lastTime = new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
 
-		/* Build private RSA Key */
+		/* Build private RSA Key based on dummy */
 		short offset = 0;
 		short keySizeInBytes = 64;
-		short keySizeInBits = 512;
+		short keySizeInBits = (short) (keySizeInBytes * 8);
 		secretKey = (RSAPrivateKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits, false);
 		secretKey.setExponent(dummyPrivExponent, offset, keySizeInBytes);
 		secretKey.setModulus(dummyPrivModulus, offset, keySizeInBytes);
 
+		/* Build public RSA Key based on dummy */
+		offset = 0;
+		keySizeInBytes = 64; // dit aanpassen D:
+		keySizeInBits = (short) (keySizeInBytes * 8);
+		publicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
+		publicKey.setExponent(dummyPubExponent, offset, (short) 3);
+		publicKey.setModulus(dummyPubModulus, offset, keySizeInBytes);
+
 		/* Build public RSA Key of Middleware */
 		offset = 0;
-		keySizeInBytes = 256;
+		keySizeInBytes = 64;
 		keySizeInBits = (short) (keySizeInBytes * 8);
 		pkMiddleware = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
 		pkMiddleware.setExponent(dummyPubExponent, offset, (short) 3);
@@ -171,8 +191,14 @@ public class IdentityCard extends Applet {
 		case VALIDATE_TIME_INS:
 			validateTime(apdu);
 			break;
-		case UPDATE_TIME_INS:
+		case SEND_SIG_INS:
+			updateSig(apdu);
+			break;
+		case SEND_SIG_TIME_INS:
 			updateTime(apdu);
+			break;
+		case SEND_CERT_INS:
+			receiveCert(apdu);
 			break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
@@ -181,8 +207,6 @@ public class IdentityCard extends Applet {
 
 	private boolean compareTime() {
 		// Twee tijden van elkaar aftrekken
-		byte[] threshold = new byte[] { (byte) 0, (byte) 1, (byte) 81, (byte) -128 };
-
 		byte[] result = new byte[4];
 		for (short i = 0; i < 4; i++) {
 			result[i] = (byte) (tempTime[i] - lastTime[i]);
@@ -219,11 +243,60 @@ public class IdentityCard extends Applet {
 		return slice;
 	}
 
+	private void receiveCert(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			byte[] buffer = apdu.getBuffer();
+
+			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
+
+			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
+			short bytesLeft;
+			short readCount;
+			short offSet = 0x00;
+
+			if (teller == (short) 1) {
+				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+				readCount = apdu.setIncomingAndReceive();
+				while (bytesLeft > 0) {
+					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+					bytesLeft -= readCount;
+					offSet += readCount;
+					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+				}
+
+				certServiceProvider = new byte[(short) incomingData.length];
+				Util.arrayCopy(incomingData, (short) 0, certServiceProvider, (short) 0, (short) incomingData.length);
+				certServiceProvider = cutOffNulls(certServiceProvider);
+			} else if (teller == (short) 2) {
+				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+				readCount = apdu.setIncomingAndReceive();
+				while (bytesLeft > 0) {
+					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+					bytesLeft -= readCount;
+					offSet += readCount;
+					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+				}
+
+				// certServiceProvider = new byte[(short) incomingData.length];
+				// Util.arrayCopy(incomingData, (short) 0, certServiceProvider,
+				// (short) 0, (short) incomingData.length);
+				cutOffNulls(certServiceProvider);
+				byte[] temp = new byte[(short) (incomingData.length + certServiceProvider.length)];
+				Util.arrayCopy(certServiceProvider, (short) 0, temp, (short) 0, (short) certServiceProvider.length);
+				Util.arrayCopy(incomingData, (short) 0, temp, (short) certServiceProvider.length, (short) incomingData.length);
+
+				certServiceProvider = temp;
+				certServiceProvider = cutOffNulls(certServiceProvider);
+			}
+		}
+	}
+
 	/*
 	 * This method is used to authenticate the owner of the card using a PIN
 	 * code.
 	 */
-
 	private void validatePIN(APDU apdu) {
 		// shizzle in commentaar is om te werken adhv encrypted communication
 
@@ -260,6 +333,40 @@ public class IdentityCard extends Applet {
 		}
 	}
 
+	private void updateSig(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			/** TODO: add verifySig en lastValidationTime < time? **/
+			byte[] buffer = apdu.getBuffer();
+			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
+			short bytesLeft;
+			short readCount;
+			short offSet = 0x00;
+
+			bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+			readCount = apdu.setIncomingAndReceive();
+			while (bytesLeft > 0) {
+				Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+				bytesLeft -= readCount;
+				offSet += readCount;
+				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+			}
+
+			try {
+				if (verifySignatureForMessage(publicKey, tempTimeUpdate, incomingData)) {
+					lastTime = tempTimeUpdate;
+					tempTimeUpdate = null;
+				} else {
+					ISOException.throwIt(VERIFY_FAILED);
+				}
+			} catch (Exception e) {
+				ISOException.throwIt(VERIFY_EXCEPTION_THROWN);
+			}
+
+		}
+	}
+
 	private void updateTime(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
@@ -267,10 +374,8 @@ public class IdentityCard extends Applet {
 			/** TODO: add verifySig en lastValidationTime < time? **/
 			byte[] buffer = apdu.getBuffer();
 			byte[] time = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
-			// Tijd format gaat normaal altijd 4 bytes lang zijn
 			time = slice(time, (short) 0, (short) 4);
-
-			lastTime = time;
+			tempTimeUpdate = time;
 		}
 	}
 
@@ -299,6 +404,12 @@ public class IdentityCard extends Applet {
 			apdu.setOutgoingLength(siglength);
 			apdu.sendBytesLong(output, (short) 0, (short) siglength);
 		}
+	}
+
+	public boolean verifySignatureForMessage(RSAPublicKey pubKey, byte[] sig, byte[] message) throws Exception {
+		Signature signature = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
+		signature.init(pubKey, Signature.MODE_VERIFY);
+		return signature.verify(message, (short) 0x80, (short) 4, sig, (short) 0, (short) 0x80);
 	}
 
 	public short generateSignature(RSAPrivateKey privKey, byte[] input, short offset, short length, byte[] output) {
@@ -340,6 +451,8 @@ public class IdentityCard extends Applet {
 			answer = new byte[] { (byte) 1 };
 		}
 
+		tempTime = null;
+
 		apdu.setOutgoing();
 		apdu.setOutgoingLength((short) answer.length);
 		apdu.sendBytesLong(answer, (short) 0, (short) answer.length);
@@ -355,8 +468,8 @@ public class IdentityCard extends Applet {
 			// resp[0] = 1 en resp[1] = 112
 
 			byte[] response = new byte[2];
-			response[0] = (byte) (certificate.length / 100);
-			response[1] = (byte) (certificate.length % 100);
+			response[0] = (byte) (certServiceProvider.length / 100);
+			response[1] = (byte) (certServiceProvider.length % 100);
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) response.length);
 			apdu.sendBytesLong(response, (short) 0, (short) response.length);
@@ -376,14 +489,14 @@ public class IdentityCard extends Applet {
 			short hulp = 0;
 			short start = (short) (teller * 240);
 			short end;
-			if ((short) (((short) (teller + 1)) * 240) > (short) certificate.length) {
-				end = (short) certificate.length;
+			if ((short) (((short) (teller + 1)) * 240) > (short) certServiceProvider.length) {
+				end = (short) certServiceProvider.length;
 			} else {
 				end = (short) (start + 240);
 			}
 
 			for (short i = start; i < end; i++) {
-				output[hulp] = certificate[i];
+				output[hulp] = certServiceProvider[i];
 				hulp++;
 			}
 
@@ -430,13 +543,16 @@ public class IdentityCard extends Applet {
 
 	private byte[] cutOffNulls(byte[] data) {
 		short length = (short) data.length;
-		short i;
-		for (i = 0; i < length; i++) {
-			if (data[i] == (byte) 0)
+		for (short i = length; i > 0; i--) {
+			byte kappa = data[(short) (i - 1)];
+			if (kappa != (byte) 0) {
+				length = (short) (i - 1);
 				break;
+			}
 		}
-		byte[] cleanedData = new byte[i];
-		Util.arrayCopy(data, (short) 0, cleanedData, (short) 0, i);
+		byte[] cleanedData = new byte[length];
+		Util.arrayCopy(data, (short) 0, cleanedData, (short) 0, length);
+
 		return cleanedData;
 	}
 }
