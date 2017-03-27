@@ -426,7 +426,7 @@ public class IdentityCard extends Applet {
 		Signature signature = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
 		signature.init(pubKey, Signature.MODE_VERIFY);
 		try {
-			return signature.verify(dataBuffer, dataOffset, (short) 32, signatureBuffer, signatureOffset, (short) (signatureBuffer[(short) (signatureOffset + 1)] + 2));
+			return signature.verify(dataBuffer, dataOffset, (short) 4, signatureBuffer, signatureOffset, (short) 64);
 		} catch (Exception e) {
 			return false;
 		}
