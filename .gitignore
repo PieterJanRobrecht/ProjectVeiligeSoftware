@@ -4,6 +4,7 @@ JavaCard/.jcproject
 *.bat
 *.xml
 Javacard/target/
+Middleware/target/
 
 # Created by https://www.gitignore.io/api/eclipse,java
 
