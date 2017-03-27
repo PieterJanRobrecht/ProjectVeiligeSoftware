@@ -78,7 +78,8 @@ public class SSLConnectionTimeServer extends Communicator {
 			returnValue[0] = sig;
 			returnValue[1] = time;
 		} catch (IOException e) {
-			System.err.println(e.toString());
+			e.printStackTrace();
+//			System.err.println(e.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

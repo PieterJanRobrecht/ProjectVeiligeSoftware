@@ -135,7 +135,7 @@ public class MiddlewareController {
 		/*** STAP 1 ***/
 		System.out.println("Sending Time..");
 		boolean isValid = isValid();
-		System.out.println("revalidation needed: " + !isValid);
+		System.out.println("Revalidation needed: " + !isValid);
 		System.out.println("Complete! \n");
 
 		if (!isValid) {
@@ -331,7 +331,7 @@ public class MiddlewareController {
 
 			System.out.println("\tTime was sent to card, no exceptions met");
 
-			/** send time to JC **/
+			/** send signature to JC **/
 			bytes = SSLConnectionTimeServer.hexStringToByteArray(time[0]);
 
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_SIG_INS, 0x00, 0x00, bytes);
