@@ -16,6 +16,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Arrays;
 
 /**
  * TODO belangrijke url
@@ -59,20 +60,22 @@ public class Test extends Communicator {
 		SSLSocket sslSocket = null;
 
 		try {
-			sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1337);
+			sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1338);
 			sslSocket.startHandshake();
 
 			InputStream inputStream = sslSocket.getInputStream();
 			OutputStream outputStream = sslSocket.getOutputStream();
 
-			String sig1 = receive(inputStream);
-			String sig2 = receive(inputStream);
-			String sig = sig1 + sig2;
-			String time = receive(inputStream);
-			System.out.println("Signature: " + sig);
-			System.out.println("Timestamp: " + time);
+			String cert = null;
+			for (int i = 0; i < 9; i++) {
+				cert += receive(inputStream);
+			}
 
-			System.out.println("Verified: " + verifySignatureForMessage(pubKey, hexStringToByteArray(sig), time));
+			byte[] certInBytes = hexStringToByteArray(cert);
+
+			System.out.println("Cert in hex: " + cert);
+			System.out.println("Cert: " + Arrays.toString(certInBytes));
+
 			inputStream.close();
 			outputStream.close();
 

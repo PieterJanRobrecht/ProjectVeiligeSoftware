@@ -55,7 +55,7 @@ public class Server extends Communicator {
 				inputStream = sslSocket.getInputStream();
 				outputStream = sslSocket.getOutputStream();
 
-				System.out.println("Client connected to fetch time, returning " + Arrays.toString(certificate));
+				System.out.println("Client connected to fetch certificate, returning " + Arrays.toString(certificate));
 
 				String test = bytesToHex(certificate);
 				send(test.substring(0, 100), outputStream);
