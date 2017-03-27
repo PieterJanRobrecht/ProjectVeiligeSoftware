@@ -61,7 +61,8 @@ public class SSLConnectionServiceProvider extends Communicator {
 
 			returnValue = certInBytes;
 		} catch (IOException e) {
-			System.err.println(e.toString());
+			e.printStackTrace();
+//			System.err.println(e.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
