@@ -49,6 +49,8 @@ public class SSLConnectionServiceProvider extends Communicator {
 				cert += receive(inputStream);
 			}
 
+			cert = cert.split("null")[1];
+			
 			byte[] certInBytes = hexStringToByteArray(cert);
 
 			System.out.println("Cert in hex: " + cert);
