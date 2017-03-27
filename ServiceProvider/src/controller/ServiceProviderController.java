@@ -17,6 +17,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
+import ssl.ServiceProviderServer;
 
 public class ServiceProviderController {
 
@@ -49,6 +50,8 @@ public class ServiceProviderController {
 
 	@FXML
 	private CheckBox birthDateCheck;
+	
+	private ServiceProviderServer sps;
 
 	@FXML
 	void submitSettings(ActionEvent event) {
@@ -136,4 +139,11 @@ public class ServiceProviderController {
 		communicationArea.appendText(text+"\n");
 	}
 
+	public ServiceProviderServer getsetServiceProviderServer() {
+		return sps;
+	}
+
+	public void setServiceProviderServer(ServiceProviderServer sps) {
+		this.sps = sps;
+	}
 }
