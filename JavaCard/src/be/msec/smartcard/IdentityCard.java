@@ -7,6 +7,8 @@ import javacard.framework.ISOException;
 import javacard.framework.JCSystem;
 import javacard.framework.OwnerPIN;
 import javacard.framework.Util;
+import javacard.security.DESKey;
+import javacard.security.Key;
 import javacard.security.KeyBuilder;
 import javacard.security.PrivateKey;
 import javacard.security.PublicKey;
@@ -32,7 +34,9 @@ public class IdentityCard extends Applet {
 	private static final byte SEND_SIG_INS = 0x46;
 	private static final byte SEND_SIG_TIME_INS = 0x48;
 
-	private static final byte SEND_CERT_INS = 0x41;
+	private static final byte SEND_CERT_INS = 0x50;
+	private static final byte GET_KEY_INS = 0x52;
+	private static final byte GET_MSG_INS = 0x54;
 
 	private final static byte PIN_TRY_LIMIT = (byte) 0x03;
 	private final static byte PIN_SIZE = (byte) 0x04;
@@ -42,12 +46,21 @@ public class IdentityCard extends Applet {
 	private final static short KAPPA = 0x6337;
 	private final static short VERIFY_FAILED = 0x6338;
 	private final static short VERIFY_EXCEPTION_THROWN = 0x6339;
+	private final static short ALG_FAILED = 0x6340;
+
+	/** Invalid key ID. */
+	public static final byte INVALID_KEY = (byte) -1;
+	/** Invalid pair of key IDs. */
+	public static final short INVALID_KEY_PAIR = (short) -1;
 
 	private RSAPublicKey pkMiddleware;
 	private RSAPrivateKey secretKey;
 	private RSAPublicKey publicKey;
 
 	private byte[] certServiceProvider;
+
+	/** Holds random material for creating symmetric keys. */
+	private static byte[] randomMaterial;
 
 	// 86400 seconden ofwel 24 uur als threshold
 	private byte[] threshold = new byte[] { (byte) 0, (byte) 1, (byte) 81, (byte) -128 };
@@ -108,6 +121,19 @@ public class IdentityCard extends Applet {
 
 	private byte[] tempTimeUpdate;
 
+	/**
+	 * Randomizer instance.
+	 * 
+	 * Static because the dynamic version leaks memory.
+	 */
+	private static RandomData randomizer;
+
+	/** The key file (parallel: register file). */
+	private static Key[] keys;
+
+	/** The number of entries in the keys file. */
+	public static final short NUM_KEYS = 8;
+
 	private IdentityCard() {
 		/* During instantiation of the applet, all objects are created. */
 		pin = new OwnerPIN(PIN_TRY_LIMIT, PIN_SIZE);
@@ -145,6 +171,10 @@ public class IdentityCard extends Applet {
 		pkMiddleware = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
 		pkMiddleware.setExponent(dummyPubExponent, offset, (short) 3);
 		pkMiddleware.setModulus(dummyPubModulus, offset, keySizeInBytes);
+
+		randomMaterial = JCSystem.makeTransientByteArray((short) 16, JCSystem.CLEAR_ON_DESELECT);
+		keys = new Key[NUM_KEYS];
+		randomizer = RandomData.getInstance(RandomData.ALG_PSEUDO_RANDOM);
 
 		/* This method registers the applet with the JCRE on the card. */
 		register();
@@ -218,6 +248,12 @@ public class IdentityCard extends Applet {
 			break;
 		case SEND_CERT_INS:
 			receiveCert(apdu);
+			break;
+		case GET_KEY_INS:
+			generateKey(apdu);
+			break;
+		case GET_MSG_INS:
+			fetchMessage(apdu);
 			break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
@@ -384,13 +420,13 @@ public class IdentityCard extends Applet {
 				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
 			}
 
-			//incomingData = cutOffNulls(incomingData);
+			// incomingData = cutOffNulls(incomingData);
 			byte[] signature = new byte[64];
-			for(short i = 0; i < 64; i++) {
+			for (short i = 0; i < 64; i++) {
 				signature[i] = incomingData[i];
 			}
 
-			try {
+			
 				// boolean verified = verifySignatureForMessage(publicKey, incomingData, tempTimeUpdate);
 				// RSAPublicKey pubKey, byte[] dataBuffer, short dataOffset, byte[] signatureBuffer, short signatureOffset) {
 				boolean verified = verifyPublic(timePublicKey, tempTimeUpdate, (short) 0, signature, (short) 0);
@@ -402,9 +438,7 @@ public class IdentityCard extends Applet {
 				} else {
 					ISOException.throwIt(VERIFY_FAILED);
 				}
-			} catch (Exception e) {
-				ISOException.throwIt(VERIFY_EXCEPTION_THROWN);
-			}
+			
 
 		}
 	}
@@ -436,6 +470,59 @@ public class IdentityCard extends Applet {
 		}
 	}
 
+	public void generateKey(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			// TODO if (verifyCert(CertSP)==false) abort()
+			// TODO if (CertSP.validEndTime < lastValidationTime) abort()
+
+			// TODO Ks := genNewSymKey(getSecureRand())
+			byte privKeyIndex = findFreeKeySlot();
+			if (privKeyIndex == INVALID_KEY)
+				ISOException.throwIt(INVALID_KEY_PAIR);
+
+			DESKey Ks = (DESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_DES, KeyBuilder.LENGTH_DES3_2KEY, false);
+			short keySize = (short) (Ks.getSize() / 8);
+			random(randomMaterial, (short) 0, keySize);
+			Ks.setKey(randomMaterial, (short) 0);
+			keys[privKeyIndex] = Ks;
+
+			// TODO Ekey := asymEncrypt(Ks, CertSP.PKSP)
+			Cipher asymCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
+			asymCipher.init(pkMiddleware, Cipher.MODE_ENCRYPT);
+			byte[] encryptedData = new byte[256];
+			byte[] KsInBytes = new byte[16];
+			Ks.getKey(KsInBytes, (short) 0);
+
+			KsInBytes = slice(KsInBytes, (short) 0, (short) 16);
+
+			try {
+				asymCipher.doFinal(KsInBytes, (short) 0, (short) 16, encryptedData, (short) 0);
+			} catch (Exception e) {
+				ISOException.throwIt(ALG_FAILED);
+			}
+
+			// TODO return EKey
+			apdu.setOutgoing();
+			apdu.setOutgoingLength((short) encryptedData.length);
+			apdu.sendBytesLong(encryptedData, (short) 0, (short) encryptedData.length);
+		}
+	}
+
+	public void fetchMessage(APDU apdu) {
+		/** TODO **/
+		// TODO c := genChallenge(getSecureRand())
+
+		// TODO Emsg := symEncrypt([c, CertSP:Subject], Ks)
+
+		// TODO return Emsg
+	}
+
+	public static final void random(byte[] buffer, short offset, short length) {
+		randomizer.generateData(buffer, offset, length);
+	}
+
 	public boolean verifySignatureForMessage(RSAPublicKey pubKey, byte[] sig, byte[] message) throws Exception {
 		Signature signature = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
 		signature.init(pubKey, Signature.MODE_VERIFY);
@@ -446,8 +533,8 @@ public class IdentityCard extends Applet {
 		Signature signature = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
 		signature.init(pubKey, Signature.MODE_VERIFY);
 		try {
-			boolean test = signature.verify(dataBuffer, dataOffset, (short) 4, signatureBuffer, signatureOffset, (short) 64);
-			// TODO: please fix me I'm broken
+			// return signature.verify(dataBuffer, dataOffset, (short) 4,
+			// signatureBuffer, signatureOffset, (short) 64);
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -459,6 +546,20 @@ public class IdentityCard extends Applet {
 		signature.init(privKey, Signature.MODE_SIGN);
 		short sigLength = signature.sign(input, offset, length, output, (short) 0);
 		return sigLength;
+	}
+
+	/**
+	 * Identifies an available key slot. This does not mark the slot busy
+	 * (allocation), it merely identifies it.
+	 * 
+	 * @return a key slot that is available, or -1 if all the slots are taken
+	 */
+	private static final byte findFreeKeySlot() {
+		for (byte i = (byte) 0; i < keys.length; i++) {
+			if (keys[i] == null)
+				return i;
+		}
+		return INVALID_KEY;
 	}
 
 	public void setTempTime(APDU apdu) {

@@ -2,11 +2,15 @@ package controller;
 
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
 import java.util.Arrays;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -35,7 +39,6 @@ import be.msec.client.Keys;
 import be.msec.client.connection.Connection;
 import be.msec.client.connection.IConnection;
 import be.msec.client.connection.SimulatedConnection;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -59,13 +62,16 @@ public class MiddlewareController {
 	private static final byte SEND_SIG_INS = 0x46;
 	private static final byte SEND_SIG_TIME_INS = 0x48;
 
-	private static final byte SEND_CERT_INS = 0x41;
+	private static final byte SEND_CERT_INS = 0x50;
+	private static final byte GET_KEY_INS = 0x52;
+	private static final byte GET_MSG_INS = 0x54;
 
 	private final static short SW_VERIFICATION_FAILED = 0x6322;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
 	private final static short KAPPA = 0x6337;
 	private final static short VERIFY_FAILED = 0x6338;
 	private final static short VERIFY_EXCEPTION_THROWN = 0x6339;
+	private final static short ALG_FAILED = 0x6340;
 
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
 	// gebruik momenteel overal dezelfde :')
@@ -515,10 +521,63 @@ public class MiddlewareController {
 			// System.out.println("Certificaat: " +
 			// Arrays.toString(finalCertificate));
 
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_KEY_INS, 0x00, 0x00, 0xff);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			byte[] inc = r.getData();
+			System.out.println("\tPayload: " + Arrays.toString(inc));
+
+
+			// /** ONLY FOR SIMULATOR **/
+			// byte[] filterData = new byte[inc.length - 6];
+			// for (int i = 5; i < inc.length; i++) {
+			// filterData[i - 5] = inc[i];
+			// }
+			// System.out.println("\tFilterred payload: " +
+			// Arrays.toString(filterData));
+			// /************************/
+
+			/* Build private RSA Key based on dummy */
+			// short offset = 0;
+			// short keySizeInBytes = 64;
+			// short keySizeInBits = (short) (keySizeInBytes * 8);
+			// RSAPrivateKey secretKey = (RSAPrivateKey)
+			// KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits,
+			// false);
+			// secretKey.setExponent(dummyPrivExponent, offset, keySizeInBytes);
+			// secretKey.setModulus(dummyPrivModulus, offset, keySizeInBytes);
+
+			String mod = bytesToHex(dummyPrivModulus);
+			String exp = bytesToHex(dummyPrivExponent);
+			RSAPrivateKey secretKey = (RSAPrivateKey) generatePrivateKey(mod, exp);
+
+			/** TODO DECRYPT MESSAGE **/
+			byte[] temp = slice(inc, 5, 69);
+			byte[] kappa = decryptWithPrivateKey(secretKey, temp);
+			System.out.println(Arrays.toString(kappa));
+			
+			temp = slice(inc, 69, 133);
+			kappa = decryptWithPrivateKey(secretKey, temp);
+			System.out.println(Arrays.toString(kappa));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
+	}
+
+	public byte[] slice(byte[] original, int offset, int end) {
+		int length = (int) (end - offset);
+		byte[] slice = new byte[length];
+
+		for (int i = offset; i < end; i++) {
+			int index = (int) (i - offset);
+			slice[index] = original[i];
+		}
+		return slice;
 	}
 
 	private byte[] fetchCert() {
@@ -623,6 +682,67 @@ public class MiddlewareController {
 	public int unsigned(byte x) {
 		return (x & 0xFF);
 	}
+
+	private byte[] cutOffNulls(byte[] data) {
+		short length = (short) data.length;
+		for (short i = length; i > 0; i--) {
+			byte kappa = data[(short) (i - 1)];
+			if (kappa != (byte) 0) {
+				length = (short) (i - 1);
+				break;
+			}
+		}
+
+		byte[] cleanedData = new byte[length];
+		for (int i = 0; i < length; i++) {
+			cleanedData[i] = data[i];
+		}
+
+		return cleanedData;
+	}
+
+	public static String bytesToHex(byte[] in) {
+		final StringBuilder builder = new StringBuilder();
+		for (byte b : in) {
+			builder.append(String.format("%02x", b));
+		}
+		return builder.toString();
+	}
+
+	public static PrivateKey generatePrivateKey(String mod, String exp) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		RSAPrivateKeySpec keySpec = new RSAPrivateKeySpec(new BigInteger(mod, 16), new BigInteger(exp, 16));
+		KeyFactory fact = KeyFactory.getInstance("RSA");
+		PrivateKey privKey = fact.generatePrivate(keySpec);
+		return privKey;
+	}
+
+	private static String decrypt(RSAPrivateKey privatekey, byte[] buffer) {
+
+		try {
+			Cipher decrypt = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+			decrypt.init(Cipher.DECRYPT_MODE, privatekey);
+			String decryptedMessage = new String(decrypt.doFinal(buffer), StandardCharsets.UTF_8);
+
+			return decryptedMessage;
+			// Cipher rsa;
+			// rsa = Cipher.getInstance("RSA");
+			// rsa.init(Cipher.DECRYPT_MODE, decryptionKey);
+			// byte[] utf8 = rsa.doFinal(buffer);
+			// return new String(utf8, "UTF8");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static byte[] decryptWithPrivateKey(RSAPrivateKey privatekey, byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		Cipher asymCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
+
+		asymCipher.init(Cipher.DECRYPT_MODE, privatekey);
+		return asymCipher.doFinal(data);
+	}
+	
 	// try {
 	//
 	// /*
