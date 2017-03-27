@@ -13,6 +13,7 @@ import java.security.Signature;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Arrays;
 
 /**
  * TODO getjoepte shizzle vervangen
@@ -56,7 +57,7 @@ public class SSLConnectionTimeServer extends Communicator {
 	public String[] fetchTime() {
 		String[] returnValue = new String[2];
 		try {
-			sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1337);
+			sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1336);
 			sslSocket.startHandshake();
 
 			InputStream inputStream = sslSocket.getInputStream();
@@ -67,6 +68,7 @@ public class SSLConnectionTimeServer extends Communicator {
 			String sig = sig1 + sig2;
 			String time = receive(inputStream);
 			System.out.println("Signature: " + sig);
+			System.out.println("Signature in byte: " + Arrays.toString(hexStringToByteArray(sig)));
 			System.out.println("Timestamp: " + time);
 
 			System.out.println("Verified by MW: " + verifySignatureForMessage(pubKey, hexStringToByteArray(sig), time));

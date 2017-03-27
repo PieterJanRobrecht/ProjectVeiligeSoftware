@@ -314,6 +314,9 @@ public class MiddlewareController {
 			CommandAPDU a;
 			ResponseAPDU r;
 
+			// time[0] = sig;
+			// time[1] = time;
+
 			/** send signature to JC **/
 			byte[] bytes = intToByteArray(Integer.parseInt(time[1]));
 
@@ -349,7 +352,7 @@ public class MiddlewareController {
 			addText("sendNewTime performed correctly");
 		} catch (Exception e) {
 			// do nothing... TODO fix deze shit
-			System.out.println("\t"+e.getMessage());
+			System.out.println("\t" + e.getMessage());
 		}
 	}
 

@@ -333,6 +333,18 @@ public class IdentityCard extends Applet {
 		}
 	}
 
+	private void updateTime(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			/** TODO: add verifySig en lastValidationTime < time? **/
+			byte[] buffer = apdu.getBuffer();
+			byte[] time = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
+			time = slice(time, (short) 0, (short) 4);
+			tempTimeUpdate = time;
+		}
+	}
+
 	private void updateSig(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
@@ -353,10 +365,20 @@ public class IdentityCard extends Applet {
 				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
 			}
 
+			//incomingData = cutOffNulls(incomingData);
+			byte[] signature = new byte[64];
+			for(short i = 0; i < 64; i++) {
+				signature[i] = incomingData[i];
+			}
+
 			try {
-				if (verifySignatureForMessage(publicKey, tempTimeUpdate, incomingData)) {
+				// boolean verified = verifySignatureForMessage(publicKey, incomingData, tempTimeUpdate);
+				// RSAPublicKey pubKey, byte[] dataBuffer, short dataOffset, byte[] signatureBuffer, short signatureOffset) {
+				boolean verified = verifyPublic(publicKey, tempTimeUpdate, (short) 0, signature, (short) 0);
+				if (verified) {
 					lastTime = tempTimeUpdate;
 					tempTimeUpdate = null;
+					ISOException.throwIt(KAPPA);
 				} else {
 					ISOException.throwIt(VERIFY_FAILED);
 				}
@@ -364,18 +386,6 @@ public class IdentityCard extends Applet {
 				ISOException.throwIt(VERIFY_EXCEPTION_THROWN);
 			}
 
-		}
-	}
-
-	private void updateTime(APDU apdu) {
-		if (!pin.isValidated())
-			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
-		else {
-			/** TODO: add verifySig en lastValidationTime < time? **/
-			byte[] buffer = apdu.getBuffer();
-			byte[] time = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
-			time = slice(time, (short) 0, (short) 4);
-			tempTimeUpdate = time;
 		}
 	}
 
@@ -410,6 +420,16 @@ public class IdentityCard extends Applet {
 		Signature signature = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
 		signature.init(pubKey, Signature.MODE_VERIFY);
 		return signature.verify(message, (short) 0x80, (short) 4, sig, (short) 0, (short) 0x80);
+	}
+
+	public boolean verifyPublic(RSAPublicKey pubKey, byte[] dataBuffer, short dataOffset, byte[] signatureBuffer, short signatureOffset) {
+		Signature signature = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
+		signature.init(pubKey, Signature.MODE_VERIFY);
+		try {
+			return signature.verify(dataBuffer, dataOffset, (short) 32, signatureBuffer, signatureOffset, (short) (signatureBuffer[(short) (signatureOffset + 1)] + 2));
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	public short generateSignature(RSAPrivateKey privKey, byte[] input, short offset, short length, byte[] output) {
@@ -550,6 +570,7 @@ public class IdentityCard extends Applet {
 				break;
 			}
 		}
+
 		byte[] cleanedData = new byte[length];
 		Util.arrayCopy(data, (short) 0, cleanedData, (short) 0, length);
 
