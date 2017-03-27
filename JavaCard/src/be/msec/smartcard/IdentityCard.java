@@ -395,6 +395,7 @@ public class IdentityCard extends Applet {
 				// RSAPublicKey pubKey, byte[] dataBuffer, short dataOffset, byte[] signatureBuffer, short signatureOffset) {
 				boolean verified = verifyPublic(timePublicKey, tempTimeUpdate, (short) 0, signature, (short) 0);
 				if (verified) {
+					// Stap 11 nog implementeren
 					lastTime = tempTimeUpdate;
 					tempTimeUpdate = null;
 					ISOException.throwIt(KAPPA);
