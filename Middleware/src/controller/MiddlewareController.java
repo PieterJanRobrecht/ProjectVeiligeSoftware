@@ -349,6 +349,7 @@ public class MiddlewareController {
 			addText("sendNewTime performed correctly");
 		} catch (Exception e) {
 			// do nothing... TODO fix deze shit
+			System.out.println("\t"+e.getMessage());
 		}
 	}
 
