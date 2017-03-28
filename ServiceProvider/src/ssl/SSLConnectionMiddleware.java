@@ -16,23 +16,23 @@ public class SSLConnectionMiddleware {
         sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
         sslSocket = null;
         
-		try {
-            sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1337);
-            sslSocket.startHandshake();
-
-            InputStream inputStream = sslSocket.getInputStream();
-            OutputStream outputStream = sslSocket.getOutputStream();
-
-        } catch (IOException e) {
-            System.err.println("Connection to server lost.");
-        } finally {
-            if (sslSocket != null) {
-                try {
-                    sslSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+//		try {
+//            sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1337);
+//            sslSocket.startHandshake();
+//
+//            InputStream inputStream = sslSocket.getInputStream();
+//            OutputStream outputStream = sslSocket.getOutputStream();
+//
+//        } catch (IOException e) {
+//            System.err.println("Connection to server lost.");
+//        } finally {
+//            if (sslSocket != null) {
+//                try {
+//                    sslSocket.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
 	}
 }
