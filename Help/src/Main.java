@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
@@ -20,7 +21,10 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -57,12 +61,18 @@ public class Main {
 			(byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8,
 			(byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa,
 			(byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
-
+	
+	private static byte[] timePubExp = new byte[] { (byte) 1, (byte) 0, (byte) 1 };
+	private static byte[] timePubMod = new byte[] { (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
+	
+	private static byte[] timeSecExp = new byte[] { (byte) 0, (byte) -105, (byte) -124, (byte) 117, (byte) 48, (byte) -93, (byte) -89, (byte) -60, (byte) -33, (byte) 18, (byte) 113, (byte) -64, (byte) -40, (byte) 57, (byte) -20, (byte) -66, (byte) -62, (byte) 81, (byte) -21, (byte) -6, (byte) 1, (byte) 48, (byte) -16, (byte) 9, (byte) -127, (byte) 112, (byte) -28, (byte) 68, (byte) -8, (byte) 108, (byte) 71, (byte) 60, (byte) -118, (byte) 10, (byte) -27, (byte) -119, (byte) -102, (byte) -106, (byte) 111, (byte) 4, (byte) -99, (byte) -114, (byte) -101, (byte) -48, (byte) -68, (byte) -43, (byte) -43, (byte) 18, (byte) -113, (byte) -108, (byte) 80, (byte) 16, (byte) 24, (byte) -19, (byte) 64, (byte) 22, (byte) -75, (byte) -36, (byte) -44, (byte) -117, (byte) -4, (byte) 16, (byte) -88, (byte) 0, (byte) 1 };
+	private static byte[] timeSecMod = new byte[] { (byte) 0, (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
+			
 	public static void main(String[] args) {
-		intToByteArray(1490635770);
-		byte[] past = new byte[] { (byte) 88, (byte) -39, (byte) 74, (byte) -102 }; //Komt binnen
+//		intToByteArray(1490635770);
+		byte[] test = new byte[] { (byte) 88, (byte) -38, (byte) -71, (byte) -18 }; //Komt binnen
 		byte[] future = new byte[] { (byte) 88, (byte) -39, (byte) 75, (byte) -6 }; //Staat op kaart
-		System.out.println(checkIfPast(future, past));
+//		System.out.println(checkIfPast(future, past));
 //		byte[] test = { (byte) 1, (byte) 81, (byte) -128 };
 		// System.out.println(fromByteArray(test).toString());
 
@@ -79,50 +89,81 @@ public class Main {
 		// System.out.println(getal);
 		// intToByteArray(getal);
 
-//		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-//		FileReader fr = null, fr2 = null;
-//		try {
-//			fr = new FileReader("../Certificaten2/g.crt");
-//			fr2 = new FileReader("../Certificaten2/g.key");
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		PEMReader pemReader = new PEMReader(fr);
-//		X509Certificate cert = null;
-//		RSAPrivateKey sk = null;
-//		RSAPublicKey pk = null;
-//		try {
-//			cert = (X509Certificate) pemReader.readObject();
-//			pemReader = new PEMReader(fr2);
-//			KeyPair kp = (KeyPair) pemReader.readObject();
-//			sk = (RSAPrivateKey) kp.getPrivate();
-//			pk = (RSAPublicKey) cert.getPublicKey();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		intToByteArray(pk.getModulus().intValue());
-//		intToByteArray(pk.getPublicExponent().intValue());
-//		toStringArray(pk.getEncoded());
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		FileReader fr = null, fr2 = null;
+		try {
+			fr = new FileReader("../Certificaten2/g.crt");
+			fr2 = new FileReader("../Certificaten2/g.key");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		PEMReader pemReader = new PEMReader(fr);
+		X509Certificate cert = null;
+		RSAPrivateKey sk = null;
+		RSAPublicKey pk = null;
+		try {
+			cert = (X509Certificate) pemReader.readObject();
+			pemReader = new PEMReader(fr2);
+			KeyPair kp = (KeyPair) pemReader.readObject();
+			sk = (RSAPrivateKey) kp.getPrivate();
+			pk = (RSAPublicKey) cert.getPublicKey();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		byte[] b = pk.getModulus().toByteArray();
+		intToByteArray(sk.getPrivateExponent());
+		intToByteArray(sk.getModulus());
 
-		// byte[] digitalSignature = null;
-		// try {
-		// digitalSignature = signData(test, sk);
-		// } catch (Exception e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		//
-		// boolean verified = false;
-		//
-		// try {
-		// verified = verifySig(test, pk, digitalSignature);
-		// } catch (Exception e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// System.out.println(verified) ;
+		RSAPublicKeySpec spec = new RSAPublicKeySpec(new BigInteger(1, timePubMod), new BigInteger(1, timePubExp));
+		KeyFactory factory = null;
+		try {
+			factory = KeyFactory.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			pk = (RSAPublicKey) factory.generatePublic(spec);
+		} catch (InvalidKeySpecException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		RSAPrivateKeySpec spac = new RSAPrivateKeySpec(new BigInteger(1, timeSecMod), new BigInteger(1, timeSecExp));
+		factory = null;
+		try {
+			factory = KeyFactory.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			sk = (RSAPrivateKey) factory.generatePrivate(spac);
+		} catch (InvalidKeySpecException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		 byte[] digitalSignature = null;
+		 try {
+		 digitalSignature = signData(test, sk);
+		 } catch (Exception e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 }
+		
+		 boolean verified = false;
+		
+		 try {
+		 verified = verifySig(test, pk, digitalSignature);
+		 } catch (Exception e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 }
+		 System.out.println(verified) ;
 	}
 	
 	private static boolean checkIfPast(byte[] lastTime, byte[] tempTimeUpdate) {
@@ -195,6 +236,17 @@ public class Main {
 
 	private static byte[] intToByteArray(final int i) {
 		BigInteger bigInt = BigInteger.valueOf(i);
+		String array = Arrays.toString(bigInt.toByteArray());
+		array = array.replace(",", ", (byte)");
+		array = array.replace("[", "[(byte) ");
+		array = array.replace("[", "{ ");
+		array = array.replace("]", " }");
+		System.out.println(array);
+		return bigInt.toByteArray();
+	}
+	
+	private static byte[] intToByteArray(final BigInteger i) {
+		BigInteger bigInt = i;
 		String array = Arrays.toString(bigInt.toByteArray());
 		array = array.replace(",", ", (byte)");
 		array = array.replace("[", "[(byte) ");
