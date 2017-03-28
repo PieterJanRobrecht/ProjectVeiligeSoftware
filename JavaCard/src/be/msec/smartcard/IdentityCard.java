@@ -316,12 +316,12 @@ public class IdentityCard extends Applet {
 		// initial time
 		lastTime = new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
 
-//		short offset = 0;
-//		short keySizeInBytes = (short) 4;
-//		short keySizeInBits = (short) (keySizeInBytes * 8);
-//		timePublicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
-//		timePublicKey.setExponent(timePubExp, offset, (short) 3);
-//		timePublicKey.setModulus(timePubMod, offset, keySizeInBytes);
+		short offset = 0;
+		short keySizeInBytes = (short) 4;
+		short keySizeInBits = (short) (keySizeInBytes * 8);
+		timePublicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
+		timePublicKey.setExponent(timePubExp, offset, (short) 3);
+		timePublicKey.setModulus(timePubMod, offset, keySizeInBytes);
 
 		/* Build private RSA Key based on dummy */
 		keySizeInBytes = 64;
@@ -608,7 +608,7 @@ public class IdentityCard extends Applet {
 			// incomingData, tempTimeUpdate);
 			// RSAPublicKey pubKey, byte[] dataBuffer, short dataOffset, byte[]
 			// signatureBuffer, short signatureOffset) {
-			boolean verified = verifyPublic(timePublicKey, tempTimeUpdate, (short) 0, signature, (short) 0);
+			boolean verified = verifyPublic(timePublicKey, tempTimeUpdate, signature);
 			if (verified) {
 				boolean past = checkIfPast(lastTime, tempTimeUpdate);
 				if(past)
@@ -753,7 +753,6 @@ public class IdentityCard extends Applet {
 		signature.init(pubKey, Signature.MODE_VERIFY);
 		//signature.update(signatureBuffer, (short) 0, (short) 64);
 		try {
-			// verify(byte[] inBuff, short inOffset, short inLength, byte[] sigBuff, short sigOffset, short sigLength)
 			return signature.verify(dataBuffer, (short) 0, (short) 4, signatureBuffer, (short) 0, (short) 64);
 		} catch (Exception e) {
 			return false;
