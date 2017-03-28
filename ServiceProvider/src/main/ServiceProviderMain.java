@@ -31,10 +31,12 @@ public class ServiceProviderMain extends Application {
 			ServiceProviderController serviceProviderController = loader.<ServiceProviderController>getController();
 			assert (serviceProviderController != null);
 			
-			// Rhino Hier moet je het aanpassen dan
-//			ServiceProviderServer sps = new ServiceProviderServer();
-//			serviceProviderController.setServiceProviderServer(sps);
-
+			ServiceProviderServer sps = new ServiceProviderServer();
+			serviceProviderController.setServiceProviderServer(sps);
+	        
+	        Thread thread = new Thread(sps);
+	        thread.start();
+	        
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

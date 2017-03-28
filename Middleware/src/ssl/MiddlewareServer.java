@@ -30,10 +30,51 @@ import java.util.Arrays;
  * @author rhino
  *
  */
-public class MiddlewareServer extends Communicator {
+public class MiddlewareServer extends Communicator implements Runnable {
 	private MiddlewareController mc;
 	public MiddlewareServer(MiddlewareController mwc) {
 		this.mc = mwc;
+	}
+
+	private byte[] intToByteArray(final int i) {
+		BigInteger bigInt = BigInteger.valueOf(i);
+		System.out.print("\tConverting " + i + " ...");
+		System.out.println(" converted to " + Arrays.toString(bigInt.toByteArray()));
+		return bigInt.toByteArray();
+	}
+	
+	public static String bytesToHex(byte[] in) {
+		final StringBuilder builder = new StringBuilder();
+		for (byte b : in) {
+			builder.append(String.format("%02x", b));
+		}
+		return builder.toString();
+	}
+	
+	public byte[] generateSignatureForMessage(PrivateKey privKey, byte[]  message) throws Exception {
+		Signature rsa = Signature.getInstance("SHA1withRSA");
+		rsa.initSign(privKey);
+		rsa.update(message);
+		return rsa.sign();
+	}
+
+	public byte[] generateSignatureForMessage(RSAPrivateKey privKey, byte[] message) throws Exception {
+		Signature rsa = Signature.getInstance("SHA1withRSA");
+		rsa.initSign(privKey);
+		rsa.update(message);
+		return rsa.sign();
+	}
+
+	public static PrivateKey bigIntegerToPrivateKey(String mod, String exp) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		RSAPrivateKeySpec keySpec = new RSAPrivateKeySpec(new BigInteger(mod, 16), new BigInteger(exp, 16));
+		KeyFactory fact = KeyFactory.getInstance("RSA");
+		PrivateKey privKey = fact.generatePrivate(keySpec);
+		return privKey;
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 		System.setProperty("javax.net.ssl.keyStore", "ssl/server_keystore");
 		System.setProperty("javax.net.ssl.keyStorePassword", "server_keystore");
 		System.setProperty("javax.net.ssl.trustStore", "ssl/server_truststore");
@@ -107,41 +148,5 @@ public class MiddlewareServer extends Communicator {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	private byte[] intToByteArray(final int i) {
-		BigInteger bigInt = BigInteger.valueOf(i);
-		System.out.print("\tConverting " + i + " ...");
-		System.out.println(" converted to " + Arrays.toString(bigInt.toByteArray()));
-		return bigInt.toByteArray();
-	}
-	
-	public static String bytesToHex(byte[] in) {
-		final StringBuilder builder = new StringBuilder();
-		for (byte b : in) {
-			builder.append(String.format("%02x", b));
-		}
-		return builder.toString();
-	}
-	
-	public byte[] generateSignatureForMessage(PrivateKey privKey, byte[]  message) throws Exception {
-		Signature rsa = Signature.getInstance("SHA1withRSA");
-		rsa.initSign(privKey);
-		rsa.update(message);
-		return rsa.sign();
-	}
-
-	public byte[] generateSignatureForMessage(RSAPrivateKey privKey, byte[] message) throws Exception {
-		Signature rsa = Signature.getInstance("SHA1withRSA");
-		rsa.initSign(privKey);
-		rsa.update(message);
-		return rsa.sign();
-	}
-
-	public static PrivateKey bigIntegerToPrivateKey(String mod, String exp) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		RSAPrivateKeySpec keySpec = new RSAPrivateKeySpec(new BigInteger(mod, 16), new BigInteger(exp, 16));
-		KeyFactory fact = KeyFactory.getInstance("RSA");
-		PrivateKey privKey = fact.generatePrivate(keySpec);
-		return privKey;
 	}
 }

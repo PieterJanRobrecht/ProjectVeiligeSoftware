@@ -27,6 +27,8 @@ public class Client extends Application {
 			assert (middlewareController != null);
 			
 			MiddlewareServer mws = new MiddlewareServer(middlewareController);
+	        Thread thread = new Thread(mws);
+	        thread.start();
 
 		} catch (IOException e) {
 			e.printStackTrace();
