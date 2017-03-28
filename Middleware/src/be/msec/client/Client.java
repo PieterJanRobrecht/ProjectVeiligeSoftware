@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import ssl.MiddlewareServer;
 
 import java.io.IOException;
 
@@ -24,6 +25,8 @@ public class Client extends Application {
 			// Ophalen van de controller horende bij de view klasse
 			MiddlewareController middlewareController = loader.<MiddlewareController>getController();
 			assert (middlewareController != null);
+			
+			MiddlewareServer mws = new MiddlewareServer(middlewareController);
 
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -32,7 +32,7 @@ import java.util.Arrays;
  */
 public class MiddlewareServer extends Communicator {
 	private MiddlewareController mc;
-	private MiddlewareServer(MiddlewareController mwc) {
+	public MiddlewareServer(MiddlewareController mwc) {
 		this.mc = mwc;
 		System.setProperty("javax.net.ssl.keyStore", "ssl/server_keystore");
 		System.setProperty("javax.net.ssl.keyStorePassword", "server_keystore");
