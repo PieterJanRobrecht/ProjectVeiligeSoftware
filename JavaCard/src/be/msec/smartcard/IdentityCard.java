@@ -319,9 +319,9 @@ public class IdentityCard extends Applet {
 		short offset = 0;
 		short keySizeInBytes = (short) 4;
 		short keySizeInBits = (short) (keySizeInBytes * 8);
-		timePublicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
-		timePublicKey.setExponent(timePubExp, offset, (short) 3);
-		timePublicKey.setModulus(timePubMod, offset, keySizeInBytes);
+//		timePublicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
+//		timePublicKey.setExponent(timePubExp, offset, (short) 3);
+//		timePublicKey.setModulus(timePubMod, offset, keySizeInBytes);
 
 		/* Build private RSA Key based on dummy */
 		keySizeInBytes = 64;
