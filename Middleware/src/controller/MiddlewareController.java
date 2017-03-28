@@ -48,6 +48,7 @@ import be.msec.client.connection.SimulatedConnection;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
+import ssl.MiddlewareServer;
 import ssl.SSLConnectionServiceProvider;
 import ssl.SSLConnectionTimeServer;
 
@@ -151,6 +152,16 @@ public class MiddlewareController {
 			sendNewTime(fetchNewTime());
 			System.out.println("Complete! \n");
 		}
+	}
+	
+	@FXML
+	public void initialize() {		
+		MiddlewareServer sps = new MiddlewareServer(this);
+        
+        Thread thread = new Thread(sps);
+        thread.start();
+        
+//		this.setMiddlewareThread(thread);
 	}
 
 	private void startSimulator() {

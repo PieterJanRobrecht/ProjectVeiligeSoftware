@@ -17,7 +17,7 @@ public class SSLConnectionMiddleware {
         sslSocket = null;
         
 //		try {
-//            sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1337);
+//            sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 13340);
 //            sslSocket.startHandshake();
 //
 //            InputStream inputStream = sslSocket.getInputStream();

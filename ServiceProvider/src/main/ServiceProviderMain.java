@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import controller.ServiceProviderController;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -30,13 +31,6 @@ public class ServiceProviderMain extends Application {
 			// Ophalen van de controller horende bij de view klasse
 			ServiceProviderController serviceProviderController = loader.<ServiceProviderController>getController();
 			assert (serviceProviderController != null);
-			
-			ServiceProviderServer sps = new ServiceProviderServer();
-			serviceProviderController.setServiceProviderServer(sps);
-	        
-	        Thread thread = new Thread(sps);
-	        thread.start();
-	        
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

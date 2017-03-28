@@ -75,8 +75,8 @@ public class MiddlewareServer extends Communicator implements Runnable {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		System.setProperty("javax.net.ssl.keyStore", "ssl/server_keystore");
-		System.setProperty("javax.net.ssl.keyStorePassword", "server_keystore");
+//		System.setProperty("javax.net.ssl.keyStore", "ssl/server_keystore");
+//		System.setProperty("javax.net.ssl.keyStorePassword", "server_keystore");
 		System.setProperty("javax.net.ssl.trustStore", "ssl/server_truststore");
 		System.setProperty("javax.net.ssl.trustStorePassword", "server_truststore");
 
@@ -87,7 +87,7 @@ public class MiddlewareServer extends Communicator implements Runnable {
 		SSLServerSocket sslServerSocket = null;
 
 		try {
-			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(1337);
+			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(13340);
 		} catch (IOException e) {
 			System.err.println("Unable to initiate SSLServerSocket.");
 			e.printStackTrace();

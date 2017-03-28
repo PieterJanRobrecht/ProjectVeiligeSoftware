@@ -11,6 +11,7 @@ import java.security.cert.X509Certificate;
 
 import org.bouncycastle.openssl.PEMReader;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -50,8 +51,8 @@ public class ServiceProviderController {
 
 	@FXML
 	private CheckBox birthDateCheck;
-	
-	private ServiceProviderServer sps;
+
+	private Thread serverThread;
 
 	@FXML
 	void submitSettings(ActionEvent event) {
@@ -63,13 +64,13 @@ public class ServiceProviderController {
 		boolean gender = genderCheck.selectedProperty().getValue();
 		boolean birthday = birthDateCheck.selectedProperty().getValue();
 		String output = providerCombo.getSelectionModel().getSelectedItem().toString();
-		
+
 		try {
 			X509Certificate cert = getCertificate(output);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday
 				+ " for " + output;
 		addText(submit);
@@ -77,10 +78,10 @@ public class ServiceProviderController {
 
 	private X509Certificate getCertificate(String output) throws CertificateException, FileNotFoundException {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-	    FileReader fr = null;
-	    String fileName = new String();
-	    // Alle paswoorden zijn gelijk aan password
-	    switch (output) {
+		FileReader fr = null;
+		String fileName = new String();
+		// Alle paswoorden zijn gelijk aan password
+		switch (output) {
 		case "Overheid 1":
 			addText("Overheid 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/gov1.crt";
@@ -116,9 +117,9 @@ public class ServiceProviderController {
 		default:
 			break;
 		}
-	    fr = new FileReader (fileName);
-	    PEMReader pemReader = new PEMReader(fr);
-	    X509Certificate cert = null;
+		fr = new FileReader(fileName);
+		PEMReader pemReader = new PEMReader(fr);
+		X509Certificate cert = null;
 		try {
 			cert = (X509Certificate) pemReader.readObject();
 		} catch (IOException e) {
@@ -133,17 +134,24 @@ public class ServiceProviderController {
 		providerCombo.getItems().addAll("Overheid 1", "Overheid 2", "Sociaal Netwerk 1", "Sociaal Netwerk 2",
 				"Default 1", "Default 2", "Keuze 1", "Keuze 2");
 		providerCombo.getSelectionModel().selectFirst();
+
+		ServiceProviderServer sps = new ServiceProviderServer();
+
+		Thread thread = new Thread(sps);
+		thread.start();
+
+		this.setServerThread(thread);
 	}
 
 	public void addText(String text) {
-		communicationArea.appendText(text+"\n");
+		communicationArea.appendText(text + "\n");
 	}
 
-	public ServiceProviderServer getsetServiceProviderServer() {
-		return sps;
+	public Thread getServerThread() {
+		return serverThread;
 	}
 
-	public void setServiceProviderServer(ServiceProviderServer sps) {
-		this.sps = sps;
+	public void setServerThread(Thread serverThread) {
+		this.serverThread = serverThread;
 	}
 }
