@@ -87,7 +87,7 @@ public class MiddlewareServer extends Communicator implements Runnable {
 		SSLServerSocket sslServerSocket = null;
 
 		try {
-			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(1336);
+			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(1337);
 		} catch (IOException e) {
 			System.err.println("Unable to initiate SSLServerSocket.");
 			e.printStackTrace();
