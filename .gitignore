@@ -2,7 +2,7 @@ JavaCard/GPShell-1.4.4/
 JavaCard/.jcproject
 *.txt
 *.bat
-*.xml
+JavaCard/projectBuilder.xml
 Javacard/target/
 Middleware/target/
 ServiceProvider/target/

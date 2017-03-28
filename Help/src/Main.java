@@ -1,3 +1,4 @@
+import java.awt.Checkbox;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -58,8 +59,11 @@ public class Main {
 			(byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
 
 	public static void main(String[] args) {
-		// intToByteArray(86400);
-		byte[] test = { (byte) 1, (byte) 81, (byte) -128 };
+		intToByteArray(1490635770);
+		byte[] past = new byte[] { (byte) 88, (byte) -39, (byte) 74, (byte) -102 }; //Komt binnen
+		byte[] future = new byte[] { (byte) 88, (byte) -39, (byte) 75, (byte) -6 }; //Staat op kaart
+		System.out.println(checkIfPast(future, past));
+//		byte[] test = { (byte) 1, (byte) 81, (byte) -128 };
 		// System.out.println(fromByteArray(test).toString());
 
 		// int unixTime = (int) (System.currentTimeMillis() / 1000);
@@ -75,32 +79,32 @@ public class Main {
 		// System.out.println(getal);
 		// intToByteArray(getal);
 
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		FileReader fr = null, fr2 = null;
-		try {
-			fr = new FileReader("../Certificaten2/g.crt");
-			fr2 = new FileReader("../Certificaten2/g.key");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		PEMReader pemReader = new PEMReader(fr);
-		X509Certificate cert = null;
-		RSAPrivateKey sk = null;
-		RSAPublicKey pk = null;
-		try {
-			cert = (X509Certificate) pemReader.readObject();
-			pemReader = new PEMReader(fr2);
-			KeyPair kp = (KeyPair) pemReader.readObject();
-			sk = (RSAPrivateKey) kp.getPrivate();
-			pk = (RSAPublicKey) cert.getPublicKey();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		intToByteArray(pk.getModulus().intValue());
-		intToByteArray(pk.getPublicExponent().intValue());
-		toStringArray(pk.getEncoded());
+//		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+//		FileReader fr = null, fr2 = null;
+//		try {
+//			fr = new FileReader("../Certificaten2/g.crt");
+//			fr2 = new FileReader("../Certificaten2/g.key");
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		PEMReader pemReader = new PEMReader(fr);
+//		X509Certificate cert = null;
+//		RSAPrivateKey sk = null;
+//		RSAPublicKey pk = null;
+//		try {
+//			cert = (X509Certificate) pemReader.readObject();
+//			pemReader = new PEMReader(fr2);
+//			KeyPair kp = (KeyPair) pemReader.readObject();
+//			sk = (RSAPrivateKey) kp.getPrivate();
+//			pk = (RSAPublicKey) cert.getPublicKey();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		intToByteArray(pk.getModulus().intValue());
+//		intToByteArray(pk.getPublicExponent().intValue());
+//		toStringArray(pk.getEncoded());
 
 		// byte[] digitalSignature = null;
 		// try {
@@ -119,6 +123,19 @@ public class Main {
 		// e.printStackTrace();
 		// }
 		// System.out.println(verified) ;
+	}
+	
+	private static boolean checkIfPast(byte[] lastTime, byte[] tempTimeUpdate) {
+		// TODO: is het lastTime > tempTimeUpdate of is het lastTime <= tempTimeUpdate
+		boolean past = false;
+		for(short i = 0; i<4;i++){
+			byte hulp = (byte) (lastTime[i] - tempTimeUpdate[i]);
+			if(hulp > 0){
+				past = true;
+				break;
+			}
+		}
+		return past;
 	}
 
 	private static void toStringArray(byte[] encoded) {

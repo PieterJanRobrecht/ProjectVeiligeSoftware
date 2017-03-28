@@ -117,7 +117,6 @@ public class MiddlewareController {
 //										 * willen we auth?
 //										 **/
 //		);
-
 	}
 
 	@FXML

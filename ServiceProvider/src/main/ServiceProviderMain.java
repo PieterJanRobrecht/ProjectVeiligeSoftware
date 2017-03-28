@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import ssl.ServiceProviderServer;
 
 public class ServiceProviderMain extends Application {
 
@@ -29,6 +30,10 @@ public class ServiceProviderMain extends Application {
 			// Ophalen van de controller horende bij de view klasse
 			ServiceProviderController serviceProviderController = loader.<ServiceProviderController>getController();
 			assert (serviceProviderController != null);
+			
+			// Rhino Hier moet je het aanpassen dan
+			ServiceProviderServer sps = new ServiceProviderServer();
+			serviceProviderController.setServiceProviderServer(sps);
 
 		} catch (IOException e) {
 			e.printStackTrace();
