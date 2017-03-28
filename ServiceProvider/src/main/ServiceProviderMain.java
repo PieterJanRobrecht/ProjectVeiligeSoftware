@@ -32,8 +32,8 @@ public class ServiceProviderMain extends Application {
 			assert (serviceProviderController != null);
 			
 			// Rhino Hier moet je het aanpassen dan
-			ServiceProviderServer sps = new ServiceProviderServer();
-			serviceProviderController.setServiceProviderServer(sps);
+//			ServiceProviderServer sps = new ServiceProviderServer();
+//			serviceProviderController.setServiceProviderServer(sps);
 
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -283,7 +283,7 @@ public class IdentityCard extends Applet {
 			(byte) 3, (byte) 1, (byte) 0, (byte) 1 };
 
 	private byte[] timePubExp = new byte[] { (byte) 1, (byte) 0, (byte) 1 };
-	private byte[] timePubMod = new byte[] { (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
+	private byte[] timePubMod = new byte[] { (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
 
 	private RSAPublicKey timePublicKey;
 	private PrivateKey coSecretKey;
@@ -317,7 +317,7 @@ public class IdentityCard extends Applet {
 		lastTime = new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
 
 		short offset = 0;
-		short keySizeInBytes = (short) 4;
+		short keySizeInBytes = (short) 64;
 		short keySizeInBits = (short) (keySizeInBytes * 8);
 //		timePublicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
 //		timePublicKey.setExponent(timePubExp, offset, (short) 3);
@@ -568,7 +568,7 @@ public class IdentityCard extends Applet {
 	private void updateTime(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
-		else if (tempTimeUpdate == null) {
+		if (tempTimeUpdate == null) {
 			byte[] buffer = apdu.getBuffer();
 			byte[] time = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
 			time = slice(time, (short) 0, (short) 4);
@@ -578,6 +578,7 @@ public class IdentityCard extends Applet {
 		}
 	}
 
+	//
 	private void updateSig(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
@@ -610,9 +611,9 @@ public class IdentityCard extends Applet {
 			// signatureBuffer, short signatureOffset) {
 			boolean verified = verifyPublic(timePublicKey, tempTimeUpdate, signature);
 			if (verified) {
-				boolean past = checkIfPast(lastTime, tempTimeUpdate);
-				if(past)
-					ISOException.throwIt(VERIFY_FAILED);
+//				boolean past = checkIfPast(lastTime, tempTimeUpdate);
+//				if(past)
+//					ISOException.throwIt(VERIFY_FAILED);
 				lastTime = tempTimeUpdate;
 				tempTimeUpdate = null;
 				ISOException.throwIt(KAPPA);
@@ -629,7 +630,7 @@ public class IdentityCard extends Applet {
 		boolean past = false;
 		for(short i = 0; i<4;i++){
 			byte hulp = (byte) (lastTime[i] - tempTimeUpdate[i]);
-			if(hulp > 0){
+			if(hulp < 0){
 				past = true;
 				break;
 			}
@@ -811,7 +812,7 @@ public class IdentityCard extends Applet {
 		} else {
 			answer = new byte[] { (byte) 1 };
 		}
-
+		
 		tempTime = null;
 
 		apdu.setOutgoing();

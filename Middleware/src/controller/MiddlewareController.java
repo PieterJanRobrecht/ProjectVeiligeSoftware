@@ -143,11 +143,13 @@ public class MiddlewareController {
 		/*** STAP 1 ***/
 		System.out.println("Sending Time..");
 		boolean isValid = isValid();
-		System.out.println("Revalidation needed: " + !isValid);
+		System.out.println("revalidation needed: " + !isValid);
 		System.out.println("Complete! \n");
 
 		if (!isValid) {
+			System.out.println("Sending Revalidation..");
 			sendNewTime(fetchNewTime());
+			System.out.println("Complete! \n");
 		}
 	}
 
@@ -346,6 +348,8 @@ public class MiddlewareController {
 			} else if (r.getSW() == VERIFY_FAILED) {
 				addText("SIGNATURE INVALID");
 				throw new Exception("SIGNATURE INVALID");
+			} else if (r.getSW() == KAPPA){
+				addText("SIGNATURE VALID");
 			} else if (r.getSW() != 0x9000)
 				throw new Exception("\tException on the card: " + Integer.toHexString(r.getSW()));
 

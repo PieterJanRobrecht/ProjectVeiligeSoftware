@@ -3,6 +3,8 @@ package ssl;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.sun.javafx.image.IntToBytePixelConverter;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +39,10 @@ public class SSLConnectionTimeServer extends Communicator {
 	private RSAPublicKey pubKey;
 	
 	private byte[] timeCert = new byte[] {(byte) 48,(byte) -126,(byte) 1,(byte) 126,(byte) 48,(byte) -126,(byte) 1,(byte) 40,(byte) 2,(byte) 1,(byte) 1,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 11,(byte) 5,(byte) 0,(byte) 48,(byte) 72,(byte) 49,(byte) 11,(byte) 48,(byte) 9,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 6,(byte) 19,(byte) 2,(byte) 66,(byte) 69,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 8,(byte) 12,(byte) 10,(byte) 83,(byte) 111,(byte) 109,(byte) 101,(byte) 45,(byte) 83,(byte) 116,(byte) 97,(byte) 116,(byte) 101,(byte) 49,(byte) 17,(byte) 48,(byte) 15,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 10,(byte) 12,(byte) 8,(byte) 67,(byte) 101,(byte) 114,(byte) 116,(byte) 65,(byte) 117,(byte) 116,(byte) 104,(byte) 49,(byte) 17,(byte) 48,(byte) 15,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 3,(byte) 12,(byte) 8,(byte) 67,(byte) 101,(byte) 114,(byte) 116,(byte) 65,(byte) 117,(byte) 116,(byte) 104,(byte) 48,(byte) 30,(byte) 23,(byte) 13,(byte) 49,(byte) 55,(byte) 48,(byte) 51,(byte) 50,(byte) 55,(byte) 49,(byte) 49,(byte) 53,(byte) 48,(byte) 48,(byte) 52,(byte) 90,(byte) 23,(byte) 13,(byte) 49,(byte) 57,(byte) 48,(byte) 51,(byte) 50,(byte) 55,(byte) 49,(byte) 49,(byte) 53,(byte) 48,(byte) 48,(byte) 52,(byte) 90,(byte) 48,(byte) 76,(byte) 49,(byte) 11,(byte) 48,(byte) 9,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 6,(byte) 19,(byte) 2,(byte) 66,(byte) 69,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 8,(byte) 12,(byte) 10,(byte) 83,(byte) 111,(byte) 109,(byte) 101,(byte) 45,(byte) 83,(byte) 116,(byte) 97,(byte) 116,(byte) 101,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 10,(byte) 12,(byte) 10,(byte) 84,(byte) 105,(byte) 109,(byte) 101,(byte) 83,(byte) 101,(byte) 114,(byte) 118,(byte) 101,(byte) 114,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 3,(byte) 12,(byte) 10,(byte) 84,(byte) 105,(byte) 109,(byte) 101,(byte) 83,(byte) 101,(byte) 114,(byte) 118,(byte) 101,(byte) 114,(byte) 48,(byte) 92,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 1,(byte) 5,(byte) 0,(byte) 3,(byte) 75,(byte) 0,(byte) 48,(byte) 72,(byte) 2,(byte) 65,(byte) 0,(byte) -17,(byte) -49,(byte) 3,(byte) -29,(byte) -86,(byte) 74,(byte) 61,(byte) -60,(byte) 101,(byte) -54,(byte) -76,(byte) 23,(byte) -75,(byte) 63,(byte) -88,(byte) 115,(byte) -93,(byte) -78,(byte) -22,(byte) -23,(byte) -74,(byte) 80,(byte) 73,(byte) -127,(byte) 89,(byte) -89,(byte) -77,(byte) -48,(byte) 8,(byte) 78,(byte) -104,(byte) 114,(byte) -65,(byte) -71,(byte) -117,(byte) -56,(byte) -126,(byte) 54,(byte) 69,(byte) -120,(byte) -75,(byte) 112,(byte) -35,(byte) 30,(byte) -71,(byte) -65,(byte) 98,(byte) 112,(byte) 107,(byte) 117,(byte) -10,(byte) 60,(byte) -44,(byte) -34,(byte) -119,(byte) 107,(byte) 74,(byte) 26,(byte) 74,(byte) 56,(byte) -43,(byte) -79,(byte) 113,(byte) 49,(byte) 2,(byte) 3,(byte) 1,(byte) 0,(byte) 1,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 11,(byte) 5,(byte) 0,(byte) 3,(byte) 65,(byte) 0,(byte) 112,(byte) -111,(byte) 77,(byte) 12,(byte) -58,(byte) -66,(byte) 121,(byte) 125,(byte) -111,(byte) 87,(byte) -74,(byte) -102,(byte) 9,(byte) -56,(byte) 91,(byte) 62,(byte) -31,(byte) 78,(byte) 10,(byte) 37,(byte) -54,(byte) -108,(byte) 41,(byte) -81,(byte) -48,(byte) 78,(byte) -28,(byte) -87,(byte) -64,(byte) -105,(byte) -108,(byte) 108,(byte) 50,(byte) -11,(byte) 47,(byte) 71,(byte) 118,(byte) 19,(byte) -39,(byte) -12,(byte) 71,(byte) -108,(byte) 38,(byte) 28,(byte) -87,(byte) -50,(byte) -106,(byte) 55,(byte) 86,(byte) -6,(byte) -38,(byte) -42,(byte) -52,(byte) 61,(byte) 94,(byte) 16,(byte) 102,(byte) 0,(byte) -60,(byte) 9,(byte) 32,(byte) -122,(byte) -124,(byte) -28};
+	private byte[] timePubExp = new byte[] { (byte) 1, (byte) 0, (byte) 1 };
+	private byte[] timePubMod = new byte[] { (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
 
+	
 	//private PublicKey timePubKey;
 	
 	SSLSocketFactory sslSocketFactory;
@@ -45,9 +50,12 @@ public class SSLConnectionTimeServer extends Communicator {
 
 	public SSLConnectionTimeServer() {
 		try {
-			String mod = bytesToHex(dummyPubModulus);
-			String exp = bytesToHex(dummyPubExponent);
-			pubKey = (RSAPublicKey) bigIntegerToPublicKey(mod, exp);
+//			String mod = bytesToHex(dummyPubModulus);
+//			String exp = bytesToHex(dummyPubExponent);
+//			pubKey = (RSAPublicKey) bigIntegerToPublicKey(mod, exp);
+//			String mod = bytesToHex(timePubMod);
+//			String exp = bytesToHex(timePubExp);
+			pubKey = (RSAPublicKey) bigIntegerToPublicKey(timePubMod, timePubExp);
 			
 			CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 			InputStream in = new ByteArrayInputStream(timeCert);
@@ -114,20 +122,35 @@ public class SSLConnectionTimeServer extends Communicator {
 	
 	public boolean verifySignatureForMessage(PublicKey pubKey, byte[] sig, String message) throws Exception {
 		Signature s = Signature.getInstance("SHA1withRSA");
+		byte[] b = intToByteArray(Integer.parseInt(message));
 		s.initVerify(pubKey);
-		s.update(message.getBytes());
+		s.update(b);
 		return s.verify(sig);
+	}
+	
+	private byte[] intToByteArray(final int i) {
+		BigInteger bigInt = BigInteger.valueOf(i);
+		System.out.print("\tConverting " + i + " ...");
+		System.out.println(" converted to " + Arrays.toString(bigInt.toByteArray()));
+		return bigInt.toByteArray();
 	}
 
-	public boolean verifySignatureForMessage(RSAPublicKey pubKey, byte[] sig, String message) throws Exception {
-		Signature s = Signature.getInstance("SHA1withRSA");
-		s.initVerify(pubKey);
-		s.update(message.getBytes());
-		return s.verify(sig);
-	}
+//	public boolean verifySignatureForMessage(RSAPublicKey pubKey, byte[] sig, String message) throws Exception {
+//		Signature s = Signature.getInstance("SHA1withRSA");
+//		s.initVerify(pubKey);
+//		s.update(message.getBytes());
+//		return s.verify(sig);
+//	}
 
 	public static PublicKey bigIntegerToPublicKey(String mod, String exp) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		RSAPublicKeySpec keySpec = new RSAPublicKeySpec(new BigInteger(mod, 16), new BigInteger(exp, 16));
+		KeyFactory fact = KeyFactory.getInstance("RSA");
+		PublicKey pubKey = fact.generatePublic(keySpec);
+		return pubKey;
+	}
+	
+	public static PublicKey bigIntegerToPublicKey(byte[] mod, byte[] exp) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		RSAPublicKeySpec keySpec = new RSAPublicKeySpec(new BigInteger(1, mod), new BigInteger(1, exp));
 		KeyFactory fact = KeyFactory.getInstance("RSA");
 		PublicKey pubKey = fact.generatePublic(keySpec);
 		return pubKey;
