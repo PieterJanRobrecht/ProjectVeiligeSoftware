@@ -16,6 +16,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.smartcardio.CommandAPDU;
@@ -83,6 +85,8 @@ public class MiddlewareController {
 	// Gemaakt aan de hand van goede certificaten?
 	private byte[] certCA = new byte[] {(byte) 48,(byte) -126,(byte) 1,(byte) -39,(byte) 48,(byte) -126,(byte) 1,(byte) -125,(byte) -96,(byte) 3,(byte) 2,(byte) 1,(byte) 2,(byte) 2,(byte) 9,(byte) 0,(byte) -93,(byte) 38,(byte) 118,(byte) 61,(byte) 72,(byte) -98,(byte) 45,(byte) 71,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 11,(byte) 5,(byte) 0,(byte) 48,(byte) 72,(byte) 49,(byte) 11,(byte) 48,(byte) 9,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 6,(byte) 19,(byte) 2,(byte) 66,(byte) 69,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 8,(byte) 12,(byte) 10,(byte) 83,(byte) 111,(byte) 109,(byte) 101,(byte) 45,(byte) 83,(byte) 116,(byte) 97,(byte) 116,(byte) 101,(byte) 49,(byte) 17,(byte) 48,(byte) 15,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 10,(byte) 12,(byte) 8,(byte) 67,(byte) 101,(byte) 114,(byte) 116,(byte) 65,(byte) 117,(byte) 116,(byte) 104,(byte) 49,(byte) 17,(byte) 48,(byte) 15,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 3,(byte) 12,(byte) 8,(byte) 67,(byte) 101,(byte) 114,(byte) 116,(byte) 65,(byte) 117,(byte) 116,(byte) 104,(byte) 48,(byte) 30,(byte) 23,(byte) 13,(byte) 49,(byte) 55,(byte) 48,(byte) 51,(byte) 50,(byte) 55,(byte) 49,(byte) 49,(byte) 52,(byte) 52,(byte) 53,(byte) 53,(byte) 90,(byte) 23,(byte) 13,(byte) 50,(byte) 50,(byte) 48,(byte) 51,(byte) 50,(byte) 55,(byte) 49,(byte) 49,(byte) 52,(byte) 52,(byte) 53,(byte) 53,(byte) 90,(byte) 48,(byte) 72,(byte) 49,(byte) 11,(byte) 48,(byte) 9,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 6,(byte) 19,(byte) 2,(byte) 66,(byte) 69,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 8,(byte) 12,(byte) 10,(byte) 83,(byte) 111,(byte) 109,(byte) 101,(byte) 45,(byte) 83,(byte) 116,(byte) 97,(byte) 116,(byte) 101,(byte) 49,(byte) 17,(byte) 48,(byte) 15,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 10,(byte) 12,(byte) 8,(byte) 67,(byte) 101,(byte) 114,(byte) 116,(byte) 65,(byte) 117,(byte) 116,(byte) 104,(byte) 49,(byte) 17,(byte) 48,(byte) 15,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 3,(byte) 12,(byte) 8,(byte) 67,(byte) 101,(byte) 114,(byte) 116,(byte) 65,(byte) 117,(byte) 116,(byte) 104,(byte) 48,(byte) 92,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 1,(byte) 5,(byte) 0,(byte) 3,(byte) 75,(byte) 0,(byte) 48,(byte) 72,(byte) 2,(byte) 65,(byte) 0,(byte) -81,(byte) -118,(byte) -116,(byte) 28,(byte) 68,(byte) -91,(byte) -115,(byte) 18,(byte) 104,(byte) 21,(byte) 18,(byte) -81,(byte) 116,(byte) -39,(byte) 84,(byte) 58,(byte) -24,(byte) 36,(byte) -53,(byte) 35,(byte) 2,(byte) 31,(byte) -49,(byte) -29,(byte) -104,(byte) 28,(byte) -58,(byte) -120,(byte) 59,(byte) -127,(byte) -3,(byte) -75,(byte) 118,(byte) 126,(byte) -24,(byte) 67,(byte) -11,(byte) 31,(byte) -13,(byte) -8,(byte) 119,(byte) 67,(byte) -114,(byte) 106,(byte) -114,(byte) 84,(byte) 11,(byte) -77,(byte) 5,(byte) -116,(byte) -67,(byte) 126,(byte) -4,(byte) -76,(byte) 125,(byte) -28,(byte) -128,(byte) -32,(byte) -81,(byte) -54,(byte) 81,(byte) -46,(byte) 40,(byte) -17,(byte) 2,(byte) 3,(byte) 1,(byte) 0,(byte) 1,(byte) -93,(byte) 80,(byte) 48,(byte) 78,(byte) 48,(byte) 29,(byte) 6,(byte) 3,(byte) 85,(byte) 29,(byte) 14,(byte) 4,(byte) 22,(byte) 4,(byte) 20,(byte) -26,(byte) 45,(byte) 119,(byte) 26,(byte) -45,(byte) -52,(byte) -1,(byte) -54,(byte) 104,(byte) 103,(byte) -92,(byte) 4,(byte) -85,(byte) 68,(byte) -111,(byte) -65,(byte) 87,(byte) -23,(byte) -55,(byte) 61,(byte) 48,(byte) 31,(byte) 6,(byte) 3,(byte) 85,(byte) 29,(byte) 35,(byte) 4,(byte) 24,(byte) 48,(byte) 22,(byte) -128,(byte) 20,(byte) -26,(byte) 45,(byte) 119,(byte) 26,(byte) -45,(byte) -52,(byte) -1,(byte) -54,(byte) 104,(byte) 103,(byte) -92,(byte) 4,(byte) -85,(byte) 68,(byte) -111,(byte) -65,(byte) 87,(byte) -23,(byte) -55,(byte) 61,(byte) 48,(byte) 12,(byte) 6,(byte) 3,(byte) 85,(byte) 29,(byte) 19,(byte) 4,(byte) 5,(byte) 48,(byte) 3,(byte) 1,(byte) 1,(byte) -1,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 11,(byte) 5,(byte) 0,(byte) 3,(byte) 65,(byte) 0,(byte) 33,(byte) 75,(byte) 28,(byte) -22,(byte) -58,(byte) 81,(byte) -78,(byte) -99,(byte) -3,(byte) -102,(byte) 0,(byte) 84,(byte) 76,(byte) -83,(byte) 51,(byte) -67,(byte) -31,(byte) -51,(byte) 107,(byte) 102,(byte) 49,(byte) 1,(byte) 124,(byte) 0,(byte) 14,(byte) 8,(byte) 120,(byte) -80,(byte) 117,(byte) 15,(byte) 32,(byte) -47,(byte) -65,(byte) -89,(byte) 18,(byte) -34,(byte) 124,(byte) 47,(byte) 114,(byte) -86,(byte) -104,(byte) -21,(byte) -79,(byte) 13,(byte) -29,(byte) -93,(byte) -99,(byte) 61,(byte) 17,(byte) 71,(byte) 104,(byte) 75,(byte) 116,(byte) 61,(byte) 94,(byte) 125,(byte) 71,(byte) 124,(byte) 5,(byte) -87,(byte) -104,(byte) -51,(byte) -69,(byte) -35};
 	
+	private SecretKey Ks;
+	
 	@FXML
 	private TextArea communicationArea;
 
@@ -107,12 +111,12 @@ public class MiddlewareController {
 		}
 
 		/*** STAP 2 ***/
-		System.out.println("Fetching SP certificate and passing it to SC..");
-		authenticateServiceProvider( /**
-										 * steek hier nog waarde in voor wie
-										 * willen we auth?
-										 **/
-		);
+//		System.out.println("Fetching SP certificate and passing it to SC..");
+//		authenticateServiceProvider( /**
+//										 * steek hier nog waarde in voor wie
+//										 * willen we auth?
+//										 **/
+//		);
 
 	}
 
@@ -521,6 +525,7 @@ public class MiddlewareController {
 			// System.out.println("Certificaat: " +
 			// Arrays.toString(finalCertificate));
 
+			/** FETCH SYMMETRIC KEY **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_KEY_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
 
@@ -530,39 +535,23 @@ public class MiddlewareController {
 			byte[] inc = r.getData();
 			System.out.println("\tPayload: " + Arrays.toString(inc));
 
-
-			// /** ONLY FOR SIMULATOR **/
-			// byte[] filterData = new byte[inc.length - 6];
-			// for (int i = 5; i < inc.length; i++) {
-			// filterData[i - 5] = inc[i];
-			// }
-			// System.out.println("\tFilterred payload: " +
-			// Arrays.toString(filterData));
-			// /************************/
-
-			/* Build private RSA Key based on dummy */
-			// short offset = 0;
-			// short keySizeInBytes = 64;
-			// short keySizeInBits = (short) (keySizeInBytes * 8);
-			// RSAPrivateKey secretKey = (RSAPrivateKey)
-			// KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits,
-			// false);
-			// secretKey.setExponent(dummyPrivExponent, offset, keySizeInBytes);
-			// secretKey.setModulus(dummyPrivModulus, offset, keySizeInBytes);
-
 			String mod = bytesToHex(dummyPrivModulus);
 			String exp = bytesToHex(dummyPrivExponent);
 			RSAPrivateKey secretKey = (RSAPrivateKey) generatePrivateKey(mod, exp);
 
-			/** TODO DECRYPT MESSAGE **/
-			byte[] temp = slice(inc, 5, 69);
-			byte[] kappa = decryptWithPrivateKey(secretKey, temp);
-			System.out.println(Arrays.toString(kappa));
+			byte[] data = slice(inc, 0, 64);
+			System.out.println(Arrays.toString(data));
 			
-			temp = slice(inc, 69, 133);
-			kappa = decryptWithPrivateKey(secretKey, temp);
-			System.out.println(Arrays.toString(kappa));
+			Cipher asymCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+			asymCipher.init(Cipher.DECRYPT_MODE, secretKey);
 
+			byte[] decryptedData = new byte[256];
+			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
+			
+			byte[] returnData = cutOffNulls(decryptedData);
+			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
+			Ks = originalKey;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -688,7 +677,7 @@ public class MiddlewareController {
 		for (short i = length; i > 0; i--) {
 			byte kappa = data[(short) (i - 1)];
 			if (kappa != (byte) 0) {
-				length = (short) (i - 1);
+				length = (short) (i);
 				break;
 			}
 		}

@@ -96,7 +96,7 @@ public class TimeServiceServer extends Communicator {
 
 				System.out.println("Client connected to fetch time, returning " + unixTime);
 
-				String test = bytesToHex(generateSignatureForMessage(timeSecretKey, "" + unixTime));
+				String test = bytesToHex(generateSignatureForMessage(timeSecretKey, intToByteArray(unixTime)));
 				send(test.substring(0, 80), outputStream);
 				send(test.substring(80, 128), outputStream);
 				send("" + unixTime, outputStream);
@@ -112,6 +112,13 @@ public class TimeServiceServer extends Communicator {
 		}
 	}
 
+	private byte[] intToByteArray(final int i) {
+		BigInteger bigInt = BigInteger.valueOf(i);
+		System.out.print("\tConverting " + i + " ...");
+		System.out.println(" converted to " + Arrays.toString(bigInt.toByteArray()));
+		return bigInt.toByteArray();
+	}
+	
 	public static String bytesToHex(byte[] in) {
 		final StringBuilder builder = new StringBuilder();
 		for (byte b : in) {
@@ -120,17 +127,17 @@ public class TimeServiceServer extends Communicator {
 		return builder.toString();
 	}
 	
-	public byte[] generateSignatureForMessage(PrivateKey privKey, String message) throws Exception {
+	public byte[] generateSignatureForMessage(PrivateKey privKey, byte[]  message) throws Exception {
 		Signature rsa = Signature.getInstance("SHA1withRSA");
 		rsa.initSign(privKey);
-		rsa.update(message.getBytes());
+		rsa.update(message);
 		return rsa.sign();
 	}
 
-	public byte[] generateSignatureForMessage(RSAPrivateKey privKey, String message) throws Exception {
+	public byte[] generateSignatureForMessage(RSAPrivateKey privKey, byte[] message) throws Exception {
 		Signature rsa = Signature.getInstance("SHA1withRSA");
 		rsa.initSign(privKey);
-		rsa.update(message.getBytes());
+		rsa.update(message);
 		return rsa.sign();
 	}
 

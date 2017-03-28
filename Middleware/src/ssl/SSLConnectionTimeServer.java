@@ -38,7 +38,7 @@ public class SSLConnectionTimeServer extends Communicator {
 	
 	private byte[] timeCert = new byte[] {(byte) 48,(byte) -126,(byte) 1,(byte) 126,(byte) 48,(byte) -126,(byte) 1,(byte) 40,(byte) 2,(byte) 1,(byte) 1,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 11,(byte) 5,(byte) 0,(byte) 48,(byte) 72,(byte) 49,(byte) 11,(byte) 48,(byte) 9,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 6,(byte) 19,(byte) 2,(byte) 66,(byte) 69,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 8,(byte) 12,(byte) 10,(byte) 83,(byte) 111,(byte) 109,(byte) 101,(byte) 45,(byte) 83,(byte) 116,(byte) 97,(byte) 116,(byte) 101,(byte) 49,(byte) 17,(byte) 48,(byte) 15,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 10,(byte) 12,(byte) 8,(byte) 67,(byte) 101,(byte) 114,(byte) 116,(byte) 65,(byte) 117,(byte) 116,(byte) 104,(byte) 49,(byte) 17,(byte) 48,(byte) 15,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 3,(byte) 12,(byte) 8,(byte) 67,(byte) 101,(byte) 114,(byte) 116,(byte) 65,(byte) 117,(byte) 116,(byte) 104,(byte) 48,(byte) 30,(byte) 23,(byte) 13,(byte) 49,(byte) 55,(byte) 48,(byte) 51,(byte) 50,(byte) 55,(byte) 49,(byte) 49,(byte) 53,(byte) 48,(byte) 48,(byte) 52,(byte) 90,(byte) 23,(byte) 13,(byte) 49,(byte) 57,(byte) 48,(byte) 51,(byte) 50,(byte) 55,(byte) 49,(byte) 49,(byte) 53,(byte) 48,(byte) 48,(byte) 52,(byte) 90,(byte) 48,(byte) 76,(byte) 49,(byte) 11,(byte) 48,(byte) 9,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 6,(byte) 19,(byte) 2,(byte) 66,(byte) 69,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 8,(byte) 12,(byte) 10,(byte) 83,(byte) 111,(byte) 109,(byte) 101,(byte) 45,(byte) 83,(byte) 116,(byte) 97,(byte) 116,(byte) 101,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 10,(byte) 12,(byte) 10,(byte) 84,(byte) 105,(byte) 109,(byte) 101,(byte) 83,(byte) 101,(byte) 114,(byte) 118,(byte) 101,(byte) 114,(byte) 49,(byte) 19,(byte) 48,(byte) 17,(byte) 6,(byte) 3,(byte) 85,(byte) 4,(byte) 3,(byte) 12,(byte) 10,(byte) 84,(byte) 105,(byte) 109,(byte) 101,(byte) 83,(byte) 101,(byte) 114,(byte) 118,(byte) 101,(byte) 114,(byte) 48,(byte) 92,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 1,(byte) 5,(byte) 0,(byte) 3,(byte) 75,(byte) 0,(byte) 48,(byte) 72,(byte) 2,(byte) 65,(byte) 0,(byte) -17,(byte) -49,(byte) 3,(byte) -29,(byte) -86,(byte) 74,(byte) 61,(byte) -60,(byte) 101,(byte) -54,(byte) -76,(byte) 23,(byte) -75,(byte) 63,(byte) -88,(byte) 115,(byte) -93,(byte) -78,(byte) -22,(byte) -23,(byte) -74,(byte) 80,(byte) 73,(byte) -127,(byte) 89,(byte) -89,(byte) -77,(byte) -48,(byte) 8,(byte) 78,(byte) -104,(byte) 114,(byte) -65,(byte) -71,(byte) -117,(byte) -56,(byte) -126,(byte) 54,(byte) 69,(byte) -120,(byte) -75,(byte) 112,(byte) -35,(byte) 30,(byte) -71,(byte) -65,(byte) 98,(byte) 112,(byte) 107,(byte) 117,(byte) -10,(byte) 60,(byte) -44,(byte) -34,(byte) -119,(byte) 107,(byte) 74,(byte) 26,(byte) 74,(byte) 56,(byte) -43,(byte) -79,(byte) 113,(byte) 49,(byte) 2,(byte) 3,(byte) 1,(byte) 0,(byte) 1,(byte) 48,(byte) 13,(byte) 6,(byte) 9,(byte) 42,(byte) -122,(byte) 72,(byte) -122,(byte) -9,(byte) 13,(byte) 1,(byte) 1,(byte) 11,(byte) 5,(byte) 0,(byte) 3,(byte) 65,(byte) 0,(byte) 112,(byte) -111,(byte) 77,(byte) 12,(byte) -58,(byte) -66,(byte) 121,(byte) 125,(byte) -111,(byte) 87,(byte) -74,(byte) -102,(byte) 9,(byte) -56,(byte) 91,(byte) 62,(byte) -31,(byte) 78,(byte) 10,(byte) 37,(byte) -54,(byte) -108,(byte) 41,(byte) -81,(byte) -48,(byte) 78,(byte) -28,(byte) -87,(byte) -64,(byte) -105,(byte) -108,(byte) 108,(byte) 50,(byte) -11,(byte) 47,(byte) 71,(byte) 118,(byte) 19,(byte) -39,(byte) -12,(byte) 71,(byte) -108,(byte) 38,(byte) 28,(byte) -87,(byte) -50,(byte) -106,(byte) 55,(byte) 86,(byte) -6,(byte) -38,(byte) -42,(byte) -52,(byte) 61,(byte) 94,(byte) 16,(byte) 102,(byte) 0,(byte) -60,(byte) 9,(byte) 32,(byte) -122,(byte) -124,(byte) -28};
 
-	private PublicKey timePubKey;
+	//private PublicKey timePubKey;
 	
 	SSLSocketFactory sslSocketFactory;
 	SSLSocket sslSocket;
@@ -52,7 +52,7 @@ public class SSLConnectionTimeServer extends Communicator {
 			CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 			InputStream in = new ByteArrayInputStream(timeCert);
 			X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
-			timePubKey = cert.getPublicKey();
+			//timePubKey = cert.getPublicKey();
 		} catch (NoSuchAlgorithmException e1) {
 			e1.printStackTrace();
 		} catch (InvalidKeySpecException e1) {
@@ -88,7 +88,7 @@ public class SSLConnectionTimeServer extends Communicator {
 			System.out.println("Signature in byte: " + Arrays.toString(hexStringToByteArray(sig)));
 			System.out.println("Timestamp: " + time);
 
-			System.out.println("Verified by MW: " + verifySignatureForMessage(timePubKey, hexStringToByteArray(sig), time));
+			System.out.println("Verified by MW: " + verifySignatureForMessage(pubKey, hexStringToByteArray(sig), time));
 			inputStream.close();
 			outputStream.close();
 
@@ -110,7 +110,7 @@ public class SSLConnectionTimeServer extends Communicator {
 		}
 
 		return returnValue;
-	}
+	}	
 	
 	public boolean verifySignatureForMessage(PublicKey pubKey, byte[] sig, String message) throws Exception {
 		Signature s = Signature.getInstance("SHA1withRSA");
