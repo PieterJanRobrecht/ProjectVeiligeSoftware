@@ -3,6 +3,7 @@ package ssl;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import be.msec.client.connection.IConnection;
 import controller.MiddlewareController;
 
 import java.io.IOException;
@@ -30,10 +31,11 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 	SSLSocketFactory sslSocketFactory;
 	SSLSocket sslSocket;
 	MiddlewareController mwc;
+	IConnection connection;
 	
     final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
-	public SSLConnectionServiceProvider(MiddlewareController mwc) {
+	public SSLConnectionServiceProvider(MiddlewareController mwc, IConnection connection) {
 		// System.setProperty("javax.net.ssl.keyStore", "ssl/Obama");
 		// System.setProperty("javax.net.ssl.keyStorePassword", "ThankYou");
 		System.setProperty("javax.net.ssl.trustStore", "ssl/client_truststore");
@@ -43,38 +45,12 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 
 		sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 		sslSocket = null;
+		
+		this.connection = connection;
 	}
 	
 	private void startHandelingThread() {
-		Thread t = new Thread(new Runnable(){
-			
-			@Override
-			public void run() {
-				while(true){
-					try {
-						String message = queue.take();
-						
-						switch (message) {
-						case "AuthSP":
-							authenticateServiceProvider();
-							break;
-
-						default:
-							break;
-						}
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-
-			private void authenticateServiceProvider() {
-				// TODO Auto-generated method stub
-				System.out.println("HIERO");
-			}
-			
-		});
+		Thread t = new Thread(new HandlingThread(sslSocket, queue));
 		t.start();
 	}
 
@@ -91,13 +67,9 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 						String message = receive(inputStream);
 						queue.put(message);
 						
-//						inputStream.close();
-//						outputStream.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
