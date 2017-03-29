@@ -16,6 +16,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ServiceProviderServer extends Communicator implements Runnable {
 	SSLSocket sslSocket;
@@ -73,6 +75,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 	String task = null;
 
+	final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+	
 	public ServiceProviderServer() {
 
 	}
@@ -119,6 +123,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		startListeningThread();
 
 		// Begin Stap 2
 		authenticateServiceProvider();
@@ -126,72 +132,30 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		// Begin stap 3
 		authenticateCard();
 		
-//		System.out.println("SSLServerSocket initialized.");
-//		while (true) {
-//			try {
-//
-//				// dit zorgt voor problemen :'( *sadface*
-//				// X509Certificate x509Certificate =
-//				// sslSession.getPeerCertificateChain()[0];
-//				// String username =
-//				// x509Certificate.getSubjectDN().getName().split("CN=")[1].split(",")[0];
-//
-//				String[] message;
-//
-//				while (true) {
-//					inputStream = sslSocket.getInputStream();
-//					outputStream = sslSocket.getOutputStream();
-//					message = receive(inputStream).split(" ");
-//					try {
-//						switch (Integer.parseInt(message[0])) {
-//						case 0:
-//							System.out.println(
-//									"Client connected to fetch certificate, returning " + Arrays.toString(certificate));
-//
-//							String test = bytesToHex(certificate);
-//							send(test.substring(0, 100), outputStream);
-//							send(test.substring(100, 200), outputStream);
-//							send(test.substring(200, 300), outputStream);
-//							send(test.substring(300, 400), outputStream);
-//							send(test.substring(400, 500), outputStream);
-//							send(test.substring(500, 600), outputStream);
-//							send(test.substring(600, 700), outputStream);
-//							send(test.substring(700, 800), outputStream);
-//							send(test.substring(800, test.length()), outputStream);
-//							break;
-//						case 1:
-//							System.out.println("Client connected to fetch task, waiting... ");
-//							while (task == null) {
-//								Thread.sleep(100);
-//							}
-//							send(task, outputStream);
-//
-//							System.out.println("Task received, pushing: " + task);
-//							task = null;
-//							break;
-//						default:
-//							send("Invalid command.", outputStream);
-//							break;
-//						}
-//					} catch (NumberFormatException e) {
-//						send("Invalid command. " + e.getMessage(), outputStream);
-//					} catch (ArrayIndexOutOfBoundsException e) {
-//						send("Invalid command. " + e.getMessage(), outputStream);
-//					}
-//				}
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			} finally {
-//				try {
-//					inputStream.close();
-//					outputStream.close();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
+	}
+	
+	private void startListeningThread() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					try {
+						InputStream inputStream = sslSocket.getInputStream();
+						OutputStream outputStream = sslSocket.getOutputStream();
+
+						String message = receive(inputStream);
+						queue.put(message);
+
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+		});
+		t.start();
 	}
 
 	/*** STAP 2 ***/
@@ -208,7 +172,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			System.out.println("Client connected to fetch certificate, returning " + Arrays.toString(certificate));
 			
 			String test = bytesToHex(certificate);
-			System.out.println(test);
+//			System.out.println(test);
 			send(test.substring(0, 100), outputStream);
 			send(test.substring(100, 200), outputStream);
 			send(test.substring(200, 300), outputStream);
