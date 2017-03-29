@@ -535,24 +535,9 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-			System.out.println("\tPayload SYMMETRIC KEY: " + Arrays.toString(inc));
-
-			String mod = bytesToHex(dummyPrivModulus);
-			String exp = bytesToHex(dummyPrivExponent);
-			RSAPrivateKey secretKey = (RSAPrivateKey) generatePrivateKey(mod, exp);
-
-			byte[] data = slice(inc, 0, 64);
-			System.out.println(Arrays.toString(data));
-
-			Cipher asymCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-			asymCipher.init(Cipher.DECRYPT_MODE, secretKey);
-
-			byte[] decryptedData = new byte[256];
-			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
-
-			byte[] returnData = cutOffNulls(decryptedData);
-
-			return inc;
+			
+			// System.out.println("\tPayload SYMMETRIC KEY: " +
+			// Arrays.toString(inc));
 			// SecretKey originalKey = new SecretKeySpec(returnData, 0,
 			// returnData.length, "DES");
 			// Ks = originalKey;
@@ -566,6 +551,7 @@ public class MiddlewareController {
 			// certFac.generateCertificate(is);
 			//
 			// byte[] subject = certCA.getSubjectDN().getName().getBytes();
+			// System.out.println(Arrays.toString(data));
 			//
 			// a = new CommandAPDU(IDENTITY_CARD_CLA, GET_MSG_INS, subject[0],
 			// 0x00, 0xff);
@@ -577,7 +563,37 @@ public class MiddlewareController {
 			//
 			// inc = r.getData();
 			// System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
+			// returnData.length, "DES");
+			// Ks = originalKey;
 
+			return inc;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public byte[] getEmsg() {
+		/** FETCH Emsg **/
+		CommandAPDU a;
+		ResponseAPDU r;
+
+		try {
+			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
+			InputStream is = new ByteArrayInputStream(certCA);
+			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
+
+			byte[] subject = certCA.getSubjectDN().getName().getBytes();
+
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_MSG_INS, subject[0], 0x00, 0xff);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			byte[] inc = r.getData();
+			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
+			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
