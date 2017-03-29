@@ -72,21 +72,23 @@ public class HandlingThread extends Communicator implements Runnable {
 		cert = cert.split("null")[1];
 
 		System.out.println(cert);
-
 		byte[] certInBytes = hexStringToByteArray(cert);
 
 		System.out.println("Cert in hex: " + cert);
 		System.out.println("Cert: " + Arrays.toString(certInBytes));
 
 		byte[] Ks = mwc.authenticateServiceProvider(certInBytes);
-
+		Ks = cutOffNulls(Ks);
+		
 		String ks = bytesToHex(Ks);
 		System.out.println(ks.length() + " || " + ks);
 		send(ks, outputStream);
 		
 		byte[] Emsg = mwc.getEmsg();
+
+		Emsg = cutOffNulls(Emsg);
 		
-		String EMsg = bytesToHex(Ks);
+		String EMsg = bytesToHex(Emsg);
 		System.out.println(EMsg.length() + " || " + EMsg);
 		send(EMsg, outputStream);
 	}
@@ -119,4 +121,24 @@ public class HandlingThread extends Communicator implements Runnable {
 		}
 		return builder.toString();
 	}
+	
+
+	private byte[] cutOffNulls(byte[] data) {
+		short length = (short) data.length;
+		for (short i = length; i > 0; i--) {
+			byte kappa = data[(short) (i - 1)];
+			if (kappa != (byte) 0) {
+				length = (short) (i);
+				break;
+			}
+		}
+
+		byte[] cleanedData = new byte[length];
+		for (int i = 0; i < length; i++) {
+			cleanedData[i] = data[i];
+		}
+
+		return cleanedData;
+	}
+	
 }
