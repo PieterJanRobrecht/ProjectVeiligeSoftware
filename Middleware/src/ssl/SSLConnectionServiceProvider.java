@@ -44,6 +44,7 @@ public class SSLConnectionServiceProvider extends Communicator {
 			InputStream inputStream = sslSocket.getInputStream();
 			OutputStream outputStream = sslSocket.getOutputStream();
 
+			System.out.println("Sending 0 to SP to receive cert");
 			send("0", outputStream);
 			String cert = null;
 			for (int i = 0; i < 9; i++) {

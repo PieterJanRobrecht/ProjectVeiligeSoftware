@@ -85,7 +85,7 @@ public class SSLConnectionServiceProviderAsync extends Observable {
 			}
 		});
 		
-		t.run();
+		t.start();
 	}
 
 	protected void send(String message, OutputStream outputStream) throws IOException {

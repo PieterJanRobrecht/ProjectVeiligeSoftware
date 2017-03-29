@@ -72,10 +72,11 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 
 				String[] message;
+				inputStream = sslSocket.getInputStream();
+				outputStream = sslSocket.getOutputStream();
 
 				while (true) {
-					inputStream = sslSocket.getInputStream();
-					outputStream = sslSocket.getOutputStream();
+					System.out.println("Waiting on incomming requests...");
 					message = receive(inputStream).split(" ");
 					try {
 						switch (Integer.parseInt(message[0])) {
@@ -117,13 +118,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
-			} finally {
-				try {
-					inputStream.close();
-					outputStream.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 			}
 		}
 	}

@@ -174,7 +174,7 @@ public class MiddlewareController implements Observer {
 
 		// this.setMiddlewareThread(thread);
 
-		System.out.println("initialize");
+		System.out.println("Started fetchTask");
 		fetchTask();
 	}
 
@@ -445,6 +445,7 @@ public class MiddlewareController implements Observer {
 	}
 
 	public void authenticateServiceProvider() {
+		System.out.println("Start");
 		byte[] cert = fetchCert();
 
 		CommandAPDU a;
@@ -586,6 +587,15 @@ public class MiddlewareController implements Observer {
 			inc = r.getData();
 			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
 
+			Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+			asymCipher.init(Cipher.DECRYPT_MODE, Ks);
+
+			decryptedData = new byte[256];
+			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
+
+			returnData = cutOffNulls(decryptedData);
+			System.out.println(Arrays.toString(returnData));
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -604,14 +614,19 @@ public class MiddlewareController implements Observer {
 	}
 
 	private byte[] fetchCert() {
+		System.out.println("Fetching certificate from SP");
 		SSLConnectionServiceProvider c = new SSLConnectionServiceProvider();
+
+		System.out.println("Starting fetchTask");
+		fetchTask();
+		
 		return c.fetchCert(/** hier waarde in meegeven? **/
 		);
 	}
-	
+
 	private void fetchTask() {
-		System.out.println("DEBUG - fetchTask()");
 		SSLConnectionServiceProviderAsync c = new SSLConnectionServiceProviderAsync();
+		c.addObserver(this);
 		c.fetchTask();
 	}
 
@@ -775,7 +790,23 @@ public class MiddlewareController implements Observer {
 	@Override
 	public void update(Observable arg0, Object arg1) {
 		// TODO Auto-generated method stub
-		System.out.println("MVC pushed: " + arg0.toString());
+		SSLConnectionServiceProviderAsync scpa = (SSLConnectionServiceProviderAsync) arg0;
+		System.out.println("MVC pushed: " + scpa.getValue());
+
+		switch (scpa.getValue()) {
+		case "1":
+			System.out.println("Executing authenticateServiceProvider()");
+			authenticateServiceProvider();
+			break;
+		case "2":
+			
+			break;
+		default:
+			break;
+
+		}
+		
+		System.out.println("Started fetchTask()");
 		fetchTask();
 	}
 
