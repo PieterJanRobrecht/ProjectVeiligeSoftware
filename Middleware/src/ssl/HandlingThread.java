@@ -42,19 +42,7 @@ public class HandlingThread extends Communicator implements Runnable {
 			}
 		}
 	}
-
-	/***
-	 * STAP 3
-	 * 
-	 * @throws IOException
-	 ***/
-	private void authenticateCard() throws IOException {
-		// TODO Auto-generated method stub
-		System.out.println("Authenticating Card");
-		InputStream inputStream = sslSocket.getInputStream();
-		OutputStream outputStream = sslSocket.getOutputStream();
-	}
-
+	
 	/***
 	 * STAP 2
 	 * 
@@ -80,6 +68,20 @@ public class HandlingThread extends Communicator implements Runnable {
 		System.out.println("Cert: " + Arrays.toString(certInBytes));
 
 	}
+	
+	/***
+	 * STAP 3
+	 * 
+	 * @throws IOException
+	 ***/
+	private void authenticateCard() throws IOException {
+		// TODO Auto-generated method stub
+		System.out.println("Authenticating Card");
+		InputStream inputStream = sslSocket.getInputStream();
+		OutputStream outputStream = sslSocket.getOutputStream();
+	}
+
+	
 
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
