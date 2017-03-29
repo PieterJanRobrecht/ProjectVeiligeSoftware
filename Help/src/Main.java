@@ -92,7 +92,7 @@ public class Main {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		FileReader fr = null, fr2 = null;
 		try {
-			fr = new FileReader("../Certificaten2/g.crt");
+			fr = new FileReader("../Certificaten2/sp.crt");
 			fr2 = new FileReader("../Certificaten2/g.key");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

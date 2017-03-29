@@ -467,7 +467,7 @@ public class MiddlewareController{
 			byte[] returnData = cutOffNulls(decryptedData);
 			
 			
-			return returnData;
+			return inc;
 //			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
 //			Ks = originalKey;
 //
