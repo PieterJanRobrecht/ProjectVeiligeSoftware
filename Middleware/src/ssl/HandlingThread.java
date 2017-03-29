@@ -26,24 +26,26 @@ public class HandlingThread extends Communicator implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				String message = queue.take();
+				if (queue.peek().equals("AuthSP") || queue.peek().equals("AuthCard")) {
+					String message = queue.take();
 
-				switch (message) {
-				case "AuthSP":
-					authenticateServiceProvider();
-					break;
-				case "AuthCard":
-					authenticateCard();
-					break;
-				default:
-					break;
+					switch (message) {
+					case "AuthSP":
+						authenticateServiceProvider();
+						break;
+					case "AuthCard":
+						authenticateCard();
+						break;
+					default:
+						break;
+					}
 				}
 			} catch (InterruptedException | IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	/***
 	 * STAP 2
 	 * 
@@ -51,25 +53,27 @@ public class HandlingThread extends Communicator implements Runnable {
 	 * @throws InterruptedException 
 	 ***/
 	private void authenticateServiceProvider() throws IOException, InterruptedException {
-		System.out.println("Authenticating Service Provider");
+			System.out.println("Authenticating Service Provider");
 
-		InputStream inputStream = sslSocket.getInputStream();
-		OutputStream outputStream = sslSocket.getOutputStream();
+			InputStream inputStream = sslSocket.getInputStream();
 
-		String cert = null;
-		for (int i = 0; i < 9; i++) {
-			cert += queue.take();
-		}
-		cert = cert.split("null")[1];
+			String cert = null;
+			for (int i = 0; i < queue.size(); i++) {
+				if (!queue.peek().equals("AuthSP") && !queue.peek().equals("AuthCard")) {
+					cert += queue.take();
+					System.out.println(i + " -\t " + cert);
+				}
+			}
+			System.out.println(cert);
 
-		byte[] certInBytes = hexStringToByteArray(cert);
+			byte[] certInBytes = hexStringToByteArray(cert);
 
-		System.out.println("Cert in hex: " + cert);
-		System.out.println("Cert: " + Arrays.toString(certInBytes));
+			System.out.println("Cert in hex: " + cert);
+			System.out.println("Cert: " + Arrays.toString(certInBytes));
 
-		mwc.authenticateServiceProvider(certInBytes);
+			mwc.authenticateServiceProvider(certInBytes);
 	}
-	
+
 	/***
 	 * STAP 3
 	 * 
