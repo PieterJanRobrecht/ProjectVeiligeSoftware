@@ -66,7 +66,7 @@ public class HandlingThread extends Communicator implements Runnable {
 			String first = queue.peek();
 			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
 				cert += queue.take();
-				// System.out.println(i + " -\t " + cert);
+				System.out.println(i + " -\t " + cert);
 			}
 		}
 		cert = cert.split("null")[1];

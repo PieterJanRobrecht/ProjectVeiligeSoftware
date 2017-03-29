@@ -6,7 +6,6 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
 <AnchorPane prefHeight="295.0" prefWidth="535.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ServiceProviderController">
    <children>
       <BorderPane layoutX="120.0" layoutY="7.0" prefHeight="358.0" prefWidth="535.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -101,6 +100,8 @@
                   </HBox>
                   <HBox fx:id="submitButton" alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
                      <children>
+                        <Button mnemonicParsing="false" onAction="#lockProvider" text="Lock" />
+                        <Region HBox.hgrow="ALWAYS" />
                         <Button mnemonicParsing="false" onAction="#submitSettings" text="Submit" />
                      </children>
                      <VBox.margin>

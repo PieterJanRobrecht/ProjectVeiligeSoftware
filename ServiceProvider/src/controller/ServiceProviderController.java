@@ -3,9 +3,11 @@ package controller;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -55,6 +57,23 @@ public class ServiceProviderController {
 	private Thread serverThread;
 
 	@FXML
+	void lockProvider(ActionEvent event) {
+		String output = providerCombo.getSelectionModel().getSelectedItem().toString();
+		try {
+			sps = new ServiceProviderServer(getCertificate(output), getKey(output));
+		} catch (CertificateException | FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Thread thread = new Thread(sps);
+		thread.start();
+
+		this.setServerThread(thread);
+	}
+
+	@FXML
 	void submitSettings(ActionEvent event) {
 		boolean name = nameCheck.selectedProperty().getValue();
 		boolean adress = adressCheck.selectedProperty().getValue();
@@ -71,10 +90,50 @@ public class ServiceProviderController {
 			e.printStackTrace();
 		}
 
-		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday + " for " + output;
+		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday
+				+ " for " + output;
 		addText(submit);
 
 		sps.setTask("1");
+	}
+
+	private RSAPrivateKey getKey(String output) throws IOException {
+		// TODO Auto-generated method stub
+		String fileName = null;
+		switch (output) {
+		case "Overheid 1":
+			fileName = "../Certificaten2/gov1.key";
+			break;
+		case "Overheid 2":
+			fileName = "../Certificaten2/gov2.key";
+			break;
+		case "Sociaal Netwerk 1":
+			fileName = "../Certificaten2/soc1.key";
+			break;
+		case "Sociaal Netwerk 2":
+			fileName = "../Certificaten2/soc2.key";
+			break;
+		case "Default 1":
+			fileName = "../Certificaten2/def1.key";
+			break;
+		case "Default 2":
+			fileName = "../Certificaten2/def2.key";
+			break;
+		case "Keuze 1":
+			fileName = "../Certificaten2/oth1.key";
+			break;
+		case "Keuze 2":
+			fileName = "../Certificaten2/oth2.key";
+			break;
+		default:
+			break;
+		}
+		FileReader fr = null, fr2 = null;
+		fr2 = new FileReader(fileName);
+		PEMReader pemReader = new PEMReader(fr2);
+		KeyPair kp = (KeyPair) pemReader.readObject();
+		RSAPrivateKey sk = (RSAPrivateKey) kp.getPrivate();
+		return sk;
 	}
 
 	private X509Certificate getCertificate(String output) throws CertificateException, FileNotFoundException {
@@ -132,16 +191,12 @@ public class ServiceProviderController {
 
 	@FXML
 	public void initialize() {
-		providerCombo.getItems().addAll("Overheid 1", "Overheid 2", "Sociaal Netwerk 1", "Sociaal Netwerk 2", "Default 1", "Default 2", "Keuze 1", "Keuze 2");
+		providerCombo.getItems().addAll("Overheid 1", "Overheid 2", "Sociaal Netwerk 1", "Sociaal Netwerk 2",
+				"Default 1", "Default 2", "Keuze 1", "Keuze 2");
 		providerCombo.getSelectionModel().selectFirst();
 
-//	    final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-		sps = new ServiceProviderServer();
-
-		Thread thread = new Thread(sps);
-		thread.start();
-
-		this.setServerThread(thread);
+		// final BlockingQueue<String> queue = new
+		// LinkedBlockingQueue<String>();
 	}
 
 	public void addText(String text) {

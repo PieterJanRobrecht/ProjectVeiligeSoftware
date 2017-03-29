@@ -6,7 +6,8 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-import javax.security.cert.X509Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -78,10 +79,12 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 	String task = null;
 
 	final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-	SecretKey ks;
+	X509Certificate x509Certificate;
+	RSAPrivateKey spPrivateKey;
 
-	public ServiceProviderServer() {
-
+	public ServiceProviderServer(X509Certificate x509Certificate, RSAPrivateKey rsaPrivateKey) {
+		this.x509Certificate = x509Certificate;
+		this.spPrivateKey = rsaPrivateKey;
 	}
 
 	public static String bytesToHex(byte[] in) {
@@ -129,11 +132,17 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 		startListeningThread();
 
-		// Begin Stap 2
-		authenticateServiceProvider();
+		try {
+			// Begin Stap 2
+			authenticateServiceProvider();
 
-		// Begin stap 3
-		authenticateCard();
+			// Begin stap 3
+			authenticateCard();
+
+		} catch (CertificateEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void startListeningThread() {
@@ -160,8 +169,13 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		t.start();
 	}
 
-	/*** STAP 2 ***/
-	private void authenticateServiceProvider() {
+	/***
+	 * STAP 2
+	 * 
+	 * @throws CertificateEncodingException
+	 * @throws java.security.cert.CertificateEncodingException
+	 ***/
+	private void authenticateServiceProvider() throws CertificateEncodingException {
 		System.out.println("Authenticating Service Provider");
 		InputStream inputStream = null;
 		OutputStream outputStream = null;
@@ -171,10 +185,11 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 			send("AuthSP", outputStream);
 
-			System.out.println("Client connected to fetch certificate, returning " + Arrays.toString(certificate));
+			System.out.println("Client connected to fetch certificate, returning "
+					+ Arrays.toString(x509Certificate.getEncoded()));
 
-			String test = bytesToHex(certificate);
-			// System.out.println(test);
+			String test = bytesToHex(x509Certificate.getEncoded());
+			System.out.println(test);
 			send(test.substring(0, 100), outputStream);
 			send(test.substring(100, 200), outputStream);
 			send(test.substring(200, 300), outputStream);
@@ -182,13 +197,12 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			send(test.substring(400, 500), outputStream);
 			send(test.substring(500, 600), outputStream);
 			send(test.substring(600, 700), outputStream);
-			send(test.substring(700, 800), outputStream);
-			send(test.substring(800, test.length()), outputStream);
+			send(test.substring(700, test.length()), outputStream);
 
 			String key = queue.take();
 			byte[] returnData = hexStringToByteArray(key);
 			SecretKey ks = new SecretKeySpec(returnData, 0, returnData.length, "DES");
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
