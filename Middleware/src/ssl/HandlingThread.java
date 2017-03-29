@@ -9,13 +9,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.net.ssl.SSLSocket;
 
+import controller.MiddlewareController;
+
 public class HandlingThread extends Communicator implements Runnable {
 	SSLSocket sslSocket;
 	final BlockingQueue<String> queue;
+	MiddlewareController mwc;
 
-	public HandlingThread(SSLSocket sslSocket2, BlockingQueue<String> queue2) {
+	public HandlingThread(SSLSocket sslSocket2, BlockingQueue<String> queue2, MiddlewareController mwc) {
 		sslSocket = sslSocket2;
 		queue = queue2;
+		this.mwc = mwc;
 	}
 
 	public void run() {
@@ -39,8 +43,11 @@ public class HandlingThread extends Communicator implements Runnable {
 		}
 	}
 
-	/*** STAP 3 
-	 * @throws IOException ***/
+	/***
+	 * STAP 3
+	 * 
+	 * @throws IOException
+	 ***/
 	private void authenticateCard() throws IOException {
 		// TODO Auto-generated method stub
 		System.out.println("Authenticating Card");
@@ -48,29 +55,30 @@ public class HandlingThread extends Communicator implements Runnable {
 		OutputStream outputStream = sslSocket.getOutputStream();
 	}
 
-	/*** STAP 2 
-	 * @throws IOException ***/
+	/***
+	 * STAP 2
+	 * 
+	 * @throws IOException
+	 ***/
 	private void authenticateServiceProvider() throws IOException {
+//		mwc.doIets();
 		System.out.println("Authenticating Service Provider");
+
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
 
-			String cert = null;
-			for (int i = 0; i < 9; i++) {
-				cert += receive(inputStream);
-			}
-
-			cert = cert.split("null")[1];
-
-			byte[] certInBytes = hexStringToByteArray(cert);
-
-			System.out.println("Cert in hex: " + cert);
-			System.out.println("Cert: " + Arrays.toString(certInBytes));
-			
-			
-		} catch (Exception e) {
-			e.printStackTrace();
+		String cert = null;
+		for (int i = 0; i < 9; i++) {
+			cert += receive(inputStream);
 		}
+
+		cert = cert.split("null")[1];
+
+		byte[] certInBytes = hexStringToByteArray(cert);
+
+		System.out.println("Cert in hex: " + cert);
+		System.out.println("Cert: " + Arrays.toString(certInBytes));
+
 	}
 
 	public static byte[] hexStringToByteArray(String s) {
