@@ -403,9 +403,7 @@ public class MiddlewareController{
 		}
 	}
 
-	public void authenticateServiceProvider() {
-		byte[] cert = fetchCert();
-
+	public void authenticateServiceProvider(byte[] cert) {
 		CommandAPDU a;
 		ResponseAPDU r;
 
@@ -504,12 +502,12 @@ public class MiddlewareController{
 		return slice;
 	}
 
-	private byte[] fetchCert() {
-		SSLConnectionServiceProvider c = new SSLConnectionServiceProvider(this, connection);
-		return c.fetchCert(/** hier waarde in meegeven? **/
-		);
-	}
-
+//	private byte[] fetchCert() {
+//		SSLConnectionServiceProvider c = new SSLConnectionServiceProvider(this, connection);
+//		return c.fetchCert(/** hier waarde in meegeven? **/
+//		);
+//	}
+	
 	public static void sendData(byte command, byte p1, byte p2, byte[] data) throws Exception {
 		System.out.println("Send data (length " + data.length + "): ");
 

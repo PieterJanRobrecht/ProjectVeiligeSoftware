@@ -27,46 +27,46 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author rhino
  *
  */
-public class SSLConnectionServiceProvider extends Communicator implements Runnable{
+public class SSLConnectionServiceProvider extends Communicator implements Runnable {
 	SSLSocketFactory sslSocketFactory;
 	SSLSocket sslSocket;
 	MiddlewareController mwc;
 	IConnection connection;
-	
-    final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+
+	final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
 	public SSLConnectionServiceProvider(MiddlewareController mwc, IConnection connection) {
 		// System.setProperty("javax.net.ssl.keyStore", "ssl/Obama");
 		// System.setProperty("javax.net.ssl.keyStorePassword", "ThankYou");
 		System.setProperty("javax.net.ssl.trustStore", "ssl/client_truststore");
 		System.setProperty("javax.net.ssl.trustStorePassword", "client_truststore");
-	
+
 		this.mwc = mwc;
 
 		sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 		sslSocket = null;
-		
+
 		this.connection = connection;
 	}
-	
+
 	private void startHandelingThread() {
 		Thread t = new Thread(new HandlingThread(sslSocket, queue));
 		t.start();
 	}
 
 	private void startListeningThread() {
-		Thread t = new Thread(new Runnable(){
+		Thread t = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				while(true){
+				while (true) {
 					try {
 						InputStream inputStream = sslSocket.getInputStream();
 						OutputStream outputStream = sslSocket.getOutputStream();
-						
+
 						String message = receive(inputStream);
 						queue.put(message);
-						
+
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (InterruptedException e) {
@@ -74,19 +74,19 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 					}
 				}
 			}
-			
+
 		});
 		t.start();
 	}
 
-	public void connect(){
+	public void connect() {
 		try {
 			sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1338);
 			sslSocket.startHandshake();
-			
+
 			startListeningThread();
 			startHandelingThread();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -94,8 +94,8 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 		}
 	}
 
-	public byte[] fetchCert() {
-		byte[] returnValue = null;
+//	public byte[] fetchCert() {
+//		byte[] returnValue = null;
 //		try {
 //			sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1338);
 //			sslSocket.startHandshake();
@@ -110,7 +110,7 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 //			}
 //
 //			cert = cert.split("null")[1];
-//			
+//
 //			byte[] certInBytes = hexStringToByteArray(cert);
 //
 //			System.out.println("Cert in hex: " + cert);
@@ -133,9 +133,9 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 //				}
 //			}
 //		}
-
-		return returnValue;
-	}
+//
+//		return returnValue;
+//	}
 
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
@@ -148,7 +148,7 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 
 	@Override
 	public void run() {
-		
+
 	}
 
 }
