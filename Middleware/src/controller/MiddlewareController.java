@@ -467,7 +467,7 @@ public class MiddlewareController {
 			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
 			Ks = originalKey;
 
-			return returnData;
+			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

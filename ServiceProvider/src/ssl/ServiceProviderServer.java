@@ -1,5 +1,7 @@
 package ssl;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
@@ -76,7 +78,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 	String task = null;
 
 	final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-	
+	SecretKey ks;
+
 	public ServiceProviderServer() {
 
 	}
@@ -117,22 +120,22 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			sslSocket.setNeedClientAuth(false);
 			SSLSession sslSession = sslSocket.getSession();
 			// Hebben nu een connectie met MW die we open houden
-			
+
 			System.out.println("Got a connection with MW");
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		startListeningThread();
 
 		// Begin Stap 2
 		authenticateServiceProvider();
-		
+
 		// Begin stap 3
 		authenticateCard();
 	}
-	
+
 	private void startListeningThread() {
 		Thread t = new Thread(new Runnable() {
 			@Override
@@ -165,13 +168,13 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		try {
 			inputStream = sslSocket.getInputStream();
 			outputStream = sslSocket.getOutputStream();
-			
+
 			send("AuthSP", outputStream);
-			
+
 			System.out.println("Client connected to fetch certificate, returning " + Arrays.toString(certificate));
-			
+
 			String test = bytesToHex(certificate);
-//			System.out.println(test);
+			// System.out.println(test);
 			send(test.substring(0, 100), outputStream);
 			send(test.substring(100, 200), outputStream);
 			send(test.substring(200, 300), outputStream);
@@ -181,12 +184,19 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			send(test.substring(600, 700), outputStream);
 			send(test.substring(700, 800), outputStream);
 			send(test.substring(800, test.length()), outputStream);
+
+			String key = queue.take();
+			byte[] returnData = hexStringToByteArray(key);
+			SecretKey ks = new SecretKeySpec(returnData, 0, returnData.length, "DES");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-	
+
 	/*** STAP 3 ***/
 	private void authenticateCard() {
 		// TODO Auto-generated method stub
@@ -195,17 +205,16 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		try {
 			inputStream = sslSocket.getInputStream();
 			outputStream = sslSocket.getOutputStream();
-			
+
 			send("AuthCard", outputStream);
-			
+
 			int c = generateChallenge();
-			
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
 		byte[] data = new byte[len / 2];
@@ -214,13 +223,12 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		}
 		return data;
 	}
-	
+
 	private int generateChallenge() {
 		Random rand = new Random();
 		int challenge = rand.nextInt(255);
 		return challenge;
 	}
-
 
 	public void setTask(String task) {
 		this.task = task;
