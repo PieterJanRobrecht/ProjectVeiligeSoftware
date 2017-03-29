@@ -57,7 +57,7 @@ public class IdentityCard extends Applet {
 
 	private RSAPublicKey pkMiddleware;
 	private RSAPrivateKey secretKey;
-	//private RSAPublicKey publicKey;
+	// private RSAPublicKey publicKey;
 
 	private byte[] certServiceProvider;
 
@@ -66,55 +66,7 @@ public class IdentityCard extends Applet {
 
 	// 86400 seconden ofwel 24 uur als threshold
 	private byte[] threshold = new byte[] { (byte) 0, (byte) 1, (byte) 81, (byte) -128 };
-	private byte[] certificate = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -67, (byte) 48, (byte) -126,
-			(byte) 1, (byte) 103, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 5, (byte) 0,
-			(byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42,
-			(byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5, (byte) 5, (byte) 0,
-			(byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4,
-			(byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6,
-			(byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12, (byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116,
-			(byte) 49, (byte) 25, (byte) 48, (byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12,
-			(byte) 16, (byte) 75, (byte) 97, (byte) 72, (byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110,
-			(byte) 116, (byte) 45, (byte) 76, (byte) 105, (byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49,
-			(byte) 20, (byte) 48, (byte) 18, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11,
-			(byte) 86, (byte) 97, (byte) 107, (byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32,
-			(byte) 73, (byte) 84, (byte) 49, (byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4,
-			(byte) 3, (byte) 12, (byte) 12, (byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111,
-			(byte) 115, (byte) 115, (byte) 97, (byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 32, (byte) 23,
-			(byte) 13, (byte) 49, (byte) 48, (byte) 48, (byte) 50, (byte) 50, (byte) 52, (byte) 48, (byte) 57,
-			(byte) 52, (byte) 51, (byte) 48, (byte) 50, (byte) 90, (byte) 24, (byte) 15, (byte) 53, (byte) 49,
-			(byte) 55, (byte) 57, (byte) 48, (byte) 49, (byte) 48, (byte) 57, (byte) 49, (byte) 57, (byte) 50,
-			(byte) 57, (byte) 52, (byte) 50, (byte) 90, (byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48,
-			(byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69,
-			(byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12,
-			(byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48, (byte) 23,
-			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97, (byte) 72,
-			(byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76, (byte) 105,
-			(byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18, (byte) 6,
-			(byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107,
-			(byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32, (byte) 73, (byte) 84, (byte) 49,
-			(byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 12,
-			(byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111, (byte) 115, (byte) 115, (byte) 97,
-			(byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
-			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1,
-			(byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0,
-			(byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 82, (byte) 25, (byte) -66, (byte) 34, (byte) 5,
-			(byte) -58, (byte) 75, (byte) -39, (byte) -54, (byte) 43, (byte) 25, (byte) -117, (byte) 80, (byte) -62,
-			(byte) 51, (byte) 19, (byte) 59, (byte) -70, (byte) -100, (byte) 85, (byte) 24, (byte) -57, (byte) 108,
-			(byte) -98, (byte) -2, (byte) 1, (byte) -80, (byte) -39, (byte) 63, (byte) 93, (byte) 112, (byte) 7,
-			(byte) 4, (byte) 18, (byte) -11, (byte) -98, (byte) 17, (byte) 126, (byte) -54, (byte) 27, (byte) -56,
-			(byte) 33, (byte) 77, (byte) -111, (byte) -74, (byte) -78, (byte) 88, (byte) 70, (byte) -22, (byte) -3,
-			(byte) 15, (byte) 16, (byte) 37, (byte) -18, (byte) 92, (byte) 74, (byte) 124, (byte) -107, (byte) -116,
-			(byte) -125, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
-			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5,
-			(byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 33, (byte) 97, (byte) 121, (byte) -25, (byte) 43,
-			(byte) -47, (byte) 113, (byte) -104, (byte) -11, (byte) -42, (byte) -46, (byte) -17, (byte) 1, (byte) -38,
-			(byte) 50, (byte) 59, (byte) -63, (byte) -74, (byte) -33, (byte) 90, (byte) 92, (byte) -59, (byte) 99,
-			(byte) -17, (byte) -60, (byte) 17, (byte) 25, (byte) 79, (byte) 68, (byte) 68, (byte) -57, (byte) -8,
-			(byte) -64, (byte) 35, (byte) -19, (byte) -114, (byte) 110, (byte) -116, (byte) 31, (byte) -126, (byte) -24,
-			(byte) 54, (byte) 71, (byte) 82, (byte) -53, (byte) -78, (byte) -84, (byte) -45, (byte) -83, (byte) 87,
-			(byte) 68, (byte) 124, (byte) -1, (byte) -128, (byte) -49, (byte) 124, (byte) 103, (byte) 28, (byte) 56,
-			(byte) -114, (byte) -10, (byte) 97, (byte) -78, (byte) 54 };
+	private byte[] certificate = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -67, (byte) 48, (byte) -126, (byte) 1, (byte) 103, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 5, (byte) 0, (byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5, (byte) 5, (byte) 0, (byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12, (byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48, (byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97, (byte) 72, (byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76, (byte) 105, (byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107, (byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32, (byte) 73, (byte) 84, (byte) 49, (byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 12, (byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111, (byte) 115, (byte) 115, (byte) 97, (byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 32, (byte) 23, (byte) 13, (byte) 49, (byte) 48, (byte) 48, (byte) 50, (byte) 50, (byte) 52, (byte) 48, (byte) 57, (byte) 52, (byte) 51, (byte) 48, (byte) 50, (byte) 90, (byte) 24, (byte) 15, (byte) 53, (byte) 49, (byte) 55, (byte) 57, (byte) 48, (byte) 49, (byte) 48, (byte) 57, (byte) 49, (byte) 57, (byte) 50, (byte) 57, (byte) 52, (byte) 50, (byte) 90, (byte) 48, (byte) 100, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 13, (byte) 48, (byte) 11, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 7, (byte) 12, (byte) 4, (byte) 71, (byte) 101, (byte) 110, (byte) 116, (byte) 49, (byte) 25, (byte) 48, (byte) 23, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 16, (byte) 75, (byte) 97, (byte) 72, (byte) 111, (byte) 32, (byte) 83, (byte) 105, (byte) 110, (byte) 116, (byte) 45, (byte) 76, (byte) 105, (byte) 101, (byte) 118, (byte) 101, (byte) 110, (byte) 49, (byte) 20, (byte) 48, (byte) 18, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 11, (byte) 86, (byte) 97, (byte) 107, (byte) 103, (byte) 114, (byte) 111, (byte) 101, (byte) 112, (byte) 32, (byte) 73, (byte) 84, (byte) 49, (byte) 21, (byte) 48, (byte) 19, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 12, (byte) 74, (byte) 97, (byte) 110, (byte) 32, (byte) 86, (byte) 111, (byte) 115, (byte) 115, (byte) 97, (byte) 101, (byte) 114, (byte) 116, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -73, (byte) -43, (byte) 96, (byte) -107, (byte) 82, (byte) 25, (byte) -66, (byte) 34, (byte) 5, (byte) -58, (byte) 75, (byte) -39, (byte) -54, (byte) 43, (byte) 25, (byte) -117, (byte) 80, (byte) -62, (byte) 51, (byte) 19, (byte) 59, (byte) -70, (byte) -100, (byte) 85, (byte) 24, (byte) -57, (byte) 108, (byte) -98, (byte) -2, (byte) 1, (byte) -80, (byte) -39, (byte) 63, (byte) 93, (byte) 112, (byte) 7, (byte) 4, (byte) 18, (byte) -11, (byte) -98, (byte) 17, (byte) 126, (byte) -54, (byte) 27, (byte) -56, (byte) 33, (byte) 77, (byte) -111, (byte) -74, (byte) -78, (byte) 88, (byte) 70, (byte) -22, (byte) -3, (byte) 15, (byte) 16, (byte) 37, (byte) -18, (byte) 92, (byte) 74, (byte) 124, (byte) -107, (byte) -116, (byte) -125, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 5, (byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 33, (byte) 97, (byte) 121, (byte) -25, (byte) 43, (byte) -47, (byte) 113, (byte) -104, (byte) -11, (byte) -42, (byte) -46, (byte) -17, (byte) 1, (byte) -38, (byte) 50, (byte) 59, (byte) -63, (byte) -74, (byte) -33, (byte) 90, (byte) 92, (byte) -59, (byte) 99, (byte) -17, (byte) -60, (byte) 17, (byte) 25, (byte) 79, (byte) 68, (byte) 68, (byte) -57, (byte) -8, (byte) -64, (byte) 35, (byte) -19, (byte) -114, (byte) 110, (byte) -116, (byte) 31, (byte) -126, (byte) -24, (byte) 54, (byte) 71, (byte) 82, (byte) -53, (byte) -78, (byte) -84, (byte) -45, (byte) -83, (byte) 87, (byte) 68, (byte) 124, (byte) -1, (byte) -128, (byte) -49, (byte) 124, (byte) 103, (byte) 28, (byte) 56, (byte) -114, (byte) -10, (byte) 97, (byte) -78, (byte) 54 };
 
 	private byte[] serial = new byte[] { (byte) 0x4A, (byte) 0x61, (byte) 0x6e };
 	private byte[] name = new byte[] { 0x4A, 0x61, 0x6E, 0x20, 0x56, 0x6F, 0x73, 0x73, 0x61, 0x65, 0x72, 0x74 };
@@ -148,139 +100,15 @@ public class IdentityCard extends Applet {
 
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
 	// gebruik momenteel overal dezelfde
-	private byte[] dummyPrivExponent = new byte[] { (byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1,
-			(byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad,
-			(byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9,
-			(byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9,
-			(byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60,
-			(byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11,
-			(byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65,
-			(byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff,
-			(byte) 0xc3, (byte) 0x18, (byte) 0x81 };
-	private byte[] dummyPrivModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39,
-			(byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93,
-			(byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d,
-			(byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c,
-			(byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85,
-			(byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d,
-			(byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8,
-			(byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa,
-			(byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
+	private byte[] dummyPrivExponent = new byte[] { (byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1, (byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad, (byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9, (byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9, (byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60, (byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11, (byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65, (byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff, (byte) 0xc3, (byte) 0x18, (byte) 0x81 };
+	private byte[] dummyPrivModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
 	private byte[] dummyPubExponent = new byte[] { (byte) 0x01, (byte) 0x00, (byte) 0x01 };
-	private byte[] dummyPubModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39,
-			(byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93,
-			(byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d,
-			(byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c,
-			(byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85,
-			(byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d,
-			(byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8,
-			(byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa,
-			(byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
+	private byte[] dummyPubModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
 
-	private byte[] caPublKey = new byte[] { (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42,
-			(byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0,
-			(byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -81, (byte) -118,
-			(byte) -116, (byte) 28, (byte) 68, (byte) -91, (byte) -115, (byte) 18, (byte) 104, (byte) 21, (byte) 18,
-			(byte) -81, (byte) 116, (byte) -39, (byte) 84, (byte) 58, (byte) -24, (byte) 36, (byte) -53, (byte) 35,
-			(byte) 2, (byte) 31, (byte) -49, (byte) -29, (byte) -104, (byte) 28, (byte) -58, (byte) -120, (byte) 59,
-			(byte) -127, (byte) -3, (byte) -75, (byte) 118, (byte) 126, (byte) -24, (byte) 67, (byte) -11, (byte) 31,
-			(byte) -13, (byte) -8, (byte) 119, (byte) 67, (byte) -114, (byte) 106, (byte) -114, (byte) 84, (byte) 11,
-			(byte) -77, (byte) 5, (byte) -116, (byte) -67, (byte) 126, (byte) -4, (byte) -76, (byte) 125, (byte) -28,
-			(byte) -128, (byte) -32, (byte) -81, (byte) -54, (byte) 81, (byte) -46, (byte) 40, (byte) -17, (byte) 2,
-			(byte) 3, (byte) 1, (byte) 0, (byte) 1 };
-	private byte[] coSecKey = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) 84, (byte) 2, (byte) 1, (byte) 0,
-			(byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9,
-			(byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 4, (byte) -126, (byte) 1, (byte) 62,
-			(byte) 48, (byte) -126, (byte) 1, (byte) 58, (byte) 2, (byte) 1, (byte) 0, (byte) 2, (byte) 65, (byte) 0,
-			(byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28,
-			(byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80,
-			(byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118,
-			(byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71,
-			(byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90,
-			(byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73,
-			(byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77,
-			(byte) -33, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 2, (byte) 64, (byte) 94, (byte) -55,
-			(byte) 95, (byte) 12, (byte) 106, (byte) -122, (byte) -23, (byte) -30, (byte) 15, (byte) -36, (byte) -110,
-			(byte) -14, (byte) -55, (byte) -38, (byte) -115, (byte) -123, (byte) -96, (byte) -28, (byte) 5, (byte) 85,
-			(byte) -109, (byte) -121, (byte) 50, (byte) -63, (byte) -100, (byte) 72, (byte) -128, (byte) 27, (byte) -58,
-			(byte) 88, (byte) -100, (byte) -8, (byte) 12, (byte) -108, (byte) -11, (byte) 117, (byte) -64, (byte) -119,
-			(byte) 120, (byte) 46, (byte) 90, (byte) 4, (byte) 57, (byte) 13, (byte) -109, (byte) 30, (byte) -32,
-			(byte) -82, (byte) 10, (byte) -66, (byte) 26, (byte) -81, (byte) 37, (byte) -114, (byte) -94, (byte) -7,
-			(byte) -21, (byte) 40, (byte) 69, (byte) -67, (byte) 8, (byte) 92, (byte) 64, (byte) -55, (byte) 2,
-			(byte) 33, (byte) 0, (byte) -12, (byte) -80, (byte) -103, (byte) 54, (byte) -24, (byte) -61, (byte) 75,
-			(byte) 51, (byte) 84, (byte) 9, (byte) -98, (byte) 19, (byte) -79, (byte) 96, (byte) -79, (byte) -112,
-			(byte) 5, (byte) 47, (byte) 108, (byte) 79, (byte) 108, (byte) 25, (byte) -7, (byte) 109, (byte) -79,
-			(byte) -108, (byte) -93, (byte) 76, (byte) -18, (byte) 56, (byte) 13, (byte) 53, (byte) 2, (byte) 33,
-			(byte) 0, (byte) -25, (byte) 20, (byte) -40, (byte) 40, (byte) -29, (byte) -16, (byte) -115, (byte) -61,
-			(byte) -103, (byte) 68, (byte) 92, (byte) -107, (byte) -9, (byte) 28, (byte) 42, (byte) -1, (byte) -49,
-			(byte) 75, (byte) 112, (byte) -26, (byte) -10, (byte) 43, (byte) -74, (byte) 37, (byte) 123, (byte) 122,
-			(byte) 76, (byte) -42, (byte) 114, (byte) 71, (byte) -107, (byte) 67, (byte) 2, (byte) 32, (byte) 44,
-			(byte) -7, (byte) -96, (byte) -49, (byte) -44, (byte) -20, (byte) -64, (byte) -113, (byte) -56, (byte) -84,
-			(byte) -109, (byte) -33, (byte) -82, (byte) -60, (byte) -59, (byte) 30, (byte) 97, (byte) -75, (byte) -101,
-			(byte) -60, (byte) -27, (byte) 107, (byte) -56, (byte) -54, (byte) -2, (byte) -49, (byte) 1, (byte) 77,
-			(byte) 12, (byte) -92, (byte) 68, (byte) -39, (byte) 2, (byte) 32, (byte) 67, (byte) 127, (byte) 100,
-			(byte) 48, (byte) 117, (byte) 124, (byte) 67, (byte) 124, (byte) 121, (byte) -35, (byte) 109, (byte) 9,
-			(byte) -28, (byte) -9, (byte) 86, (byte) 92, (byte) 8, (byte) 105, (byte) -23, (byte) -35, (byte) -100,
-			(byte) -44, (byte) 97, (byte) -51, (byte) 11, (byte) 7, (byte) 75, (byte) 64, (byte) 108, (byte) 123,
-			(byte) 26, (byte) 79, (byte) 2, (byte) 33, (byte) 0, (byte) -124, (byte) -63, (byte) -42, (byte) 61,
-			(byte) -15, (byte) 30, (byte) -116, (byte) -2, (byte) -81, (byte) 91, (byte) -121, (byte) 72, (byte) -20,
-			(byte) 90, (byte) 22, (byte) -63, (byte) 113, (byte) 34, (byte) 36, (byte) -1, (byte) -43, (byte) 39,
-			(byte) -64, (byte) -96, (byte) 33, (byte) -33, (byte) 125, (byte) -34, (byte) 48, (byte) 67, (byte) 93,
-			(byte) -47 };
-	private byte[] coCert = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -121, (byte) 48, (byte) -126,
-			(byte) 1, (byte) 49, (byte) 2, (byte) 1, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42,
-			(byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5,
-			(byte) 0, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85,
-			(byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17,
-			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109,
-			(byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17,
-			(byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67,
-			(byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17,
-			(byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67,
-			(byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 30,
-			(byte) 23, (byte) 13, (byte) 49, (byte) 55, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49,
-			(byte) 50, (byte) 53, (byte) 48, (byte) 50, (byte) 56, (byte) 90, (byte) 23, (byte) 13, (byte) 49,
-			(byte) 57, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 50, (byte) 53, (byte) 48,
-			(byte) 50, (byte) 56, (byte) 90, (byte) 48, (byte) 85, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6,
-			(byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19,
-			(byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83,
-			(byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101,
-			(byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12,
-			(byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15,
-			(byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 6, (byte) 67,
-			(byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15, (byte) 48, (byte) 13,
-			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109,
-			(byte) 109, (byte) 111, (byte) 110, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
-			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1,
-			(byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0,
-			(byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28,
-			(byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80,
-			(byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118,
-			(byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71,
-			(byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90,
-			(byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73,
-			(byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77,
-			(byte) -33, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
-			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11,
-			(byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 99, (byte) -110, (byte) 69, (byte) -43,
-			(byte) -84, (byte) 34, (byte) -83, (byte) -65, (byte) 10, (byte) 81, (byte) -23, (byte) -21, (byte) -32,
-			(byte) -43, (byte) 1, (byte) 20, (byte) 98, (byte) -128, (byte) -40, (byte) 92, (byte) -54, (byte) 124,
-			(byte) 48, (byte) 29, (byte) 98, (byte) -52, (byte) 47, (byte) 114, (byte) 91, (byte) -22, (byte) -35,
-			(byte) -80, (byte) 98, (byte) -75, (byte) -9, (byte) 48, (byte) 115, (byte) -57, (byte) -109, (byte) 62,
-			(byte) -31, (byte) -18, (byte) -2, (byte) -101, (byte) 79, (byte) 78, (byte) 3, (byte) 86, (byte) 79,
-			(byte) 7, (byte) 50, (byte) -34, (byte) -39, (byte) -86, (byte) -23, (byte) 80, (byte) 5, (byte) -117,
-			(byte) -119, (byte) 112, (byte) -38, (byte) 36, (byte) -41, (byte) -58 };
-	private byte[] timePubKey = new byte[] { (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42,
-			(byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0,
-			(byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -17, (byte) -49,
-			(byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76,
-			(byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23,
-			(byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8,
-			(byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54,
-			(byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98,
-			(byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107,
-			(byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49, (byte) 2,
-			(byte) 3, (byte) 1, (byte) 0, (byte) 1 };
+	private byte[] caPublKey = new byte[] { (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -81, (byte) -118, (byte) -116, (byte) 28, (byte) 68, (byte) -91, (byte) -115, (byte) 18, (byte) 104, (byte) 21, (byte) 18, (byte) -81, (byte) 116, (byte) -39, (byte) 84, (byte) 58, (byte) -24, (byte) 36, (byte) -53, (byte) 35, (byte) 2, (byte) 31, (byte) -49, (byte) -29, (byte) -104, (byte) 28, (byte) -58, (byte) -120, (byte) 59, (byte) -127, (byte) -3, (byte) -75, (byte) 118, (byte) 126, (byte) -24, (byte) 67, (byte) -11, (byte) 31, (byte) -13, (byte) -8, (byte) 119, (byte) 67, (byte) -114, (byte) 106, (byte) -114, (byte) 84, (byte) 11, (byte) -77, (byte) 5, (byte) -116, (byte) -67, (byte) 126, (byte) -4, (byte) -76, (byte) 125, (byte) -28, (byte) -128, (byte) -32, (byte) -81, (byte) -54, (byte) 81, (byte) -46, (byte) 40, (byte) -17, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1 };
+	private byte[] coSecKey = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) 84, (byte) 2, (byte) 1, (byte) 0, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 4, (byte) -126, (byte) 1, (byte) 62, (byte) 48, (byte) -126, (byte) 1, (byte) 58, (byte) 2, (byte) 1, (byte) 0, (byte) 2, (byte) 65, (byte) 0, (byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28, (byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80, (byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118, (byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71, (byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90, (byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73, (byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77, (byte) -33, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 2, (byte) 64, (byte) 94, (byte) -55, (byte) 95, (byte) 12, (byte) 106, (byte) -122, (byte) -23, (byte) -30, (byte) 15, (byte) -36, (byte) -110, (byte) -14, (byte) -55, (byte) -38, (byte) -115, (byte) -123, (byte) -96, (byte) -28, (byte) 5, (byte) 85, (byte) -109, (byte) -121, (byte) 50, (byte) -63, (byte) -100, (byte) 72, (byte) -128, (byte) 27, (byte) -58, (byte) 88, (byte) -100, (byte) -8, (byte) 12, (byte) -108, (byte) -11, (byte) 117, (byte) -64, (byte) -119, (byte) 120, (byte) 46, (byte) 90, (byte) 4, (byte) 57, (byte) 13, (byte) -109, (byte) 30, (byte) -32, (byte) -82, (byte) 10, (byte) -66, (byte) 26, (byte) -81, (byte) 37, (byte) -114, (byte) -94, (byte) -7, (byte) -21, (byte) 40, (byte) 69, (byte) -67, (byte) 8, (byte) 92, (byte) 64, (byte) -55, (byte) 2, (byte) 33, (byte) 0, (byte) -12, (byte) -80, (byte) -103, (byte) 54, (byte) -24, (byte) -61, (byte) 75, (byte) 51, (byte) 84, (byte) 9, (byte) -98, (byte) 19, (byte) -79, (byte) 96, (byte) -79, (byte) -112, (byte) 5, (byte) 47, (byte) 108, (byte) 79, (byte) 108, (byte) 25, (byte) -7, (byte) 109, (byte) -79, (byte) -108, (byte) -93, (byte) 76, (byte) -18, (byte) 56, (byte) 13, (byte) 53, (byte) 2, (byte) 33, (byte) 0, (byte) -25, (byte) 20, (byte) -40, (byte) 40, (byte) -29, (byte) -16, (byte) -115, (byte) -61, (byte) -103, (byte) 68, (byte) 92, (byte) -107, (byte) -9, (byte) 28, (byte) 42, (byte) -1, (byte) -49, (byte) 75, (byte) 112, (byte) -26, (byte) -10, (byte) 43, (byte) -74, (byte) 37, (byte) 123, (byte) 122, (byte) 76, (byte) -42, (byte) 114, (byte) 71, (byte) -107, (byte) 67, (byte) 2, (byte) 32, (byte) 44, (byte) -7, (byte) -96, (byte) -49, (byte) -44, (byte) -20, (byte) -64, (byte) -113, (byte) -56, (byte) -84, (byte) -109, (byte) -33, (byte) -82, (byte) -60, (byte) -59, (byte) 30, (byte) 97, (byte) -75, (byte) -101, (byte) -60, (byte) -27, (byte) 107, (byte) -56, (byte) -54, (byte) -2, (byte) -49, (byte) 1, (byte) 77, (byte) 12, (byte) -92, (byte) 68, (byte) -39, (byte) 2, (byte) 32, (byte) 67, (byte) 127, (byte) 100, (byte) 48, (byte) 117, (byte) 124, (byte) 67, (byte) 124, (byte) 121, (byte) -35, (byte) 109, (byte) 9, (byte) -28, (byte) -9, (byte) 86, (byte) 92, (byte) 8, (byte) 105, (byte) -23, (byte) -35, (byte) -100, (byte) -44, (byte) 97, (byte) -51, (byte) 11, (byte) 7, (byte) 75, (byte) 64, (byte) 108, (byte) 123, (byte) 26, (byte) 79, (byte) 2, (byte) 33, (byte) 0, (byte) -124, (byte) -63, (byte) -42, (byte) 61, (byte) -15, (byte) 30, (byte) -116, (byte) -2, (byte) -81, (byte) 91, (byte) -121, (byte) 72, (byte) -20, (byte) 90, (byte) 22, (byte) -63, (byte) 113, (byte) 34, (byte) 36, (byte) -1, (byte) -43, (byte) 39, (byte) -64, (byte) -96, (byte) 33, (byte) -33, (byte) 125, (byte) -34, (byte) 48, (byte) 67, (byte) 93, (byte) -47 };
+	private byte[] coCert = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -121, (byte) 48, (byte) -126, (byte) 1, (byte) 49, (byte) 2, (byte) 1, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 30, (byte) 23, (byte) 13, (byte) 49, (byte) 55, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 50, (byte) 53, (byte) 48, (byte) 50, (byte) 56, (byte) 90, (byte) 23, (byte) 13, (byte) 49, (byte) 57, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 50, (byte) 53, (byte) 48, (byte) 50, (byte) 56, (byte) 90, (byte) 48, (byte) 85, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28, (byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80, (byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118, (byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71, (byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90, (byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73, (byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77, (byte) -33, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 99, (byte) -110, (byte) 69, (byte) -43, (byte) -84, (byte) 34, (byte) -83, (byte) -65, (byte) 10, (byte) 81, (byte) -23, (byte) -21, (byte) -32, (byte) -43, (byte) 1, (byte) 20, (byte) 98, (byte) -128, (byte) -40, (byte) 92, (byte) -54, (byte) 124, (byte) 48, (byte) 29, (byte) 98, (byte) -52, (byte) 47, (byte) 114, (byte) 91, (byte) -22, (byte) -35, (byte) -80, (byte) 98, (byte) -75, (byte) -9, (byte) 48, (byte) 115, (byte) -57, (byte) -109, (byte) 62, (byte) -31, (byte) -18, (byte) -2, (byte) -101, (byte) 79, (byte) 78, (byte) 3, (byte) 86, (byte) 79, (byte) 7, (byte) 50, (byte) -34, (byte) -39, (byte) -86, (byte) -23, (byte) 80, (byte) 5, (byte) -117, (byte) -119, (byte) 112, (byte) -38, (byte) 36, (byte) -41, (byte) -58 };
+	private byte[] timePubKey = new byte[] { (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1 };
 
 	private byte[] timePubExp = new byte[] { (byte) 1, (byte) 0, (byte) 1 };
 	private byte[] timePubMod = new byte[] { (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
@@ -319,9 +147,9 @@ public class IdentityCard extends Applet {
 		short offset = 0;
 		short keySizeInBytes = (short) 64;
 		short keySizeInBits = (short) (keySizeInBytes * 8);
-//		timePublicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
-//		timePublicKey.setExponent(timePubExp, offset, (short) 3);
-//		timePublicKey.setModulus(timePubMod, offset, keySizeInBytes);
+		timePublicKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
+		timePublicKey.setExponent(timePubExp, offset, (short) 3);
+		timePublicKey.setModulus(timePubMod, offset, keySizeInBytes);
 
 		/* Build private RSA Key based on dummy */
 		keySizeInBytes = 64;
@@ -516,8 +344,7 @@ public class IdentityCard extends Applet {
 				cutOffNulls(certServiceProvider);
 				byte[] temp = new byte[(short) (incomingData.length + certServiceProvider.length)];
 				Util.arrayCopy(certServiceProvider, (short) 0, temp, (short) 0, (short) certServiceProvider.length);
-				Util.arrayCopy(incomingData, (short) 0, temp, (short) certServiceProvider.length,
-						(short) incomingData.length);
+				Util.arrayCopy(incomingData, (short) 0, temp, (short) certServiceProvider.length, (short) incomingData.length);
 
 				certServiceProvider = temp;
 				certServiceProvider = cutOffNulls(certServiceProvider);
@@ -583,7 +410,6 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else if (tempTimeUpdate != null) {
-			/** TODO: add verifySig **/
 			byte[] buffer = apdu.getBuffer();
 			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
 			short bytesLeft;
@@ -611,9 +437,10 @@ public class IdentityCard extends Applet {
 			// signatureBuffer, short signatureOffset) {
 			boolean verified = verifyPublic(timePublicKey, tempTimeUpdate, signature);
 			if (verified) {
-//				boolean past = checkIfPast(lastTime, tempTimeUpdate);
-//				if(past)
-//					ISOException.throwIt(VERIFY_FAILED);
+				// TODO enable pastcheck
+				// boolean past = checkIfPast(lastTime, tempTimeUpdate);
+				// if(past)
+				// ISOException.throwIt(VERIFY_FAILED);
 				lastTime = tempTimeUpdate;
 				tempTimeUpdate = null;
 				ISOException.throwIt(KAPPA);
@@ -628,9 +455,9 @@ public class IdentityCard extends Applet {
 
 	private boolean checkIfPast(byte[] lastTime, byte[] tempTimeUpdate) {
 		boolean past = false;
-		for(short i = 0; i<4;i++){
+		for (short i = 0; i < 4; i++) {
 			byte hulp = (byte) (lastTime[i] - tempTimeUpdate[i]);
-			if(hulp < 0){
+			if (hulp < 0) {
 				past = true;
 				break;
 			}
@@ -657,8 +484,7 @@ public class IdentityCard extends Applet {
 
 			byte[] buffer = apdu.getBuffer();
 			byte[] output = new byte[240];
-			short siglength = generateSignature(secretKey, buffer, ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(),
-					output);
+			short siglength = generateSignature(secretKey, buffer, ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(), output);
 
 			apdu.setOutgoing();
 			apdu.setOutgoingLength(siglength);
@@ -673,7 +499,7 @@ public class IdentityCard extends Applet {
 			// TODO if (verifyCert(CertSP)==false) abort()
 			// TODO if (CertSP.validEndTime < lastValidationTime) abort()
 
-			// TODO Ks := genNewSymKey(getSecureRand())
+			// DONE Ks := genNewSymKey(getSecureRand())
 			byte privKeyIndex = findFreeKeySlot();
 			if (privKeyIndex == INVALID_KEY)
 				ISOException.throwIt(INVALID_KEY_PAIR);
@@ -684,7 +510,7 @@ public class IdentityCard extends Applet {
 			Ks.setKey(randomMaterial, (short) 0);
 			keys[privKeyIndex] = Ks;
 
-			// TODO Ekey := asymEncrypt(Ks, CertSP.PKSP)
+			// DONE Ekey := asymEncrypt(Ks, CertSP.PKSP)
 			Cipher asymCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
 			asymCipher.init(pkMiddleware, Cipher.MODE_ENCRYPT);
 			byte[] encryptedData = new byte[256];
@@ -699,7 +525,7 @@ public class IdentityCard extends Applet {
 				ISOException.throwIt(ALG_FAILED);
 			}
 
-			// TODO return EKey
+			// DONE return EKey
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) encryptedData.length);
 			apdu.sendBytesLong(encryptedData, (short) 0, (short) encryptedData.length);
@@ -712,27 +538,27 @@ public class IdentityCard extends Applet {
 		else {
 			byte[] buffer = apdu.getBuffer();
 
-			// TODO c := genChallenge(getSecureRand())
+			// DONE c := genChallenge(getSecureRand())
 			byte[] c = new byte[1];
 			random(c, (short) 0, (short) 1);
 
 			byte certSubject = (byte) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
-			// TODO Emsg := symEncrypt([c, CertSP:Subject], Ks)
-			Cipher asymCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
-			asymCipher.init(pkMiddleware, Cipher.MODE_ENCRYPT);
+			// DONE Emsg := symEncrypt([c, CertSP:Subject], Ks)
+			Cipher symCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
+			symCipher.init(pkMiddleware, Cipher.MODE_ENCRYPT);
 			byte[] encryptedData = new byte[256];
 			byte[] sendData = new byte[2];
 			sendData[0] = c[0];
 			sendData[1] = certSubject;
 
 			try {
-				asymCipher.doFinal(sendData, (short) 0, (short) 2, encryptedData, (short) 0);
+				symCipher.doFinal(sendData, (short) 0, (short) 2, encryptedData, (short) 0);
 			} catch (Exception e) {
 				ISOException.throwIt(ALG_FAILED);
 			}
 
-			// TODO return EKey
+			// DONE return EKey
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) encryptedData.length);
 			apdu.sendBytesLong(encryptedData, (short) 0, (short) encryptedData.length);
@@ -752,7 +578,7 @@ public class IdentityCard extends Applet {
 	public boolean verifyPublic(RSAPublicKey pubKey, byte[] dataBuffer, byte[] signatureBuffer) {
 		Signature signature = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
 		signature.init(pubKey, Signature.MODE_VERIFY);
-		//signature.update(signatureBuffer, (short) 0, (short) 64);
+		// signature.update(signatureBuffer, (short) 0, (short) 64);
 		try {
 			return signature.verify(dataBuffer, (short) 0, (short) 4, signatureBuffer, (short) 0, (short) 64);
 		} catch (Exception e) {
@@ -812,7 +638,7 @@ public class IdentityCard extends Applet {
 		} else {
 			answer = new byte[] { (byte) 1 };
 		}
-		
+
 		tempTime = null;
 
 		apdu.setOutgoing();

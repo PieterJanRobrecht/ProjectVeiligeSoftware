@@ -105,6 +105,7 @@ public class TimeServiceServer extends Communicator {
 				System.out.println("Client connected to fetch time, returning " + unixTime);
 
 				String test = bytesToHex(generateSignatureForMessage(timeSecretKey, intToByteArray(unixTime)));
+				System.out.println("Sending... " + test);
 				send(test.substring(0, 80), outputStream);
 				send(test.substring(80, 128), outputStream);
 				send("" + unixTime, outputStream);

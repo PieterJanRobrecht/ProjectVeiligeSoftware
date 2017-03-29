@@ -44,6 +44,7 @@ public class SSLConnectionServiceProvider extends Communicator {
 			InputStream inputStream = sslSocket.getInputStream();
 			OutputStream outputStream = sslSocket.getOutputStream();
 
+			send("0", outputStream);
 			String cert = null;
 			for (int i = 0; i < 9; i++) {
 				cert += receive(inputStream);
@@ -75,28 +76,6 @@ public class SSLConnectionServiceProvider extends Communicator {
 		}
 
 		return returnValue;
-	}
-
-	public boolean verifySignatureForMessage(RSAPublicKey pubKey, byte[] sig, String message) throws Exception {
-		Signature s = Signature.getInstance("SHA1withRSA");
-		s.initVerify(pubKey);
-		s.update(message.getBytes());
-		return s.verify(sig);
-	}
-
-	public static PublicKey bigIntegerToPublicKey(String mod, String exp) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		RSAPublicKeySpec keySpec = new RSAPublicKeySpec(new BigInteger(mod, 16), new BigInteger(exp, 16));
-		KeyFactory fact = KeyFactory.getInstance("RSA");
-		PublicKey pubKey = fact.generatePublic(keySpec);
-		return pubKey;
-	}
-
-	public static String bytesToHex(byte[] in) {
-		final StringBuilder builder = new StringBuilder();
-		for (byte b : in) {
-			builder.append(String.format("%02x", b));
-		}
-		return builder.toString();
 	}
 
 	public static byte[] hexStringToByteArray(String s) {

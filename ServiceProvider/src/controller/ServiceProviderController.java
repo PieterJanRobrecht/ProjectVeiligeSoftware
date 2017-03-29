@@ -1,29 +1,25 @@
 package controller;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.Security;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.openssl.PEMReader;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
-import ssl.SSLConnectionMiddleware;
 import ssl.ServiceProviderServer;
 
 public class ServiceProviderController {
-	private SSLConnectionMiddleware scm;
-	
+	ServiceProviderServer sps;
+
 	@FXML
 	private CheckBox adressCheck;
 
@@ -73,11 +69,10 @@ public class ServiceProviderController {
 			e.printStackTrace();
 		}
 
-		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday
-				+ " for " + output;
+		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday + " for " + output;
 		addText(submit);
-		
-		scm.authenticateServiceProvider();
+
+		sps.setTask("1");
 	}
 
 	private X509Certificate getCertificate(String output) throws CertificateException, FileNotFoundException {
@@ -135,18 +130,17 @@ public class ServiceProviderController {
 
 	@FXML
 	public void initialize() {
-		providerCombo.getItems().addAll("Overheid 1", "Overheid 2", "Sociaal Netwerk 1", "Sociaal Netwerk 2",
-				"Default 1", "Default 2", "Keuze 1", "Keuze 2");
+		providerCombo.getItems().addAll("Overheid 1", "Overheid 2", "Sociaal Netwerk 1", "Sociaal Netwerk 2", "Default 1", "Default 2", "Keuze 1", "Keuze 2");
 		providerCombo.getSelectionModel().selectFirst();
 
-		ServiceProviderServer sps = new ServiceProviderServer();
+		sps = new ServiceProviderServer();
 
 		Thread thread = new Thread(sps);
 		thread.start();
 
 		this.setServerThread(thread);
-		
-		scm = new SSLConnectionMiddleware();
+
+		// scm = new SSLConnectionMiddleware();
 	}
 
 	public void addText(String text) {

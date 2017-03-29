@@ -32,8 +32,10 @@ import java.util.Arrays;
  */
 public class MiddlewareServer extends Communicator implements Runnable {
 	private MiddlewareController mc;
-	public MiddlewareServer(MiddlewareController mwc) {
+	private SSLServerSocketFactory sslServerSocketFactory;
+	public MiddlewareServer(MiddlewareController mwc, SSLServerSocketFactory SSLServerSocketFactory) {
 		this.mc = mwc;
+		this.sslServerSocketFactory = SSLServerSocketFactory;
 	}
 
 	private byte[] intToByteArray(final int i) {
@@ -81,8 +83,8 @@ public class MiddlewareServer extends Communicator implements Runnable {
 
 		InputStream inputStream;
 		OutputStream outputStream;
-
-		SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+//
+//		SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 		SSLServerSocket sslServerSocket = null;
 
 //		try {

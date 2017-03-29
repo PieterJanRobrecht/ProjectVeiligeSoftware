@@ -69,8 +69,8 @@ public class SSLConnectionTimeServer extends Communicator {
 			e.printStackTrace();
 		}
 
-		// System.setProperty("javax.net.ssl.keyStore", "ssl/Obama");
-		// System.setProperty("javax.net.ssl.keyStorePassword", "ThankYou");
+//		System.setProperty("javax.net.ssl.keyStore", "ssl/Obama");
+//		System.setProperty("javax.net.ssl.keyStorePassword", "ThankYou");
 		System.setProperty("javax.net.ssl.trustStore", "ssl/client_truststore");
 		System.setProperty("javax.net.ssl.trustStorePassword", "client_truststore");
 

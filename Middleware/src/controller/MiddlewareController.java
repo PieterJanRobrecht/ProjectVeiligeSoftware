@@ -20,6 +20,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.smartcardio.CommandAPDU;
@@ -33,6 +34,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -50,9 +53,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import ssl.MiddlewareServer;
 import ssl.SSLConnectionServiceProvider;
+import ssl.SSLConnectionServiceProviderAsync;
 import ssl.SSLConnectionTimeServer;
 
-public class MiddlewareController {
+public class MiddlewareController implements Observer {
 
 	private final static byte IDENTITY_CARD_CLA = (byte) 0x80;
 	private static final byte VALIDATE_PIN_INS = 0x22;
@@ -79,6 +83,7 @@ public class MiddlewareController {
 	private final static short VERIFY_FAILED = 0x6338;
 	private final static short VERIFY_EXCEPTION_THROWN = 0x6339;
 	private final static short ALG_FAILED = 0x6340;
+	private final static short SEQUENTIAL_FAILURE = 0x6341;
 
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
 	// gebruik momenteel overal dezelfde :')
@@ -89,6 +94,8 @@ public class MiddlewareController {
 
 	// Gemaakt aan de hand van goede certificaten?
 	private byte[] certCA = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -39, (byte) 48, (byte) -126, (byte) 1, (byte) -125, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 9, (byte) 0, (byte) -93, (byte) 38, (byte) 118, (byte) 61, (byte) 72, (byte) -98, (byte) 45, (byte) 71, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 30, (byte) 23, (byte) 13, (byte) 49, (byte) 55, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 49, (byte) 52, (byte) 52, (byte) 53, (byte) 53, (byte) 90, (byte) 23, (byte) 13, (byte) 50, (byte) 50, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 49, (byte) 52, (byte) 52, (byte) 53, (byte) 53, (byte) 90, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -81, (byte) -118, (byte) -116, (byte) 28, (byte) 68, (byte) -91, (byte) -115, (byte) 18, (byte) 104, (byte) 21, (byte) 18, (byte) -81, (byte) 116, (byte) -39, (byte) 84, (byte) 58, (byte) -24, (byte) 36, (byte) -53, (byte) 35, (byte) 2, (byte) 31, (byte) -49, (byte) -29, (byte) -104, (byte) 28, (byte) -58, (byte) -120, (byte) 59, (byte) -127, (byte) -3, (byte) -75, (byte) 118, (byte) 126, (byte) -24, (byte) 67, (byte) -11, (byte) 31, (byte) -13, (byte) -8, (byte) 119, (byte) 67, (byte) -114, (byte) 106, (byte) -114, (byte) 84, (byte) 11, (byte) -77, (byte) 5, (byte) -116, (byte) -67, (byte) 126, (byte) -4, (byte) -76, (byte) 125, (byte) -28, (byte) -128, (byte) -32, (byte) -81, (byte) -54, (byte) 81, (byte) -46, (byte) 40, (byte) -17, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) -93, (byte) 80, (byte) 48, (byte) 78, (byte) 48, (byte) 29, (byte) 6, (byte) 3, (byte) 85, (byte) 29, (byte) 14, (byte) 4, (byte) 22, (byte) 4, (byte) 20, (byte) -26, (byte) 45, (byte) 119, (byte) 26, (byte) -45, (byte) -52, (byte) -1, (byte) -54, (byte) 104, (byte) 103, (byte) -92, (byte) 4, (byte) -85, (byte) 68, (byte) -111, (byte) -65, (byte) 87, (byte) -23, (byte) -55, (byte) 61, (byte) 48, (byte) 31, (byte) 6, (byte) 3, (byte) 85, (byte) 29, (byte) 35, (byte) 4, (byte) 24, (byte) 48, (byte) 22, (byte) -128, (byte) 20, (byte) -26, (byte) 45, (byte) 119, (byte) 26, (byte) -45, (byte) -52, (byte) -1, (byte) -54, (byte) 104, (byte) 103, (byte) -92, (byte) 4, (byte) -85, (byte) 68, (byte) -111, (byte) -65, (byte) 87, (byte) -23, (byte) -55, (byte) 61, (byte) 48, (byte) 12, (byte) 6, (byte) 3, (byte) 85, (byte) 29, (byte) 19, (byte) 4, (byte) 5, (byte) 48, (byte) 3, (byte) 1, (byte) 1, (byte) -1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 33, (byte) 75, (byte) 28, (byte) -22, (byte) -58, (byte) 81, (byte) -78, (byte) -99, (byte) -3, (byte) -102, (byte) 0, (byte) 84, (byte) 76, (byte) -83, (byte) 51, (byte) -67, (byte) -31, (byte) -51, (byte) 107, (byte) 102, (byte) 49, (byte) 1, (byte) 124, (byte) 0, (byte) 14, (byte) 8, (byte) 120, (byte) -80, (byte) 117, (byte) 15, (byte) 32, (byte) -47, (byte) -65, (byte) -89, (byte) 18, (byte) -34, (byte) 124, (byte) 47, (byte) 114, (byte) -86, (byte) -104, (byte) -21, (byte) -79, (byte) 13, (byte) -29, (byte) -93, (byte) -99, (byte) 61, (byte) 17, (byte) 71, (byte) 104, (byte) 75, (byte) 116, (byte) 61, (byte) 94, (byte) 125, (byte) 71, (byte) 124, (byte) 5, (byte) -87, (byte) -104, (byte) -51, (byte) -69, (byte) -35 };
+
+	// private SSLServerSocketFactory sslServerSocketFactory;
 
 	private SecretKey Ks;
 
@@ -118,7 +125,6 @@ public class MiddlewareController {
 
 	@FXML
 	void login(ActionEvent event) {
-
 		try {
 			/* Real Card: */
 			connection = new Connection();
@@ -153,15 +159,23 @@ public class MiddlewareController {
 			System.out.println("Complete! \n");
 		}
 	}
-	
+
 	@FXML
-	public void initialize() {		
-		MiddlewareServer sps = new MiddlewareServer(this);
-        
-        Thread thread = new Thread(sps);
-        thread.start();
-        
-//		this.setMiddlewareThread(thread);
+	public void initialize() {
+		// sslServerSocketFactory = (SSLServerSocketFactory)
+		// SSLServerSocketFactory.getDefault();
+
+		// TODO
+		// MiddlewareServer sps = new MiddlewareServer(this,
+		// sslServerSocketFactory);
+
+		// Thread thread = new Thread(sps);
+		// thread.start();
+
+		// this.setMiddlewareThread(thread);
+
+		System.out.println("initialize");
+		fetchTask();
 	}
 
 	private void startSimulator() {
@@ -359,8 +373,9 @@ public class MiddlewareController {
 			} else if (r.getSW() == VERIFY_FAILED) {
 				addText("SIGNATURE INVALID");
 				throw new Exception("SIGNATURE INVALID");
-			} else if (r.getSW() == KAPPA){
+			} else if (r.getSW() == KAPPA) {
 				addText("SIGNATURE VALID");
+				System.out.println("Signature was valid! Time was updated on card.");
 			} else if (r.getSW() != 0x9000)
 				throw new Exception("\tException on the card: " + Integer.toHexString(r.getSW()));
 
@@ -561,7 +576,7 @@ public class MiddlewareController {
 			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
 
 			byte[] subject = certCA.getSubjectDN().getName().getBytes();
-			
+
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_MSG_INS, subject[0], 0x00, 0xff);
 			r = connection.transmit(a);
 
@@ -592,6 +607,12 @@ public class MiddlewareController {
 		SSLConnectionServiceProvider c = new SSLConnectionServiceProvider();
 		return c.fetchCert(/** hier waarde in meegeven? **/
 		);
+	}
+	
+	private void fetchTask() {
+		System.out.println("DEBUG - fetchTask()");
+		SSLConnectionServiceProviderAsync c = new SSLConnectionServiceProviderAsync();
+		c.fetchTask();
 	}
 
 	public static void sendData(byte command, byte p1, byte p2, byte[] data) throws Exception {
@@ -749,6 +770,13 @@ public class MiddlewareController {
 
 		asymCipher.init(Cipher.DECRYPT_MODE, privatekey);
 		return asymCipher.doFinal(data);
+	}
+
+	@Override
+	public void update(Observable arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		System.out.println("MVC pushed: " + arg0.toString());
+		fetchTask();
 	}
 
 	// try {
