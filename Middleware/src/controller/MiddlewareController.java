@@ -55,7 +55,7 @@ import ssl.MiddlewareServer;
 import ssl.SSLConnectionServiceProvider;
 import ssl.SSLConnectionTimeServer;
 
-public class MiddlewareController{
+public class MiddlewareController {
 
 	private final static byte IDENTITY_CARD_CLA = (byte) 0x80;
 	private static final byte VALIDATE_PIN_INS = 0x22;
@@ -149,7 +149,7 @@ public class MiddlewareController{
 			sendNewTime(fetchNewTime());
 			System.out.println("Complete! \n");
 		}
-		
+
 		// Nu connectie opzetten met SP
 		SSLConnectionServiceProvider sslCon = new SSLConnectionServiceProvider(this, connection);
 		sslCon.connect();
@@ -190,8 +190,7 @@ public class MiddlewareController{
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
 				throw new Exception("Applet selection failed");
-			
-			
+
 			sendPin();
 
 		} catch (Exception e) {
@@ -465,31 +464,38 @@ public class MiddlewareController{
 			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
 
 			byte[] returnData = cutOffNulls(decryptedData);
-			
-			
-			return returnData;
-//			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
-//			Ks = originalKey;
-//
-//			/** FETCH Emsg **/
-//
-//			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
-//			InputStream is = new ByteArrayInputStream(certCA);
-//			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
-//
-//			byte[] subject = certCA.getSubjectDN().getName().getBytes();
-//
-//			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_MSG_INS, subject[0], 0x00, 0xff);
-//			r = connection.transmit(a);
-//
-//			if (r.getSW() != 0x9000)
-//				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
-//
-//			inc = r.getData();
-//			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
+			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
+			Ks = originalKey;
 
+			return returnData;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public byte[] getEmsg() {
+		/** FETCH Emsg **/
+		CommandAPDU a;
+		ResponseAPDU r;
+
+		try {
+			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
+			InputStream is = new ByteArrayInputStream(certCA);
+			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
+
+			byte[] subject = certCA.getSubjectDN().getName().getBytes();
+
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_MSG_INS, subject[0], 0x00, 0xff);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			byte[] inc = r.getData();
+			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
 			
-			
+			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -507,12 +513,13 @@ public class MiddlewareController{
 		return slice;
 	}
 
-//	private byte[] fetchCert() {
-//		SSLConnectionServiceProvider c = new SSLConnectionServiceProvider(this, connection);
-//		return c.fetchCert(/** hier waarde in meegeven? **/
-//		);
-//	}
-	
+	// private byte[] fetchCert() {
+	// SSLConnectionServiceProvider c = new SSLConnectionServiceProvider(this,
+	// connection);
+	// return c.fetchCert(/** hier waarde in meegeven? **/
+	// );
+	// }
+
 	public static void sendData(byte command, byte p1, byte p2, byte[] data) throws Exception {
 		System.out.println("Send data (length " + data.length + "): ");
 

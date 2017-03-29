@@ -81,7 +81,14 @@ public class HandlingThread extends Communicator implements Runnable {
 		byte[] Ks = mwc.authenticateServiceProvider(certInBytes);
 
 		String ks = bytesToHex(Ks);
+		System.out.println(ks.length() + " || " + ks);
 		send(ks, outputStream);
+		
+		byte[] Emsg = mwc.getEmsg();
+		
+		String EMsg = bytesToHex(Ks);
+		System.out.println(EMsg.length() + " || " + EMsg);
+		send(EMsg, outputStream);
 	}
 
 	/***
