@@ -26,7 +26,9 @@ public class HandlingThread extends Communicator implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				if (queue.peek().equals("AuthSP") || queue.peek().equals("AuthCard")) {
+				// Thread.sleep(500);
+				String first = queue.peek();
+				if (first != null && (first.equals("AuthSP") || first.equals("AuthCard"))) {
 					String message = queue.take();
 
 					switch (message) {
@@ -50,30 +52,32 @@ public class HandlingThread extends Communicator implements Runnable {
 	 * STAP 2
 	 * 
 	 * @throws IOException
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 ***/
 	private void authenticateServiceProvider() throws IOException, InterruptedException {
-			System.out.println("Authenticating Service Provider");
+		System.out.println("Authenticating Service Provider");
 
-			InputStream inputStream = sslSocket.getInputStream();
+		InputStream inputStream = sslSocket.getInputStream();
 
-			String cert = null;
-			Thread.sleep(1000);
-			for (int i = 0; i < 8; i++) {
-				String first = queue.peek();
-				if (first!= null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
-					cert += queue.take();
-//					System.out.println(i + " -\t " + cert);
-				}
+		String cert = null;
+		Thread.sleep(1000);
+		for (int i = 0; i < 8; i++) {
+			String first = queue.peek();
+			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
+				cert += queue.take();
+				// System.out.println(i + " -\t " + cert);
 			}
-			System.out.println(cert);
+		}
+		cert = cert.split("null")[1];
+		
+		System.out.println(cert);
+		
+		byte[] certInBytes = hexStringToByteArray(cert);
 
-			byte[] certInBytes = hexStringToByteArray(cert);
+		System.out.println("Cert in hex: " + cert);
+		System.out.println("Cert: " + Arrays.toString(certInBytes));
 
-			System.out.println("Cert in hex: " + cert);
-			System.out.println("Cert: " + Arrays.toString(certInBytes));
-
-			mwc.authenticateServiceProvider(certInBytes);
+		mwc.authenticateServiceProvider(certInBytes);
 	}
 
 	/***
