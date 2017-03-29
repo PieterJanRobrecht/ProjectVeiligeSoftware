@@ -3,6 +3,7 @@ package ssl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Random;
 import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -49,21 +50,22 @@ public class HandlingThread extends Communicator implements Runnable {
 	 * STAP 2
 	 * 
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 ***/
-	private void authenticateServiceProvider() throws IOException {
-		try {
+	private void authenticateServiceProvider() throws IOException, InterruptedException {
 			System.out.println("Authenticating Service Provider");
 
 			InputStream inputStream = sslSocket.getInputStream();
 
 			String cert = null;
-			for (int i = 0; i < 9; i++) {
-				if (!queue.peek().equals("AuthSP") && !queue.peek().equals("AuthCard")) {
+			Thread.sleep(1000);
+			for (int i = 0; i < 8; i++) {
+				String first = queue.peek();
+				if (first!= null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
 					cert += queue.take();
-					System.out.println(i + " -\t " + cert);
+//					System.out.println(i + " -\t " + cert);
 				}
 			}
-
 			System.out.println(cert);
 
 			byte[] certInBytes = hexStringToByteArray(cert);
@@ -72,11 +74,6 @@ public class HandlingThread extends Communicator implements Runnable {
 			System.out.println("Cert: " + Arrays.toString(certInBytes));
 
 			mwc.authenticateServiceProvider(certInBytes);
-
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	/***

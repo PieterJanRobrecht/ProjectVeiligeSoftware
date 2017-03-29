@@ -11,11 +11,12 @@ import java.io.OutputStream;
  *
  */
 public abstract class Communicator {
-	byte[] data = new byte[100];
+	int messageLength = 100;
+	byte[] data = new byte[messageLength];
 	int bytesLeft, bytesExpected, chunkReceived;
 
 	protected void send(String message, OutputStream outputStream) throws IOException {
-		if (message.length() > 100)
+		if (message.length() > messageLength)
 			throw new IndexOutOfBoundsException("Message length > 100.");
 
 		char[] messageArray = message.toCharArray();
@@ -24,7 +25,7 @@ public abstract class Communicator {
 			data[i] = (byte) messageArray[i];
 		}
 
-		for (int i = message.length(); i < 100; i++) {
+		for (int i = message.length(); i < messageLength; i++) {
 			data[i] = 32;
 		}
 
@@ -32,7 +33,7 @@ public abstract class Communicator {
 	}
 
 	protected String receive(InputStream inputStream) throws IOException {
-		bytesLeft = bytesExpected = 100;
+		bytesLeft = bytesExpected = messageLength;
 
 		while (bytesLeft > 0) {
 			chunkReceived = inputStream.read(data, bytesExpected - bytesLeft, bytesLeft);
