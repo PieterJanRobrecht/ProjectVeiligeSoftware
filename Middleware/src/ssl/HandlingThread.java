@@ -1,5 +1,8 @@
 package ssl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -29,19 +32,27 @@ public class HandlingThread implements Runnable {
 				default:
 					break;
 				}
-			} catch (InterruptedException e) {
+			} catch (InterruptedException | IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
-	private void authenticateCard() {
+	/*** STAP 3 
+	 * @throws IOException ***/
+	private void authenticateCard() throws IOException {
 		// TODO Auto-generated method stub
-		
+		System.out.println("Authenticating Card");
+		InputStream inputStream = sslSocket.getInputStream();
+		OutputStream outputStream = sslSocket.getOutputStream();
 	}
 
-	private void authenticateServiceProvider() {
+	/*** STAP 2 
+	 * @throws IOException ***/
+	private void authenticateServiceProvider() throws IOException {
 		// TODO Auto-generated method stub
 		System.out.println("Authenticating Service Provider");
+		InputStream inputStream = sslSocket.getInputStream();
+		OutputStream outputStream = sslSocket.getOutputStream();
 	}
 }
