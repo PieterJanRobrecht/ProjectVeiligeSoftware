@@ -74,7 +74,6 @@ public class MiddlewareServer extends Communicator implements Runnable {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 //		System.setProperty("javax.net.ssl.keyStore", "ssl/server_keystore");
 //		System.setProperty("javax.net.ssl.keyStorePassword", "server_keystore");
 		System.setProperty("javax.net.ssl.trustStore", "ssl/server_truststore");
@@ -86,67 +85,67 @@ public class MiddlewareServer extends Communicator implements Runnable {
 		SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 		SSLServerSocket sslServerSocket = null;
 
-		try {
-			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(13340);
-		} catch (IOException e) {
-			System.err.println("Unable to initiate SSLServerSocket.");
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		while (true) {
-			try {
-				SSLSocket sslSocket = (SSLSocket) sslServerSocket.accept();
-				sslSocket.setNeedClientAuth(false);
-				SSLSession sslSession = sslSocket.getSession();
-				
-				inputStream = sslSocket.getInputStream();
-				outputStream = sslSocket.getOutputStream();
-
-				String[] message;
-				
-				while (true) {
-					message = receive(inputStream).split(" ");
-					try {
-						switch (Integer.parseInt(message[0])) {
-						case 0:
-							send("Kappa0", outputStream);
-							System.out.println("Fetching SP certificate and passing it to SC..");
-							mc.authenticateServiceProvider( /**
-															 * steek hier nog waarde in voor wie
-															 * willen we auth?
-															 **/
-							);
-							break;
-						case 1:
-							send("Kappa1", outputStream);
-							break;
-						case 2:
-							send("Kappa2", outputStream);
-							break;
-						case 3:
-							send("Kappa3", outputStream);
-							break;
-						default:
-							send("Invalid command.", outputStream);
-							break;
-						}
-					} catch (NumberFormatException e) {
-						send("Invalid command. " + e.getMessage(), outputStream);
-					} catch (ArrayIndexOutOfBoundsException e) {
-						send("Invalid command. " + e.getMessage(), outputStream);
-					} finally {
-						inputStream.close();
-						outputStream.close();
-					}
-				}
-					
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+//		try {
+//			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(1345);
+//		} catch (IOException e) {
+//			System.err.println("Unable to initiate SSLServerSocket.");
+//			e.printStackTrace();
+//			System.exit(1);
+//		}
+//
+//		while (true) {
+//			try {
+//				SSLSocket sslSocket = (SSLSocket) sslServerSocket.accept();
+//				sslSocket.setNeedClientAuth(false);
+//				SSLSession sslSession = sslSocket.getSession();
+//				
+//				inputStream = sslSocket.getInputStream();
+//				outputStream = sslSocket.getOutputStream();
+//
+//				String[] message;
+//				
+//				while (true) {
+//					message = receive(inputStream).split(" ");
+//					try {
+//						switch (Integer.parseInt(message[0])) {
+//						case 0:
+//							send("Kappa0", outputStream);
+//							System.out.println("Fetching SP certificate and passing it to SC..");
+//							mc.authenticateServiceProvider( /**
+//															 * steek hier nog waarde in voor wie
+//															 * willen we auth?
+//															 **/
+//							);
+//							break;
+//						case 1:
+//							send("Kappa1", outputStream);
+//							break;
+//						case 2:
+//							send("Kappa2", outputStream);
+//							break;
+//						case 3:
+//							send("Kappa3", outputStream);
+//							break;
+//						default:
+//							send("Invalid command.", outputStream);
+//							break;
+//						}
+//					} catch (NumberFormatException e) {
+//						send("Invalid command. " + e.getMessage(), outputStream);
+//					} catch (ArrayIndexOutOfBoundsException e) {
+//						send("Invalid command. " + e.getMessage(), outputStream);
+//					} finally {
+//						inputStream.close();
+//						outputStream.close();
+//					}
+//				}
+//					
+//
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
 	}
 }

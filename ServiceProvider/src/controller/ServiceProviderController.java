@@ -18,10 +18,12 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
+import ssl.SSLConnectionMiddleware;
 import ssl.ServiceProviderServer;
 
 public class ServiceProviderController {
-
+	private SSLConnectionMiddleware scm;
+	
 	@FXML
 	private CheckBox adressCheck;
 
@@ -74,6 +76,8 @@ public class ServiceProviderController {
 		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday
 				+ " for " + output;
 		addText(submit);
+		
+		scm.authenticateServiceProvider();
 	}
 
 	private X509Certificate getCertificate(String output) throws CertificateException, FileNotFoundException {
@@ -141,6 +145,8 @@ public class ServiceProviderController {
 		thread.start();
 
 		this.setServerThread(thread);
+		
+		scm = new SSLConnectionMiddleware();
 	}
 
 	public void addText(String text) {

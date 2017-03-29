@@ -66,7 +66,6 @@ public class SSLConnectionTimeServer extends Communicator {
 		} catch (InvalidKeySpecException e1) {
 			e1.printStackTrace();
 		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -104,7 +103,6 @@ public class SSLConnectionTimeServer extends Communicator {
 			returnValue[1] = time;
 		} catch (IOException e) {
 			e.printStackTrace();
-//			System.err.println(e.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
