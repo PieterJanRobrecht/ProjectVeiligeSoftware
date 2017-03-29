@@ -218,6 +218,17 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			
 			send("AuthSP", outputStream);
 			
+			System.out.println("Client connected to fetch certificate, returning " + Arrays.toString(certificate));
+			String test = bytesToHex(certificate);
+			send(test.substring(0, 100), outputStream);
+			send(test.substring(100, 200), outputStream);
+			send(test.substring(200, 300), outputStream);
+			send(test.substring(300, 400), outputStream);
+			send(test.substring(400, 500), outputStream);
+			send(test.substring(500, 600), outputStream);
+			send(test.substring(600, 700), outputStream);
+			send(test.substring(700, 800), outputStream);
+			send(test.substring(800, test.length()), outputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
