@@ -448,24 +448,29 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-			System.out.println("\tPayload SYMMETRIC KEY: " + Arrays.toString(inc));
-
-			String mod = bytesToHex(dummyPrivModulus);
-			String exp = bytesToHex(dummyPrivExponent);
-			RSAPrivateKey secretKey = (RSAPrivateKey) generatePrivateKey(mod, exp);
-
-			byte[] data = slice(inc, 0, 64);
-			System.out.println(Arrays.toString(data));
-
-			Cipher asymCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-			asymCipher.init(Cipher.DECRYPT_MODE, secretKey);
-
-			byte[] decryptedData = new byte[256];
-			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
-
-			byte[] returnData = cutOffNulls(decryptedData);
-			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
-			Ks = originalKey;
+			
+			// System.out.println("\tPayload SYMMETRIC KEY: " +
+			// Arrays.toString(inc));
+			//
+			// String mod = bytesToHex(dummyPrivModulus);
+			// String exp = bytesToHex(dummyPrivExponent);
+			// RSAPrivateKey secretKey = (RSAPrivateKey) generatePrivateKey(mod,
+			// exp);
+			//
+			// byte[] data = slice(inc, 0, 64);
+			// System.out.println(Arrays.toString(data));
+			//
+			// Cipher asymCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+			// asymCipher.init(Cipher.DECRYPT_MODE, secretKey);
+			//
+			// byte[] decryptedData = new byte[256];
+			// asymCipher.doFinal(data, (short) 0, (short) data.length,
+			// decryptedData, (short) 0);
+			//
+			// byte[] returnData = cutOffNulls(decryptedData);
+			// SecretKey originalKey = new SecretKeySpec(returnData, 0,
+			// returnData.length, "DES");
+			// Ks = originalKey;
 
 			return inc;
 		} catch (Exception e) {
