@@ -50,13 +50,12 @@ public class SSLConnectionServiceProvider extends Communicator {
 	}
 
 	private void startHandelingThread() {
-		Thread t = new Thread(new HandlingThread(sslSocket, queue, mwc));
+		Thread t = new Thread(new HandlingThread(sslSocket, queue));
 		t.start();
 	}
 
 	private void startListeningThread() {
 		Thread t = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
 				while (true) {

@@ -79,6 +79,7 @@ public class HandlingThread extends Communicator implements Runnable {
 		System.out.println("Cert in hex: " + cert);
 		System.out.println("Cert: " + Arrays.toString(certInBytes));
 
+		mwc.authenticateServiceProvider(certInBytes);
 	}
 
 	public static byte[] hexStringToByteArray(String s) {
