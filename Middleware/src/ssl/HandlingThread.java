@@ -25,51 +25,60 @@ public class HandlingThread extends Communicator implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				String message = queue.take();
+				if (queue.peek().equals("AuthSP") || queue.peek().equals("AuthCard")) {
+					String message = queue.take();
 
-				switch (message) {
-				case "AuthSP":
-					authenticateServiceProvider();
-					break;
-				case "AuthCard":
-					authenticateCard();
-					break;
-				default:
-					break;
+					switch (message) {
+					case "AuthSP":
+						authenticateServiceProvider();
+						break;
+					case "AuthCard":
+						authenticateCard();
+						break;
+					default:
+						break;
+					}
 				}
 			} catch (InterruptedException | IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	/***
 	 * STAP 2
 	 * 
 	 * @throws IOException
 	 ***/
 	private void authenticateServiceProvider() throws IOException {
-//		mwc.doIets();
-		System.out.println("Authenticating Service Provider");
+		try {
+			System.out.println("Authenticating Service Provider");
 
-		InputStream inputStream = sslSocket.getInputStream();
-		OutputStream outputStream = sslSocket.getOutputStream();
+			InputStream inputStream = sslSocket.getInputStream();
 
-		String cert = null;
-		for (int i = 0; i < 9; i++) {
-			cert += receive(inputStream);
+			String cert = null;
+			for (int i = 0; i < queue.size(); i++) {
+				if (!queue.peek().equals("AuthSP") && !queue.peek().equals("AuthCard")) {
+					cert += queue.take();
+					System.out.println(i + " -\t " + cert);
+				}
+			}
+
+			System.out.println(cert);
+
+			byte[] certInBytes = hexStringToByteArray(cert);
+
+			System.out.println("Cert in hex: " + cert);
+			System.out.println("Cert: " + Arrays.toString(certInBytes));
+
+			mwc.authenticateServiceProvider(certInBytes);
+
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		cert = cert.split("null")[1];
-
-		byte[] certInBytes = hexStringToByteArray(cert);
-
-		System.out.println("Cert in hex: " + cert);
-		System.out.println("Cert: " + Arrays.toString(certInBytes));
-
-		mwc.authenticateServiceProvider(certInBytes);
 	}
-	
+
 	/***
 	 * STAP 3
 	 * 
@@ -81,8 +90,6 @@ public class HandlingThread extends Communicator implements Runnable {
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
 	}
-
-	
 
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
