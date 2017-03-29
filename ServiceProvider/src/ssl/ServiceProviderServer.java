@@ -15,6 +15,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.Arrays;
+import java.util.Random;
 
 public class ServiceProviderServer extends Communicator implements Runnable {
 	SSLSocket sslSocket;
@@ -205,7 +206,9 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			send("AuthSP", outputStream);
 			
 			System.out.println("Client connected to fetch certificate, returning " + Arrays.toString(certificate));
+			
 			String test = bytesToHex(certificate);
+			System.out.println(test);
 			send(test.substring(0, 100), outputStream);
 			send(test.substring(100, 200), outputStream);
 			send(test.substring(200, 300), outputStream);
@@ -215,6 +218,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			send(test.substring(600, 700), outputStream);
 			send(test.substring(700, 800), outputStream);
 			send(test.substring(800, test.length()), outputStream);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -231,10 +235,29 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			
 			send("AuthCard", outputStream);
 			
+			int c = generateChallenge();
+			
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public static byte[] hexStringToByteArray(String s) {
+		int len = s.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+		}
+		return data;
+	}
+	
+	private int generateChallenge() {
+		Random rand = new Random();
+		int challenge = rand.nextInt(255);
+		return challenge;
+	}
+
 
 	public void setTask(String task) {
 		this.task = task;

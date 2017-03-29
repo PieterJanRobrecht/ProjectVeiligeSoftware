@@ -3,6 +3,7 @@ package ssl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Random;
 import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -47,9 +48,9 @@ public class HandlingThread extends Communicator implements Runnable {
 	 * STAP 2
 	 * 
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 ***/
-	private void authenticateServiceProvider() throws IOException {
-//		mwc.doIets();
+	private void authenticateServiceProvider() throws IOException, InterruptedException {
 		System.out.println("Authenticating Service Provider");
 
 		InputStream inputStream = sslSocket.getInputStream();
@@ -57,9 +58,8 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		String cert = null;
 		for (int i = 0; i < 9; i++) {
-			cert += receive(inputStream);
+			cert += queue.take();
 		}
-
 		cert = cert.split("null")[1];
 
 		byte[] certInBytes = hexStringToByteArray(cert);
@@ -81,8 +81,6 @@ public class HandlingThread extends Communicator implements Runnable {
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
 	}
-
-	
 
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
