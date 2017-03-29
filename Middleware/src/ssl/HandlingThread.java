@@ -58,10 +58,12 @@ public class HandlingThread extends Communicator implements Runnable {
 			InputStream inputStream = sslSocket.getInputStream();
 
 			String cert = null;
-			for (int i = 0; i < queue.size(); i++) {
-				if (!queue.peek().equals("AuthSP") && !queue.peek().equals("AuthCard")) {
+			Thread.sleep(1000);
+			for (int i = 0; i < 8; i++) {
+				String first = queue.peek();
+				if (first!= null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
 					cert += queue.take();
-					System.out.println(i + " -\t " + cert);
+//					System.out.println(i + " -\t " + cert);
 				}
 			}
 			System.out.println(cert);
