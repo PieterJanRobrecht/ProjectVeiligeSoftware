@@ -91,8 +91,8 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 						String message = receive(inputStream);
 						queue.put(message);
 						
-						inputStream.close();
-						outputStream.close();
+//						inputStream.close();
+//						outputStream.close();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -124,43 +124,43 @@ public class SSLConnectionServiceProvider extends Communicator implements Runnab
 
 	public byte[] fetchCert() {
 		byte[] returnValue = null;
-		try {
+//		try {
 //			sslSocket = (SSLSocket) sslSocketFactory.createSocket("localhost", 1338);
 //			sslSocket.startHandshake();
-
-			InputStream inputStream = sslSocket.getInputStream();
-			OutputStream outputStream = sslSocket.getOutputStream();
-
-			send("0", outputStream);
-			String cert = null;
-			for (int i = 0; i < 9; i++) {
-				cert += receive(inputStream);
-			}
-
-			cert = cert.split("null")[1];
-			
-			byte[] certInBytes = hexStringToByteArray(cert);
-
-			System.out.println("Cert in hex: " + cert);
-			System.out.println("Cert: " + Arrays.toString(certInBytes));
-
-			inputStream.close();
-			outputStream.close();
-
-			returnValue = certInBytes;
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (sslSocket != null) {
-				try {
-					sslSocket.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+//
+//			InputStream inputStream = sslSocket.getInputStream();
+//			OutputStream outputStream = sslSocket.getOutputStream();
+//
+//			send("0", outputStream);
+//			String cert = null;
+//			for (int i = 0; i < 9; i++) {
+//				cert += receive(inputStream);
+//			}
+//
+//			cert = cert.split("null")[1];
+//			
+//			byte[] certInBytes = hexStringToByteArray(cert);
+//
+//			System.out.println("Cert in hex: " + cert);
+//			System.out.println("Cert: " + Arrays.toString(certInBytes));
+//
+//			inputStream.close();
+//			outputStream.close();
+//
+//			returnValue = certInBytes;
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			if (sslSocket != null) {
+//				try {
+//					sslSocket.close();
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 
 		return returnValue;
 	}
