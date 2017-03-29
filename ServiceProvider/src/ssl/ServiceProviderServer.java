@@ -131,7 +131,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		
 		// Begin stap 3
 		authenticateCard();
-		
 	}
 	
 	private void startListeningThread() {
