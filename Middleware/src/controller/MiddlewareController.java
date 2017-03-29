@@ -139,14 +139,6 @@ public class MiddlewareController implements Observer {
 		sendPin();
 		System.out.println("Complete! \n");
 
-		// System.out.println("Getting Name..");
-		// getName();
-		// System.out.println("Complete! \n");
-		//
-		// System.out.println("Signing test..");
-		// signTest();
-		// System.out.println("Complete! \n");
-
 		/*** STAP 1 ***/
 		System.out.println("Sending Time..");
 		boolean isValid = isValid();
@@ -158,24 +150,14 @@ public class MiddlewareController implements Observer {
 			sendNewTime(fetchNewTime());
 			System.out.println("Complete! \n");
 		}
+		
+		// Nu connectie opzetten met SP
+		SSLConnectionServiceProvider sslCon = new SSLConnectionServiceProvider(this);
+		sslCon.connect();
 	}
 
 	@FXML
 	public void initialize() {
-		// sslServerSocketFactory = (SSLServerSocketFactory)
-		// SSLServerSocketFactory.getDefault();
-
-		// TODO
-		// MiddlewareServer sps = new MiddlewareServer(this,
-		// sslServerSocketFactory);
-
-		// Thread thread = new Thread(sps);
-		// thread.start();
-
-		// this.setMiddlewareThread(thread);
-
-		System.out.println("initialize");
-		fetchTask();
 	}
 
 	private void startSimulator() {
@@ -209,19 +191,8 @@ public class MiddlewareController implements Observer {
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
 				throw new Exception("Applet selection failed");
-
-			// 2. Send PIN
-			// a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00,
-			// 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04 });
-			// r = this.connection.transmit(a);
-			//
-			// System.out.println(r);
-			// if (r.getSW() == SW_VERIFICATION_FAILED)
-			// throw new Exception("PIN INVALID");
-			// else if (r.getSW() != 0x9000)
-			// throw new Exception("Exception on the card: " +
-			// Integer.toHexString(r.getSW()));
-			// System.out.println("PIN Verified");
+			
+			
 			sendPin();
 
 		} catch (Exception e) {
@@ -271,17 +242,6 @@ public class MiddlewareController implements Observer {
 			// Seconden sinds epoch
 			int unixTime = (int) (System.currentTimeMillis() / 1000);
 			byte[] bytes = intToByteArray(unixTime);
-
-			// System.out.println("\t \t DEBUG - current epoch " +
-			// Arrays.toString(bytes) + " (" + unixTime + ")");
-
-			// byte[] bytes1 = intToByteArray((int) (1483228800));
-			// System.out.println("\t \t DEBUG - 1 jan 2017 " +
-			// Arrays.toString(bytes1) + " (" + 1483228800 + ")");
-
-			// byte[] bytes2 = intToByteArray((int) (1512086400));
-			// System.out.println("\t \t DEBUG - 1 dec 2017 " +
-			// Arrays.toString(bytes2) + " (" + 1512086400 + ")");
 
 			intToByteArray(unixTime + 200000);
 			intToByteArray(unixTime - 90000);
@@ -484,64 +444,6 @@ public class MiddlewareController implements Observer {
 
 			System.out.println("\tCert was sent to card, no exceptions met");
 
-			/** DEBUG GET CERT IN ORDER TO VERIFY **/
-			// // 6. vraag lengte van certificate <-> hangt samen met 7.
-			// a = new CommandAPDU(IDENTITY_CARD_CLA, ASK_LENGTH_INS, 0x00,
-			// 0x00, 0xff);
-			// r = connection.transmit(a);
-			//
-			// if (r.getSW() != 0x9000)
-			// throw new Exception("Exception on the card: " +
-			// Integer.toHexString(r.getSW()));
-			//
-			// byte[] kappa = r.getData();
-			//
-			// int size = 0;
-			//
-			// size += unsigned(kappa[0]) * 100;
-			// size += unsigned(kappa[1]);
-			//
-			// System.out.println("Kappa size: " + size);
-			//
-			// int aantalCalls = (int) Math.ceil((double) size / 240);
-			// System.out.println("Aantal calls: " + aantalCalls);
-			//
-			// // 7. haal certificate op, op basis van aantalCalls
-			// byte[] finalCertificate = new byte[size];
-			//
-			// byte[] certificate = new byte[0];
-			//
-			// for (int i = 0; i < aantalCalls; i++) {
-			// // doe nu uw calls, pleb
-			// a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CERT_INS, (byte) i,
-			// 0x00, 0xff);
-			// r = connection.transmit(a);
-			//
-			// System.out.println(r);
-			// if (r.getSW() != 0x9000)
-			// throw new Exception("Exception on the card: " +
-			// Integer.toHexString(r.getSW()));
-			//
-			// byte[] inc = r.getData();
-			// byte[] certificateTEMP = new byte[certificate.length +
-			// inc.length];
-			//
-			// System.arraycopy(certificate, 0, certificateTEMP, 0,
-			// certificate.length);
-			// System.arraycopy(inc, 0, certificateTEMP, certificate.length,
-			// inc.length);
-			//
-			// certificate = certificateTEMP;
-			// System.out.println("");
-			// }
-			//
-			// for (int i = 0; i < size; i++) {
-			// finalCertificate[i] = certificate[i];
-			// }
-			//
-			// System.out.println("Certificaat: " +
-			// Arrays.toString(finalCertificate));
-
 			/** FETCH SYMMETRIC KEY **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_KEY_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
@@ -604,7 +506,7 @@ public class MiddlewareController implements Observer {
 	}
 
 	private byte[] fetchCert() {
-		SSLConnectionServiceProvider c = new SSLConnectionServiceProvider();
+		SSLConnectionServiceProvider c = new SSLConnectionServiceProvider(this);
 		return c.fetchCert(/** hier waarde in meegeven? **/
 		);
 	}

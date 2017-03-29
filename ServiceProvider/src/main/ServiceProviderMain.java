@@ -5,10 +5,12 @@ import java.io.IOException;
 import controller.ServiceProviderController;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import ssl.ServiceProviderServer;
 
 public class ServiceProviderMain extends Application {
@@ -31,6 +33,11 @@ public class ServiceProviderMain extends Application {
 			// Ophalen van de controller horende bij de view klasse
 			ServiceProviderController serviceProviderController = loader.<ServiceProviderController>getController();
 			assert (serviceProviderController != null);
+			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+	            public void handle(WindowEvent we) {
+	                System.exit(0);
+	            }
+	        });
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

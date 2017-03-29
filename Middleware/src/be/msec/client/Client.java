@@ -2,10 +2,12 @@ package be.msec.client;
 
 import controller.MiddlewareController;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import ssl.MiddlewareServer;
 
 import java.io.IOException;
@@ -25,6 +27,11 @@ public class Client extends Application {
 			// Ophalen van de controller horende bij de view klasse
 			MiddlewareController middlewareController = loader.<MiddlewareController>getController();
 			assert (middlewareController != null);
+			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+	            public void handle(WindowEvent we) {
+	                System.exit(0);
+	            }
+	        });
 			
 //			MiddlewareServer mws = new MiddlewareServer(middlewareController);
 //	        Thread thread = new Thread(mws);

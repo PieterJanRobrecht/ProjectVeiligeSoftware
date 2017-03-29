@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.bouncycastle.openssl.PEMReader;
 
@@ -133,14 +135,13 @@ public class ServiceProviderController {
 		providerCombo.getItems().addAll("Overheid 1", "Overheid 2", "Sociaal Netwerk 1", "Sociaal Netwerk 2", "Default 1", "Default 2", "Keuze 1", "Keuze 2");
 		providerCombo.getSelectionModel().selectFirst();
 
+//	    final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 		sps = new ServiceProviderServer();
 
 		Thread thread = new Thread(sps);
 		thread.start();
 
 		this.setServerThread(thread);
-
-		// scm = new SSLConnectionMiddleware();
 	}
 
 	public void addText(String text) {
