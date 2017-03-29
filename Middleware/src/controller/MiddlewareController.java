@@ -403,7 +403,7 @@ public class MiddlewareController{
 		}
 	}
 
-	public void authenticateServiceProvider(byte[] cert) {
+	public byte[] authenticateServiceProvider(byte[] cert) {
 		CommandAPDU a;
 		ResponseAPDU r;
 
@@ -465,30 +465,35 @@ public class MiddlewareController{
 			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
 
 			byte[] returnData = cutOffNulls(decryptedData);
-			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
-			Ks = originalKey;
+			
+			
+			return returnData;
+//			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
+//			Ks = originalKey;
+//
+//			/** FETCH Emsg **/
+//
+//			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
+//			InputStream is = new ByteArrayInputStream(certCA);
+//			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
+//
+//			byte[] subject = certCA.getSubjectDN().getName().getBytes();
+//
+//			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_MSG_INS, subject[0], 0x00, 0xff);
+//			r = connection.transmit(a);
+//
+//			if (r.getSW() != 0x9000)
+//				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+//
+//			inc = r.getData();
+//			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
 
-			/** FETCH Emsg **/
-
-			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
-			InputStream is = new ByteArrayInputStream(certCA);
-			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
-
-			byte[] subject = certCA.getSubjectDN().getName().getBytes();
-
-			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_MSG_INS, subject[0], 0x00, 0xff);
-			r = connection.transmit(a);
-
-			if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
-
-			inc = r.getData();
-			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
-
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		return null;
 	}
 
 	public byte[] slice(byte[] original, int offset, int end) {

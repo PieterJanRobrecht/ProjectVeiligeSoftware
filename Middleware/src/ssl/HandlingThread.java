@@ -58,6 +58,7 @@ public class HandlingThread extends Communicator implements Runnable {
 		System.out.println("Authenticating Service Provider");
 
 		InputStream inputStream = sslSocket.getInputStream();
+		OutputStream outputStream = sslSocket.getOutputStream();
 
 		String cert = null;
 		Thread.sleep(1000);
@@ -69,15 +70,18 @@ public class HandlingThread extends Communicator implements Runnable {
 			}
 		}
 		cert = cert.split("null")[1];
-		
+
 		System.out.println(cert);
-		
+
 		byte[] certInBytes = hexStringToByteArray(cert);
 
 		System.out.println("Cert in hex: " + cert);
 		System.out.println("Cert: " + Arrays.toString(certInBytes));
 
-		mwc.authenticateServiceProvider(certInBytes);
+		byte[] Ks = mwc.authenticateServiceProvider(certInBytes);
+
+		String ks = bytesToHex(Ks);
+		send(ks, outputStream);
 	}
 
 	/***
@@ -99,5 +103,13 @@ public class HandlingThread extends Communicator implements Runnable {
 			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
 		}
 		return data;
+	}
+
+	public static String bytesToHex(byte[] in) {
+		final StringBuilder builder = new StringBuilder();
+		for (byte b : in) {
+			builder.append(String.format("%02x", b));
+		}
+		return builder.toString();
 	}
 }
