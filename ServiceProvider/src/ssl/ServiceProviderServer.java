@@ -193,21 +193,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 //		}
 	}
 
-	private void authenticateCard() {
-		// TODO Auto-generated method stub
-		InputStream inputStream = null;
-		OutputStream outputStream = null;
-		try {
-			inputStream = sslSocket.getInputStream();
-			outputStream = sslSocket.getOutputStream();
-			
-			send("AuthCard", outputStream);
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
+	/*** STAP 2 ***/
 	private void authenticateServiceProvider() {
 		System.out.println("Authenticating Service Provider");
 		InputStream inputStream = null;
@@ -229,6 +215,22 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			send(test.substring(600, 700), outputStream);
 			send(test.substring(700, 800), outputStream);
 			send(test.substring(800, test.length()), outputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/*** STAP 3 ***/
+	private void authenticateCard() {
+		// TODO Auto-generated method stub
+		InputStream inputStream = null;
+		OutputStream outputStream = null;
+		try {
+			inputStream = sslSocket.getInputStream();
+			outputStream = sslSocket.getOutputStream();
+			
+			send("AuthCard", outputStream);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
