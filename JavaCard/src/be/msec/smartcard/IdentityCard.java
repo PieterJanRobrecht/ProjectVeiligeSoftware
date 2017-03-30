@@ -185,6 +185,8 @@ public class IdentityCard extends Applet {
 	private byte[] tempTime;
 
 	private byte[] tempTimeUpdate;
+	
+	private short privKeyKs;
 
 	/**
 	 * Randomizer instance.
@@ -580,6 +582,7 @@ public class IdentityCard extends Applet {
 			random(randomMaterial, (short) 0, keySize);
 			Ks.setKey(randomMaterial, (short) 0);
 			keys[privKeyIndex] = Ks;
+			privKeyKs = privKeyIndex;
 
 			// DONE Ekey := asymEncrypt(Ks, CertSP.PKSP)
 			Cipher asymCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
@@ -617,7 +620,7 @@ public class IdentityCard extends Applet {
 
 			// DONE Emsg := symEncrypt([c, CertSP:Subject], Ks)
 			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
-			symCipher.init(pubCertKey, Cipher.MODE_ENCRYPT);
+			symCipher.init(keys[privKeyKs], Cipher.MODE_ENCRYPT);
 			byte[] encryptedData = new byte[256];
 			byte[] sendData = new byte[2];
 			sendData[0] = c[0];
