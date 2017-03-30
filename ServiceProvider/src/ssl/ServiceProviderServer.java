@@ -178,15 +178,15 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 			System.out.println("\tPayload SYMMETRIC KEY: " + Arrays.toString(inc));
 
-			String mod = bytesToHex(dummyPrivModulus);
-			String exp = bytesToHex(dummyPrivExponent);
-			RSAPrivateKey secretKey = (RSAPrivateKey) generatePrivateKey(mod, exp);
+//			String mod = bytesToHex(dummyPrivModulus);
+//			String exp = bytesToHex(dummyPrivExponent);
+//			RSAPrivateKey secretKey = (RSAPrivateKey) generatePrivateKey(mod, exp);
 
 			byte[] data = slice(inc, 0, 64);
 			System.out.println(Arrays.toString(data));
 
 			Cipher asymCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-			asymCipher.init(Cipher.DECRYPT_MODE, secretKey);
+			asymCipher.init(Cipher.DECRYPT_MODE, spPrivateKey);
 
 			byte[] decryptedData = new byte[256];
 			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
@@ -243,9 +243,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidKeySpecException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
