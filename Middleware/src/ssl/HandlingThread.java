@@ -86,8 +86,8 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		String ks = bytesToHex(Ks);
 		System.out.println(ks.length() + " || " + ks);
-		String send1 = ks.substring(0, 100);
-		String send2 = ks.substring(100, ks.length());
+		String send1 = ks.substring(0, 95);
+		String send2 = ks.substring(95, ks.length());
 		System.out.println(send1 + send2);
 		send(send1, outputStream);
 		send(send2, outputStream);
@@ -98,8 +98,8 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		String EMsg = bytesToHex(Emsg);
 		System.out.println(EMsg.length() + " || " + EMsg);
-		send1 = EMsg.substring(0, 100);
-		send2 = EMsg.substring(100, ks.length());
+		send1 = EMsg.substring(0, 95);
+		send2 = EMsg.substring(95, ks.length());
 		System.out.println(send1 + send2);
 		send(send1, outputStream);
 		send(send2, outputStream);
@@ -111,7 +111,6 @@ public class HandlingThread extends Communicator implements Runnable {
 	 * @throws IOException
 	 ***/
 	private void authenticateCard() throws IOException {
-		// TODO Auto-generated method stub
 		System.out.println("Authenticating Card");
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
