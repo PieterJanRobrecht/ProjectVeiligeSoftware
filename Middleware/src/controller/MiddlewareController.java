@@ -79,6 +79,8 @@ public class MiddlewareController {
 
 	private static final byte PUSH_MODULUS = 0x56;
 	private static final byte PUSH_EXPONENT = 0x58;
+	
+	private static final byte GET_CHAL_INS = 0x60;
 
 	private final static short SW_VERIFICATION_FAILED = 0x6322;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
@@ -571,6 +573,28 @@ public class MiddlewareController {
 		}
 		return null;
 	}
+	
+	public byte[] authenticateCard(byte[] challenge) {
+		CommandAPDU a;
+		ResponseAPDU r;
+		
+		try {
+			
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CHAL_INS, subject[0], 0x00, 0xff);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			byte[] inc = r.getData();
+			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
+			return inc;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 
 	public byte[] slice(byte[] original, int offset, int end) {
 		int length = (int) (end - offset);
@@ -741,5 +765,6 @@ public class MiddlewareController {
 		asymCipher.init(Cipher.DECRYPT_MODE, privatekey);
 		return asymCipher.doFinal(data);
 	}
+
 
 }
