@@ -239,6 +239,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			}
 
 			msg = queue.take();
+			msg += queue.take();
 			inc = hexStringToByteArray(msg);
 
 			data = slice(inc, 0, 64);
