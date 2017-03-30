@@ -281,22 +281,12 @@ public class IdentityCard extends Applet {
 	/** ASN encoding for NULL. */
 	private static final byte[] NullSeq = { (byte) 0x05, (byte) 0x00 };
 
-	/** MD5 fingerprint of the certificate. */
-	private byte[] fp = null;
-	/** Certificate serial number. */
-	private byte[] serialNumber;
-	/** Certificate subject. */
-	private byte[] subject;
-	/** Certificate issuer. */
-	private byte[] issuer;
-
 	/** Certificate RSA Public key. */
 	private RSAPublicKey pubCertKey = null;
 
 	/** Index inside encoding. */
 	private short idx = 0;
-	/** Contains Certificate DER encoding. */
-	private byte[] enc = null;
+
 	private IdentityCard() {
 		/* During instantiation of the applet, all objects are created. */
 		pin = new OwnerPIN(PIN_TRY_LIMIT, PIN_SIZE);
@@ -759,127 +749,16 @@ public class IdentityCard extends Applet {
 
 	public void parseCertificate(byte[] buf, short off, short len) {
 		try {
-			short size = 0;
-			byte[] hash = new byte[20]; // for SHA1 fingerprint
-
-			short publicKeyLen;
-			short publicKeyPos;
 			short modulusPos;
 			short modulusLen;
 			short exponentPos;
 			short exponentLen;
 
-			// Compute the MD5 fingerprint
-			MessageDigest md = MessageDigest.getInstance(MessageDigest.ALG_SHA, false);
-
-			md.doFinal(buf, (short) off, (short) len, hash, (short) 0);
-
-			/*
-			 * Create a new certificate and fill its attributes by parsing the
-			 * DER encoding
-			 */
-
-			// Prepare to parse this certificate
-			this.idx = 0;
-			// Set the encoding
-			this.enc = new byte[len];
-			Util.arrayCopy(buf, (short) off, this.enc, (short) 0, (short) len);
-			// ... and the fingerprint
-			this.fp = new byte[hash.length];
-			Util.arrayCopy(hash, (short) 0, this.fp, (short) 0, (short) hash.length);
-
-			/*
-			 * A Certificate is a sequence of a TBSCertificate, a signature
-			 * algorithm identifier and the signature
-			 */
-			this.getLen(SEQUENCE_TYPE);
-			size = this.getLen(SEQUENCE_TYPE);
-
-			// Now parse the version
-			if ((this.enc[this.idx] & 0xf0) == 0xa0) {
-				this.idx++;
-
-				size = (short) (this.enc[this.idx++] & 0xff);
-				if ((short) (this.idx + size) > this.enc.length) {
-					ISOException.throwIt(SW_CERT_DATA_INVALID);
-				}
-
-				this.idx += size;
-			} else {
-			}
-
-			// Expect the serial number coded as an integer
-			size = this.getLen(INTEGER_TYPE);
-			serialNumber = new byte[size];
-			Util.arrayCopy(this.enc, this.idx, serialNumber, (short) 0, (short) size);
-			this.idx += size;
-
-			// Expect the signature AlgorithmIdentifier
-			byte id = this.getAlg();
-
-			size = this.getLen(SEQUENCE_TYPE);
-			short end = (short) (this.idx + size);
-			try {
-				this.issuer = this.getName(end);
-			} catch (Exception e) {
-				ISOException.throwIt(SW_CERT_ISSUER_INVALID);
-			}
-
-			size = this.getLen(SEQUENCE_TYPE);
-			end = (short) (this.idx + size);
-
-			if (size != 0) {
-				try {
-					this.subject = this.getName(end);
-				} catch (Exception e) {
-					ISOException.throwIt(SW_CERT_SUBJECT_INVALID);
-				}
-			}
-			if (Util.arrayCompare(subject, (short) 0, issuer, (short) 0, (short) subject.length) == 0) {
-			}
-			// System.out.println(new String(subject));
-			// NOTE: the subject can be null (empty sequence) if
-			// subjectAltName is present
-
-			// Parse the subject public key information
-
-			publicKeyLen = this.getLen(SEQUENCE_TYPE);
-			publicKeyPos = this.idx;
-
-			// Match the algorithm Id
-			id = this.getAlg();
-
-			if (id != RSA_ENCRYPTION) {
-				// skip the public key
-				this.idx = (short) (publicKeyPos + publicKeyLen);
-			}
-
-			// Get the bit byte[]
-			this.getLen(BITSTRING_TYPE);
-			if (this.enc[this.idx++] != 0x00) {
-				ISOException.throwIt(SW_CERT_DATA_INVALID);
-			}
-
-			this.getLen(SEQUENCE_TYPE);
-			size = this.getLen(INTEGER_TYPE);
-			if (this.enc[this.idx] == (byte) 0x00) {
-				// strip off the sign byte
-				size--;
-				this.idx++;
-			}
 
 			// Build the RSAPublicKey
 			modulusPos = this.idx;
 			modulusLen = size;
 
-			this.idx += size;
-
-			size = this.getLen(INTEGER_TYPE);
-			if (this.enc[this.idx] == (byte) 0x00) {
-				// strip off the sign byte
-				size--;
-				this.idx++;
-			}
 
 			exponentPos = this.idx;
 			exponentLen = size;
@@ -893,72 +772,6 @@ public class IdentityCard extends Applet {
 			ISOException.throwIt(SW_CERT_PARSE_FAILED);
 		}
 	}
-
-	private short getLen(byte type) {
-		if ((enc[(short) idx] == type) || ((type == ANY_STRING_TYPE) && // ordered
-																		// by
-																		// likelihood
-																		// of
-																		// match
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	((enc[idx] == PRINTSTR_TYPE) || (enc[idx] == TELETEXSTR_TYPE) || (enc[idx] == UTF8STR_TYPE) || (enc[idx] == IA5STR_TYPE) || (enc[idx] == UNIVSTR_TYPE)))) {
-			idx++;
-			short size = (short) (enc[idx++] & 0xff);
-			if (size >= 128) {
-				short tmp = (short) (size - 128);
-				// NOTE: for now, all sizes must fit short two bytes
-				if ((tmp > 2) || ((short) (idx + tmp) > enc.length)) {
-					ISOException.throwIt(SW_LEN_1_ERROR);
-				} else {
-					size = 0;
-					while (tmp > 0) {
-						size = (short) ((size << 8) + (enc[(short) (idx++)] & 0xff));
-						tmp--;
-					}
-				}
-			}
-			return size;
-		}
-		ISOException.throwIt(SW_LEN_2_ERROR);
-		return (short) 0;
-	}
-
-	private byte getAlg() {
-		byte val = 0;
-
-		try {
-			match(PKCS1Seq);
-			val = enc[idx++];
-			match(NullSeq);
-			return val;
-		} catch (Exception e) {
-			ISOException.throwIt(ISO7816.SW_DATA_INVALID);
-		}
-		return val;
-	}
-
-	private void match(byte[] buf) throws Exception {
-		if ((short) (idx + buf.length) < (short) enc.length) {
-			for (short i = 0; i < (short) buf.length; i++) {
-				if (enc[(short) (idx++)] != buf[(short) i])
-					ISOException.throwIt(SW_MATCH1_FAILED);
-			}
-		} else {
-			ISOException.throwIt(SW_MATCH2_FAILED);
-		}
-	}
-
-	private byte[] getName(short end) {
-        byte[] name = new byte[3];
-        
-        for(short i = idx; i < end-3;i++){
-           if(enc[i] == (byte) 68 && enc[i+1] == (byte) 79 && enc[i+2] == (byte) 77){
-              Util.arrayCopy(enc,(short)(i+3), name, (short)0, (short)3);
-           }
-        }
-        
-        idx = end;
-        return name;
-    }
 	
 	/**
 	 * Identifies an available key slot. This does not mark the slot busy
