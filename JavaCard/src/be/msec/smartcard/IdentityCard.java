@@ -616,7 +616,7 @@ public class IdentityCard extends Applet {
 			byte certSubject = (byte) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
 			// DONE Emsg := symEncrypt([c, CertSP:Subject], Ks)
-			Cipher symCipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
+			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
 			symCipher.init(pubCertKey, Cipher.MODE_ENCRYPT);
 			byte[] encryptedData = new byte[256];
 			byte[] sendData = new byte[2];
