@@ -105,11 +105,25 @@ public class HandlingThread extends Communicator implements Runnable {
 	 * STAP 3
 	 * 
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 ***/
-	private void authenticateCard() throws IOException {
+	private void authenticateCard() throws IOException, InterruptedException {
 		System.out.println("Authenticating Card");
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
+		
+		String challenge = null;
+		int kappa = queue.size();
+		for (int i = 0; i < kappa; i++) {
+			String first = queue.peek();
+			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
+				challenge += queue.take();
+				System.out.println(i + " -\t " + challenge);
+			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard"))) {
+				first = queue.take();
+				queue.put(first);
+			}
+		}
 		
 		
 		

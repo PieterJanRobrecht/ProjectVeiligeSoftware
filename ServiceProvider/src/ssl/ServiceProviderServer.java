@@ -311,11 +311,9 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
 		symCipher.init(Cipher.ENCRYPT_MODE, ks2);
 		
-	    BigInteger bigInt = BigInteger.valueOf(c);      
-	    byte[] input = bigInt.toByteArray();
-		byte[] cipherText = new byte[input.length];
-	    int ctLength = symCipher.update(input, 0, input.length, cipherText, 0);
-	    ctLength += symCipher.doFinal(cipherText, ctLength);
+		BigInteger bigInt = BigInteger.valueOf(c);      
+		
+		byte[] cipherText = symCipher.doFinal(bigInt.toByteArray());
 	    
 		return cipherText;
 	}
