@@ -29,8 +29,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ServiceProviderServer extends Communicator implements Runnable {
-	SSLSocket sslSocket;
-
+	private SSLSocket sslSocket;
+	private SSLServerSocket sslServerSocket;
+	
 	private SecretKey Ks;
 	
 	// dummy certificate
@@ -42,8 +43,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 	String task = null;
 
 	final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-	X509Certificate x509Certificate;
-	RSAPrivateKey spPrivateKey;
+	private X509Certificate x509Certificate;
+	private RSAPrivateKey spPrivateKey;
 
 	public ServiceProviderServer(X509Certificate x509Certificate, RSAPrivateKey rsaPrivateKey) {
 		this.x509Certificate = x509Certificate;
@@ -69,7 +70,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		OutputStream outputStream = null;
 
 		SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-		SSLServerSocket sslServerSocket = null;
+		sslServerSocket = null;
 
 		try {
 			sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(1338);
@@ -105,6 +106,38 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		} catch (CertificateEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	public void restart(){
+		if(sslSocket == null){
+			try {
+				// Krijgt connectie binnen van MW
+				sslSocket = (SSLSocket) sslServerSocket.accept();
+				sslSocket.setNeedClientAuth(false);
+				SSLSession sslSession = sslSocket.getSession();
+				// Hebben nu een connectie met MW die we open houden
+
+				System.out.println("Got a connection with MW");
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			startListeningThread();
+
+		}else{
+			try {
+				// Begin Stap 2
+				authenticateServiceProvider();
+
+				// Begin stap 3
+				authenticateCard();
+
+			} catch (CertificateEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -195,7 +228,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
 			Ks = originalKey;
 			
-			
 			gaan = true;
 			while (gaan) {
 				String first = queue.peek();
@@ -260,10 +292,28 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			send("AuthCard", outputStream);
 
 			int c = generateChallenge();
+			byte[] encrypted = symEncrypt(c, Ks);
+			String message = bytesToHex(encrypted);
+			System.out.println("Sending challenge: "+Arrays.toString(encrypted));
+			System.out.println("Or in hex: " + message +" with length " + message.length());
+			send(message, outputStream);
 
-		} catch (IOException e) {
+		} catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private byte[] symEncrypt(int c, SecretKey ks2) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
+		Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+		symCipher.init(Cipher.ENCRYPT_MODE, ks2);
+		
+	    BigInteger bigInt = BigInteger.valueOf(c);      
+	    byte[] input = bigInt.toByteArray();
+		byte[] cipherText = new byte[input.length];
+	    int ctLength = symCipher.update(input, 0, input.length, cipherText, 0);
+	    ctLength += symCipher.doFinal(cipherText, ctLength);
+	    
+		return cipherText;
 	}
 
 	public static byte[] hexStringToByteArray(String s) {
@@ -319,5 +369,21 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 	public void setTask(String task) {
 		this.task = task;
+	}
+
+	public X509Certificate getX509Certificate() {
+		return x509Certificate;
+	}
+
+	public void setX509Certificate(X509Certificate x509Certificate) {
+		this.x509Certificate = x509Certificate;
+	}
+
+	public RSAPrivateKey getSpPrivateKey() {
+		return spPrivateKey;
+	}
+
+	public void setSpPrivateKey(RSAPrivateKey spPrivateKey) {
+		this.spPrivateKey = spPrivateKey;
 	}
 }
