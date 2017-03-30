@@ -592,7 +592,6 @@ public class IdentityCard extends Applet {
 			// TODO if (verifyCert(CertSP)==false) abort()
 			// TODO if (CertSP.validEndTime < lastValidationTime) abort()
 
-			parseCertificate(certServiceProvider, (short) 0, (short) 374);
 			
 			// DONE Ks := genNewSymKey(getSecureRand())
 			byte privKeyIndex = findFreeKeySlot();
@@ -744,32 +743,6 @@ public class IdentityCard extends Applet {
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) output.length);
 			apdu.sendBytesLong(output, (short) 0, (short) output.length);
-		}
-	}
-
-	public void parseCertificate(byte[] buf, short off, short len) {
-		try {
-			short modulusPos;
-			short modulusLen;
-			short exponentPos;
-			short exponentLen;
-
-
-			// Build the RSAPublicKey
-			modulusPos = this.idx;
-			modulusLen = size;
-
-
-			exponentPos = this.idx;
-			exponentLen = size;
-
-			this.pubCertKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, (short) (modulusLen * 8), false);
-			pubCertKey.setExponent(this.enc, (short) exponentPos, (short) exponentLen);
-			pubCertKey.setModulus(this.enc, (short) modulusPos, (short) modulusLen);
-
-			return;
-		} catch (Exception e) {
-			ISOException.throwIt(SW_CERT_PARSE_FAILED);
 		}
 	}
 	
