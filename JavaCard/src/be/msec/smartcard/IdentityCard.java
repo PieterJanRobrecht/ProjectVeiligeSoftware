@@ -577,7 +577,7 @@ public class IdentityCard extends Applet {
 			if (privKeyIndex == INVALID_KEY)
 				ISOException.throwIt(INVALID_KEY_PAIR);
 
-			DESKey Ks = (DESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_DES, KeyBuilder.LENGTH_DES3_2KEY, false);
+			DESKey Ks = (DESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_DES, KeyBuilder.LENGTH_DES, false);
 			short keySize = (short) (Ks.getSize() / 8);
 			random(randomMaterial, (short) 0, keySize);
 			Ks.setKey(randomMaterial, (short) 0);

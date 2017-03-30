@@ -245,9 +245,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 			System.out.println("debug - " + Arrays.toString(inc));
 			data = slice(inc, 0, 8);
-			System.out.println(Arrays.toString(data));
 			
-			Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+			Cipher symCipher = Cipher.getInstance("DESede/CBC/PKCS5Padding");
 			symCipher.init(Cipher.DECRYPT_MODE, Ks);
 
 			decryptedData = new byte[256];
