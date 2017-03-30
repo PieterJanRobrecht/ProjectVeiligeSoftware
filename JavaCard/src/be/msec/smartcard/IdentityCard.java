@@ -400,6 +400,29 @@ public class IdentityCard extends Applet {
 		}
 	}
 
+	private void getChallenge(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		// TODO TempTime aanpassen kut
+		if (tempTimeUpdate == null) {
+			
+			byte[] buffer = apdu.getBuffer();
+			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
+			challenge = slice(challenge, (short) 0, (short) 8);
+			
+			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
+			symCipher.init(keys[privKeyKs], Cipher.MODE_DECRYPT);
+			
+			byte[] decryptedData = new byte[256];
+			symCipher.doFinal(challenge, (short) 0, (short) challenge.length, decryptedData, (short) 0);
+			decryptedData = slice(decryptedData, (short) 0, (short) 8);
+			
+//			= challenge;
+		} else {
+			ISOException.throwIt(SEQUENTIAL_FAILURE);
+		}
+	}
+
 	private void updateSig(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
@@ -449,6 +472,18 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
+			apdu.setOutgoing();
+			apdu.setOutgoingLength((short) name.length);
+			apdu.sendBytesLong(name, (short) 0, (short) name.length);
+		}
+	}
+	
+	private void getAnswerChallenge(APDU apdu) {
+		// TODO Auto-generated method stub
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) name.length);
 			apdu.sendBytesLong(name, (short) 0, (short) name.length);

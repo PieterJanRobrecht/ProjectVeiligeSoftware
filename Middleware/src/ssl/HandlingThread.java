@@ -105,15 +105,18 @@ public class HandlingThread extends Communicator implements Runnable {
 	 * STAP 3
 	 * 
 	 * @throws IOException
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 ***/
 	private void authenticateCard() throws IOException, InterruptedException {
 		System.out.println("Authenticating Card");
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
-		
+
 		String challenge = null;
-		int kappa = queue.size();
+		int kappa = 0;
+		do {
+			kappa = queue.size();
+		} while (kappa == 0);
 		for (int i = 0; i < kappa; i++) {
 			String first = queue.peek();
 			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
@@ -124,9 +127,13 @@ public class HandlingThread extends Communicator implements Runnable {
 				queue.put(first);
 			}
 		}
+		challenge = challenge.split("null")[1];
 		
-		
-		
+		System.out.println("Sending to card: " + Arrays.toString(hexStringToByteArray(challenge)) + " with length "
+				+ hexStringToByteArray(challenge).length);
+		// Send challenge to card
+		byte[] Emsg = mwc.authenticateCard(hexStringToByteArray(challenge));
+
 	}
 
 	public static byte[] hexStringToByteArray(String s) {
