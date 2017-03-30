@@ -79,9 +79,11 @@ public class MiddlewareController {
 
 	private static final byte PUSH_MODULUS = 0x56;
 	private static final byte PUSH_EXPONENT = 0x58;
-	
+
 	private static final byte GET_CHAL_INS = 0x60;
 	private static final byte GET_ANSWER_CHAL_INS = 0x62;
+
+	private static final byte FINAL_AUTH_INS = 0x64;
 
 	private final static short SW_VERIFICATION_FAILED = 0x6322;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
@@ -90,6 +92,7 @@ public class MiddlewareController {
 	private final static short VERIFY_EXCEPTION_THROWN = 0x6339;
 	private final static short ALG_FAILED = 0x6340;
 	private final static short SEQUENTIAL_FAILURE = 0x6341;
+	private final static short AUTH_FAILED = 0x6342;
 
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
 	// gebruik momenteel overal dezelfde :')
@@ -434,54 +437,17 @@ public class MiddlewareController {
 				}
 			}
 
-			// System.out.println("\tSending (" + send.length + "): " +
-			// Arrays.toString(send));
-			// a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, (byte) 1,
-			// 0x00, send);
-			// r = connection.transmit(a);
-			//
-			// if (r.getSW() == SW_VERIFICATION_FAILED) {
-			// addText("PIN INVALID");
-			// throw new Exception("PIN INVALID");
-			// } else if (r.getSW() != 0x9000)
-			// throw new Exception("Exception on the card: " +
-			// Integer.toHexString(r.getSW()));
-			//
-			// send = new byte[cert.length - 250];
-			// for (int i = 0; i < cert.length - 250; i++) {
-			// send[i] = cert[i + 250];
-			// }
-			//
-			// System.out.println("\tSending (" + send.length + "): " +
-			// Arrays.toString(send));
-			// a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, (byte) 2,
-			// 0x00, send);
-			// r = connection.transmit(a);
-			//
-			// if (r.getSW() == SW_VERIFICATION_FAILED) {
-			// addText("PIN INVALID");
-			// throw new Exception("PIN INVALID");
-			// } else if (r.getSW() != 0x9000)
-			// throw new Exception("Exception on the card: " +
-			// Integer.toHexString(r.getSW()));
-			//
-			// System.out.println("\tCert was sent to card, no exceptions met");
-
 			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
 			InputStream is = new ByteArrayInputStream(cert);
 			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
-			
+
 			RSAPublicKey pk = (RSAPublicKey) certCA.getPublicKey();
 
-			
-			
-			/** TODO HIERZO **/
-			
 			/** PUSH MODULUS **/
 			byte[] modulus = new byte[64];
 			byte[] valseKappa = pk.getModulus().toByteArray();
-			for(int i = 0; i<64; i++) {
-				modulus[i] = valseKappa[i+1];
+			for (int i = 0; i < 64; i++) {
+				modulus[i] = valseKappa[i + 1];
 			}
 			System.out.println("Modulus: " + Arrays.toString(modulus));
 			a = new CommandAPDU(IDENTITY_CARD_CLA, PUSH_MODULUS, 0x00, 0x00, modulus);
@@ -490,8 +456,6 @@ public class MiddlewareController {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-			
-			
 			/** PUSH EXPONENT **/
 			System.out.println("Exponent: " + Arrays.toString(pk.getPublicExponent().toByteArray()));
 			a = new CommandAPDU(IDENTITY_CARD_CLA, PUSH_EXPONENT, 0x00, 0x00, pk.getPublicExponent().toByteArray());
@@ -500,8 +464,6 @@ public class MiddlewareController {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-			
-			
 			/** FETCH SYMMETRIC KEY **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_KEY_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
@@ -510,37 +472,6 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-
-			// System.out.println("\tPayload SYMMETRIC KEY: " +
-			// Arrays.toString(inc));
-			// SecretKey originalKey = new SecretKeySpec(returnData, 0,
-			// returnData.length, "DES");
-			// Ks = originalKey;
-			//
-			// /** FETCH Emsg **/
-			//
-			// CertificateFactory certFac =
-			// CertificateFactory.getInstance("X.509");
-			// InputStream is = new ByteArrayInputStream(certCA);
-			// X509Certificate certCA = (X509Certificate)
-			// certFac.generateCertificate(is);
-			//
-			// byte[] subject = certCA.getSubjectDN().getName().getBytes();
-			// System.out.println(Arrays.toString(data));
-			//
-			// a = new CommandAPDU(IDENTITY_CARD_CLA, GET_MSG_INS, subject[0],
-			// 0x00, 0xff);
-			// r = connection.transmit(a);
-			//
-			// if (r.getSW() != 0x9000)
-			// throw new Exception("Exception on the card: " +
-			// Integer.toHexString(r.getSW()));
-			//
-			// inc = r.getData();
-			// System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
-			// returnData.length, "DES");
-			// Ks = originalKey;
-
 			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -574,13 +505,33 @@ public class MiddlewareController {
 		}
 		return null;
 	}
-	
+
+	public byte[] authenticateServiceProvider2(byte[] resp) {
+		CommandAPDU a;
+		ResponseAPDU r;
+
+		try {
+			/** send resp to JC **/
+			a = new CommandAPDU(IDENTITY_CARD_CLA, FINAL_AUTH_INS, 0x00, 0x00, resp);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public byte[] authenticateCard(byte[] challenge) {
 		CommandAPDU a;
 		ResponseAPDU r;
-		
+
 		try {
-			
+
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CHAL_INS, 0x00, 0x00, challenge);
 			r = connection.transmit(a);
 
@@ -599,7 +550,7 @@ public class MiddlewareController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
@@ -772,6 +723,5 @@ public class MiddlewareController {
 		asymCipher.init(Cipher.DECRYPT_MODE, privatekey);
 		return asymCipher.doFinal(data);
 	}
-
 
 }
