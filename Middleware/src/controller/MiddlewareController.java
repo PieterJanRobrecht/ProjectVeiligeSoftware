@@ -195,11 +195,10 @@ public class MiddlewareController {
 			sendNewTime(fetchNewTime());
 			System.out.println("Complete! \n");
 		}
-		
-//
-//		// Nu connectie opzetten met SP
-//		SSLConnectionServiceProvider sslCon = new SSLConnectionServiceProvider(this, connection);
-//		sslCon.connect();
+
+		// Nu connectie opzetten met SP
+		SSLConnectionServiceProvider sslCon = new SSLConnectionServiceProvider(this, connection);
+		sslCon.connect();
 	}
 
 	@FXML
@@ -274,7 +273,7 @@ public class MiddlewareController {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Applet selection failed");
 
-			sendPin();
+//			sendPin();
 
 		} catch (Exception e) {
 			e.printStackTrace();

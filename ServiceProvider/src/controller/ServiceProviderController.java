@@ -54,23 +54,29 @@ public class ServiceProviderController {
 	@FXML
 	private CheckBox birthDateCheck;
 
-	private Thread serverThread;
+	private Thread serverThread = null;
 
 	@FXML
 	void lockProvider(ActionEvent event) {
 		String output = providerCombo.getSelectionModel().getSelectedItem().toString();
 		try {
-			sps = new ServiceProviderServer(getCertificate(output), getKey(output));
+			if (serverThread == null) {
+				sps = new ServiceProviderServer(getCertificate(output), getKey(output));
+
+				Thread thread = new Thread(sps);
+				thread.start();
+
+				this.setServerThread(thread);
+			} else {
+				sps.setSpPrivateKey(getKey(output));
+				sps.setX509Certificate(getCertificate(output));
+				sps.restart();
+			}
 		} catch (CertificateException | FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		Thread thread = new Thread(sps);
-		thread.start();
-
-		this.setServerThread(thread);
 	}
 
 	@FXML
