@@ -62,11 +62,15 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		String cert = null;
 		Thread.sleep(1000);
-		for (int i = 0; i < 8; i++) {
+		int kappa = queue.size();
+		for (int i = 0; i < kappa; i++) {
 			String first = queue.peek();
 			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
 				cert += queue.take();
 				// System.out.println(i + " -\t " + cert);
+			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard"))) {
+				first = queue.take();
+				queue.put(first);
 			}
 		}
 		cert = cert.split("null")[1];
@@ -79,15 +83,19 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		byte[] Ks = mwc.authenticateServiceProvider(certInBytes);
 		Ks = cutOffNulls(Ks);
-		
+
 		String ks = bytesToHex(Ks);
 		System.out.println(ks.length() + " || " + ks);
-		send(ks, outputStream);
-		
+		String send1 = ks.substring(0, 100);
+		String send2 = ks.substring(100, ks.length());
+		System.out.println(send1 + " " + send2);
+		send(send1, outputStream);
+		send(send2, outputStream);
+
 		byte[] Emsg = mwc.getEmsg();
 
 		Emsg = cutOffNulls(Emsg);
-		
+
 		String EMsg = bytesToHex(Emsg);
 		System.out.println(EMsg.length() + " || " + EMsg);
 		send(EMsg, outputStream);
@@ -121,7 +129,6 @@ public class HandlingThread extends Communicator implements Runnable {
 		}
 		return builder.toString();
 	}
-	
 
 	private byte[] cutOffNulls(byte[] data) {
 		short length = (short) data.length;
@@ -140,5 +147,5 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		return cleanedData;
 	}
-	
+
 }

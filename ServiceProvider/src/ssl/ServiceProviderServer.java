@@ -159,6 +159,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			}
 
 			String msg = queue.take();
+			msg += queue.take();
 			byte[] inc = hexStringToByteArray(msg);
 
 			System.out.println("\tPayload SYMMETRIC KEY: " + Arrays.toString(inc));

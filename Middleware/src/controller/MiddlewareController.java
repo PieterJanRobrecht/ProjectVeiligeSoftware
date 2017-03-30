@@ -120,6 +120,11 @@ public class MiddlewareController {
 			sendNewTime(fetchNewTime());
 			System.out.println("Complete! \n");
 		}
+		
+//
+//		// Nu connectie opzetten met SP
+//		SSLConnectionServiceProvider sslCon = new SSLConnectionServiceProvider(this, connection);
+//		sslCon.connect();
 	}
 
 	@FXML
