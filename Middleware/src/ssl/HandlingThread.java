@@ -98,11 +98,7 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		String EMsg = bytesToHex(Emsg);
 		System.out.println(EMsg.length() + " || " + EMsg);
-		send1 = EMsg.substring(0, 95);
-		send2 = EMsg.substring(95, ks.length());
-		System.out.println(send1 + send2);
-		send(send1, outputStream);
-		send(send2, outputStream);
+		send(EMsg, outputStream);
 	}
 
 	/***

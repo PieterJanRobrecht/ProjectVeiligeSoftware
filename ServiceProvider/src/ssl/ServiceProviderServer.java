@@ -241,10 +241,10 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			}
 
 			msg = queue.take();
-			msg += queue.take();
 			inc = hexStringToByteArray(msg);
 
-			data = slice(inc, 0, 64);
+			System.out.println("debug - " + Arrays.toString(inc));
+			data = slice(inc, 0, 8);
 			System.out.println(Arrays.toString(data));
 			
 			Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
