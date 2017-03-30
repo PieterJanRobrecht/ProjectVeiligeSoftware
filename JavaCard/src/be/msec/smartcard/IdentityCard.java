@@ -460,6 +460,7 @@ public class IdentityCard extends Applet {
 	}
 
 	private void receiveCert(APDU apdu) {
+		/** DEPRECATED **/
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
@@ -514,8 +515,6 @@ public class IdentityCard extends Applet {
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
 			byte[] buffer = apdu.getBuffer();
-
-			/* TODO fix dit */
 			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
 			short bytesLeft;
 			short readCount;
@@ -539,8 +538,6 @@ public class IdentityCard extends Applet {
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
 			byte[] buffer = apdu.getBuffer();
-
-			/* TODO fix dit */
 			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
 			short bytesLeft;
 			short readCount;
@@ -556,8 +553,6 @@ public class IdentityCard extends Applet {
 			}
 			
 			pubCertModulus = cutOffNulls(incomingData);
-
-			ISOException.throwIt(ALG_FAILED);
 		}
 	}
 
@@ -568,9 +563,9 @@ public class IdentityCard extends Applet {
 			short offset = 0;
 			short keySizeInBytes = 64;
 			short keySizeInBits = (short) (keySizeInBytes * 8);
-			pubCertKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits, false);
-			pubCertKey.setExponent(dummyPrivExponent, offset, keySizeInBytes);
-			pubCertKey.setModulus(dummyPrivModulus, offset, keySizeInBytes);
+			pubCertKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
+			pubCertKey.setExponent(pubCertExponent, offset, (short) 3);
+			pubCertKey.setModulus(pubCertModulus, offset, keySizeInBytes);
 			
 			// TODO if (verifyCert(CertSP)==false) abort()
 			// TODO if (CertSP.validEndTime < lastValidationTime) abort()
