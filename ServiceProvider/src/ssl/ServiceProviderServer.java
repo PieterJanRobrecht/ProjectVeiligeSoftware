@@ -12,6 +12,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.io.*;
 import java.math.BigInteger;
@@ -254,6 +255,26 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			returnData = cutOffNulls(decryptedData);
 			System.out.println(Arrays.toString(returnData));
 			
+			byte[] subject = x509Certificate.getSubjectDN().getName().getBytes();
+			
+			if(returnData[1] == subject[0]) {
+				int kappa = ((short) returnData[0]) + 1;
+				System.out.println(kappa);
+				byte[] kappaSend = new byte[1];
+				kappaSend[0] = (byte)(kappa & 0xff);
+				System.out.println(kappaSend[0]);
+				
+				Cipher symCipher2 = Cipher.getInstance("DES/ECB/PKCS5Padding");
+				symCipher2.init(Cipher.ENCRYPT_MODE, Ks);
+
+				byte[] encryptedData = new byte[256];
+				symCipher2.doFinal(kappaSend, (short) 0, (short) kappaSend.length, encryptedData, (short) 0);
+				
+
+				System.out.println("debug - " + Arrays.toString(encryptedData));
+				send("AuthSP2", outputStream);
+				send(bytesToHex(encryptedData), outputStream);
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();

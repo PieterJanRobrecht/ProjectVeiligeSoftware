@@ -28,12 +28,15 @@ public class HandlingThread extends Communicator implements Runnable {
 			try {
 				// Thread.sleep(500);
 				String first = queue.peek();
-				if (first != null && (first.equals("AuthSP") || first.equals("AuthCard"))) {
+				if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2"))) {
 					String message = queue.take();
 
 					switch (message) {
 					case "AuthSP":
 						authenticateServiceProvider();
+						break;
+					case "AuthSP2":
+						authenticateServiceProvider2();
 						break;
 					case "AuthCard":
 						authenticateCard();
@@ -65,10 +68,10 @@ public class HandlingThread extends Communicator implements Runnable {
 		int kappa = queue.size();
 		for (int i = 0; i < kappa; i++) {
 			String first = queue.peek();
-			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
+			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard") && !first.equals("AuthSP2")) {
 				cert += queue.take();
 				System.out.println(i + " -\t " + cert);
-			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard"))) {
+			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2"))) {
 				first = queue.take();
 				queue.put(first);
 			}
@@ -100,33 +103,47 @@ public class HandlingThread extends Communicator implements Runnable {
 		System.out.println(EMsg.length() + " || " + EMsg);
 		send(EMsg, outputStream);
 	}
+	
+	private void authenticateServiceProvider2() throws IOException, InterruptedException {
+		System.out.println("Authenticating Service Provider");
+
+		InputStream inputStream = sslSocket.getInputStream();
+		OutputStream outputStream = sslSocket.getOutputStream();
+
+		Thread.sleep(1000);
+		String inc = queue.take();
+		System.out.println(inc);
+		
+		byte[] rec = hexStringToByteArray(inc);
+
+		System.out.println(Arrays.toString(rec));
+
+	}
 
 	/***
 	 * STAP 3
 	 * 
 	 * @throws IOException
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 ***/
 	private void authenticateCard() throws IOException, InterruptedException {
 		System.out.println("Authenticating Card");
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
-		
+
 		String challenge = null;
 		int kappa = queue.size();
 		for (int i = 0; i < kappa; i++) {
 			String first = queue.peek();
-			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard")) {
+			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard") && !first.equals("AuthSP2")) {
 				challenge += queue.take();
 				System.out.println(i + " -\t " + challenge);
-			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard"))) {
+			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2"))) {
 				first = queue.take();
 				queue.put(first);
 			}
 		}
-		
-		
-		
+
 	}
 
 	public static byte[] hexStringToByteArray(String s) {
