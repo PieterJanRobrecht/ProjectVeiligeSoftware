@@ -195,7 +195,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
 			Ks = originalKey;
 			
-			
 			gaan = true;
 			while (gaan) {
 				String first = queue.peek();
@@ -260,10 +259,28 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			send("AuthCard", outputStream);
 
 			int c = generateChallenge();
+			byte[] encrypted = symEncrypt(c, Ks);
+			String message = bytesToHex(encrypted);
+			System.out.println("Sending challenge: "+Arrays.toString(encrypted));
+			System.out.println("Or in hex: " + message +" with length " + message.length());
+			send(message, outputStream);
 
-		} catch (IOException e) {
+		} catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private byte[] symEncrypt(int c, SecretKey ks2) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
+		Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+		symCipher.init(Cipher.ENCRYPT_MODE, ks2);
+		
+	    BigInteger bigInt = BigInteger.valueOf(c);      
+	    byte[] input = bigInt.toByteArray();
+		byte[] cipherText = new byte[input.length];
+	    int ctLength = symCipher.update(input, 0, input.length, cipherText, 0);
+	    ctLength += symCipher.doFinal(cipherText, ctLength);
+	    
+		return cipherText;
 	}
 
 	public static byte[] hexStringToByteArray(String s) {

@@ -114,6 +114,9 @@ public class HandlingThread extends Communicator implements Runnable {
 		System.out.println("Authenticating Card");
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
+		
+		
+		
 	}
 
 	public static byte[] hexStringToByteArray(String s) {
