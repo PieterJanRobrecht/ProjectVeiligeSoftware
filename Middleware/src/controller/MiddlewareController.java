@@ -586,8 +586,6 @@ public class MiddlewareController {
 
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
-			
-			
 
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_ANSWER_CHAL_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
