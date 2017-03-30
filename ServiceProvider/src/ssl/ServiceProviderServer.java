@@ -334,6 +334,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				byte[] encryptedData = new byte[256];
 				symCipher2.doFinal(kappaSend, (short) 0, (short) kappaSend.length, encryptedData, (short) 0);
 				
+				encryptedData = cutOffNulls(encryptedData);
 
 				System.out.println("debug - " + Arrays.toString(encryptedData));
 				send("AuthSP2", outputStream);

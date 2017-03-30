@@ -105,7 +105,7 @@ public class HandlingThread extends Communicator implements Runnable {
 	}
 	
 	private void authenticateServiceProvider2() throws IOException, InterruptedException {
-		System.out.println("Authenticating Service Provider");
+		System.out.println("Authenticating Service Provider 2");
 
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
@@ -118,6 +118,7 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		System.out.println(Arrays.toString(rec));
 
+		byte[] resp = mwc.authenticateServiceProvider2(rec);
 	}
 
 	/***

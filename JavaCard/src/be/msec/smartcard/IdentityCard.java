@@ -41,9 +41,11 @@ public class IdentityCard extends Applet {
 
 	private static final byte PUSH_MODULUS = 0x56;
 	private static final byte PUSH_EXPONENT = 0x58;
-	
+
 	private static final byte GET_CHAL_INS = 0x60;
 	private static final byte GET_ANSWER_CHAL_INS = 0x62;
+
+	private static final byte FINAL_AUTH_INS = 0x64;
 
 	private final static byte PIN_TRY_LIMIT = (byte) 0x03;
 	private final static byte PIN_SIZE = (byte) 0x04;
@@ -54,6 +56,8 @@ public class IdentityCard extends Applet {
 	private final static short VERIFY_FAILED = 0x6338;
 	private final static short ALG_FAILED = 0x6340;
 	private final static short SEQUENTIAL_FAILURE = 0x6341;
+	private final static short AUTH_FAILED = 0x6342;
+
 	/** Invalid key ID. */
 	public static final byte INVALID_KEY = (byte) -1;
 
@@ -188,7 +192,7 @@ public class IdentityCard extends Applet {
 	private byte[] tempTime;
 
 	private byte[] tempTimeUpdate;
-	
+
 	private short privKeyKs;
 
 	/**
@@ -209,6 +213,11 @@ public class IdentityCard extends Applet {
 
 	private byte[] pubCertExponent;
 	private byte[] pubCertModulus;
+
+	private byte messageChallenge;
+	
+	
+	private byte authenticated;
 
 	private IdentityCard() {
 		/* During instantiation of the applet, all objects are created. */
@@ -347,6 +356,9 @@ public class IdentityCard extends Applet {
 		case GET_ANSWER_CHAL_INS:
 			getAnswerChallenge(apdu);
 			break;
+		case FINAL_AUTH_INS:
+			validateFinalAuth(apdu);
+			break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 		}
@@ -405,19 +417,19 @@ public class IdentityCard extends Applet {
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		// TODO TempTime aanpassen kut
 		if (tempTimeUpdate == null) {
-			
+
 			byte[] buffer = apdu.getBuffer();
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
 			challenge = slice(challenge, (short) 0, (short) 8);
-			
+
 			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
 			symCipher.init(keys[privKeyKs], Cipher.MODE_DECRYPT);
-			
+
 			byte[] decryptedData = new byte[256];
 			symCipher.doFinal(challenge, (short) 0, (short) challenge.length, decryptedData, (short) 0);
 			decryptedData = slice(decryptedData, (short) 0, (short) 8);
-			
-//			= challenge;
+
+			// = challenge;
 		} else {
 			ISOException.throwIt(SEQUENTIAL_FAILURE);
 		}
@@ -477,13 +489,13 @@ public class IdentityCard extends Applet {
 			apdu.sendBytesLong(name, (short) 0, (short) name.length);
 		}
 	}
-	
+
 	private void getAnswerChallenge(APDU apdu) {
 		// TODO Auto-generated method stub
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
-			
+
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) name.length);
 			apdu.sendBytesLong(name, (short) 0, (short) name.length);
@@ -660,6 +672,8 @@ public class IdentityCard extends Applet {
 			byte[] c = new byte[1];
 			random(c, (short) 0, (short) 1);
 
+			messageChallenge = c[0];
+
 			byte certSubject = (byte) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
 			// DONE Emsg := symEncrypt([c, CertSP:Subject], Ks)
@@ -681,6 +695,44 @@ public class IdentityCard extends Applet {
 			apdu.setOutgoingLength((short) encryptedData.length);
 			apdu.sendBytesLong(encryptedData, (short) 0, (short) encryptedData.length);
 		}
+	}
+
+	public void validateFinalAuth(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			byte[] buffer = apdu.getBuffer();
+			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
+			short bytesLeft;
+			short readCount;
+			short offSet = 0x00;
+
+			bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+			readCount = apdu.setIncomingAndReceive();
+			while (bytesLeft > 0) {
+				Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+				bytesLeft -= readCount;
+				offSet += readCount;
+				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+			}
+
+			byte[] response = cutOffNulls(incomingData);
+
+			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
+			symCipher.init(keys[privKeyKs], Cipher.MODE_DECRYPT);
+
+			byte[] decryptedData = new byte[256];
+			symCipher.doFinal(response, (short) 0, (short) response.length, decryptedData, (short) 0);
+			decryptedData = cutOffNulls(decryptedData);
+			/** TODO WERKEN HIERZO **/
+
+			if(messageChallenge + 1 == decryptedData[0]) {
+				authenticated = (byte) 1;
+			} else {
+				authenticated = (byte) 0;
+				ISOException.throwIt(AUTH_FAILED);
+			}
+		} 
 	}
 
 	public void setTempTime(APDU apdu) {
