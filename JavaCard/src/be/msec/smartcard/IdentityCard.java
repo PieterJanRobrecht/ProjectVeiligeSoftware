@@ -38,7 +38,7 @@ public class IdentityCard extends Applet {
 	private static final byte SEND_CERT_INS = 0x50;
 	private static final byte GET_KEY_INS = 0x52;
 	private static final byte GET_MSG_INS = 0x54;
-	
+
 	private static final byte PUSH_MODULUS = 0x56;
 	private static final byte PUSH_EXPONENT = 0x58;
 
@@ -528,11 +528,11 @@ public class IdentityCard extends Applet {
 				offSet += readCount;
 				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
 			}
-			
-			pubCertExponent = cutOffNulls(incomingData);
+
+			pubCertModulus = cutOffNulls(incomingData);
 		}
 	}
-	
+
 	private void receiveExponent(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
@@ -551,8 +551,8 @@ public class IdentityCard extends Applet {
 				offSet += readCount;
 				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
 			}
-			
-			pubCertModulus = cutOffNulls(incomingData);
+
+			pubCertExponent = cutOffNulls(incomingData);
 		}
 	}
 
@@ -561,12 +561,12 @@ public class IdentityCard extends Applet {
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
 			short offset = 0;
-			short keySizeInBytes = 64;
+			short keySizeInBytes = (short) 64;
 			short keySizeInBits = (short) (keySizeInBytes * 8);
 			pubCertKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
 			pubCertKey.setExponent(pubCertExponent, offset, (short) 3);
 			pubCertKey.setModulus(pubCertModulus, offset, keySizeInBytes);
-			
+
 			// TODO if (verifyCert(CertSP)==false) abort()
 			// TODO if (CertSP.validEndTime < lastValidationTime) abort()
 
