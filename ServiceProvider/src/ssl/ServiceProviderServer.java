@@ -286,6 +286,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 	/*** STAP 3 ***/
 	private void authenticateCard() {
 		// TODO Auto-generated method stub
+		System.out.println("Authenticating Card");
 		InputStream inputStream = null;
 		OutputStream outputStream = null;
 		try {
