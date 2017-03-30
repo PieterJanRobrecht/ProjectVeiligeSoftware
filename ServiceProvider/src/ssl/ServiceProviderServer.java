@@ -227,6 +227,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			byte[] returnData = cutOffNulls(decryptedData);
 			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
 			Ks = originalKey;
+			System.out.println(Ks.toString());
+			System.out.println(Ks.getEncoded());
 			
 			gaan = true;
 			while (gaan) {
