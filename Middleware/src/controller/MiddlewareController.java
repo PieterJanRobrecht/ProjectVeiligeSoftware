@@ -11,6 +11,7 @@ import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.Arrays;
@@ -76,6 +77,9 @@ public class MiddlewareController {
 	private static final byte GET_KEY_INS = 0x52;
 	private static final byte GET_MSG_INS = 0x54;
 
+	private static final byte PUSH_MODULUS = 0x56;
+	private static final byte PUSH_EXPONENT = 0x58;
+
 	private final static short SW_VERIFICATION_FAILED = 0x6322;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
 	private final static short KAPPA = 0x6337;
@@ -86,88 +90,13 @@ public class MiddlewareController {
 
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
 	// gebruik momenteel overal dezelfde :')
-	private byte[] dummyPrivExponent = new byte[] { (byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1,
-			(byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad,
-			(byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9,
-			(byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9,
-			(byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60,
-			(byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11,
-			(byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65,
-			(byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff,
-			(byte) 0xc3, (byte) 0x18, (byte) 0x81 };
-	private byte[] dummyPrivModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39,
-			(byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93,
-			(byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d,
-			(byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c,
-			(byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85,
-			(byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d,
-			(byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8,
-			(byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa,
-			(byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
+	private byte[] dummyPrivExponent = new byte[] { (byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1, (byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad, (byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9, (byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9, (byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60, (byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11, (byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65, (byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff, (byte) 0xc3, (byte) 0x18, (byte) 0x81 };
+	private byte[] dummyPrivModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
 	private byte[] dummyPubExponent = new byte[] { (byte) 0x01, (byte) 0x00, (byte) 0x01 };
-	private byte[] dummyPubModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39,
-			(byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93,
-			(byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d,
-			(byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c,
-			(byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85,
-			(byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d,
-			(byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8,
-			(byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa,
-			(byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
+	private byte[] dummyPubModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
 
 	// Gemaakt aan de hand van goede certificaten?
-	private byte[] certCA = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -39, (byte) 48, (byte) -126, (byte) 1,
-			(byte) -125, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 9, (byte) 0, (byte) -93,
-			(byte) 38, (byte) 118, (byte) 61, (byte) 72, (byte) -98, (byte) 45, (byte) 71, (byte) 48, (byte) 13,
-			(byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1,
-			(byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9,
-			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49,
-			(byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10,
-			(byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116,
-			(byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10,
-			(byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116,
-			(byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3,
-			(byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116,
-			(byte) 104, (byte) 48, (byte) 30, (byte) 23, (byte) 13, (byte) 49, (byte) 55, (byte) 48, (byte) 51,
-			(byte) 50, (byte) 55, (byte) 49, (byte) 49, (byte) 52, (byte) 52, (byte) 53, (byte) 53, (byte) 90,
-			(byte) 23, (byte) 13, (byte) 50, (byte) 50, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49,
-			(byte) 49, (byte) 52, (byte) 52, (byte) 53, (byte) 53, (byte) 90, (byte) 48, (byte) 72, (byte) 49,
-			(byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2,
-			(byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4,
-			(byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83,
-			(byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6,
-			(byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114,
-			(byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15,
-			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114,
-			(byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 92, (byte) 48, (byte) 13,
-			(byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1,
-			(byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2,
-			(byte) 65, (byte) 0, (byte) -81, (byte) -118, (byte) -116, (byte) 28, (byte) 68, (byte) -91, (byte) -115,
-			(byte) 18, (byte) 104, (byte) 21, (byte) 18, (byte) -81, (byte) 116, (byte) -39, (byte) 84, (byte) 58,
-			(byte) -24, (byte) 36, (byte) -53, (byte) 35, (byte) 2, (byte) 31, (byte) -49, (byte) -29, (byte) -104,
-			(byte) 28, (byte) -58, (byte) -120, (byte) 59, (byte) -127, (byte) -3, (byte) -75, (byte) 118, (byte) 126,
-			(byte) -24, (byte) 67, (byte) -11, (byte) 31, (byte) -13, (byte) -8, (byte) 119, (byte) 67, (byte) -114,
-			(byte) 106, (byte) -114, (byte) 84, (byte) 11, (byte) -77, (byte) 5, (byte) -116, (byte) -67, (byte) 126,
-			(byte) -4, (byte) -76, (byte) 125, (byte) -28, (byte) -128, (byte) -32, (byte) -81, (byte) -54, (byte) 81,
-			(byte) -46, (byte) 40, (byte) -17, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) -93, (byte) 80,
-			(byte) 48, (byte) 78, (byte) 48, (byte) 29, (byte) 6, (byte) 3, (byte) 85, (byte) 29, (byte) 14, (byte) 4,
-			(byte) 22, (byte) 4, (byte) 20, (byte) -26, (byte) 45, (byte) 119, (byte) 26, (byte) -45, (byte) -52,
-			(byte) -1, (byte) -54, (byte) 104, (byte) 103, (byte) -92, (byte) 4, (byte) -85, (byte) 68, (byte) -111,
-			(byte) -65, (byte) 87, (byte) -23, (byte) -55, (byte) 61, (byte) 48, (byte) 31, (byte) 6, (byte) 3,
-			(byte) 85, (byte) 29, (byte) 35, (byte) 4, (byte) 24, (byte) 48, (byte) 22, (byte) -128, (byte) 20,
-			(byte) -26, (byte) 45, (byte) 119, (byte) 26, (byte) -45, (byte) -52, (byte) -1, (byte) -54, (byte) 104,
-			(byte) 103, (byte) -92, (byte) 4, (byte) -85, (byte) 68, (byte) -111, (byte) -65, (byte) 87, (byte) -23,
-			(byte) -55, (byte) 61, (byte) 48, (byte) 12, (byte) 6, (byte) 3, (byte) 85, (byte) 29, (byte) 19, (byte) 4,
-			(byte) 5, (byte) 48, (byte) 3, (byte) 1, (byte) 1, (byte) -1, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
-			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11,
-			(byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 33, (byte) 75, (byte) 28, (byte) -22, (byte) -58,
-			(byte) 81, (byte) -78, (byte) -99, (byte) -3, (byte) -102, (byte) 0, (byte) 84, (byte) 76, (byte) -83,
-			(byte) 51, (byte) -67, (byte) -31, (byte) -51, (byte) 107, (byte) 102, (byte) 49, (byte) 1, (byte) 124,
-			(byte) 0, (byte) 14, (byte) 8, (byte) 120, (byte) -80, (byte) 117, (byte) 15, (byte) 32, (byte) -47,
-			(byte) -65, (byte) -89, (byte) 18, (byte) -34, (byte) 124, (byte) 47, (byte) 114, (byte) -86, (byte) -104,
-			(byte) -21, (byte) -79, (byte) 13, (byte) -29, (byte) -93, (byte) -99, (byte) 61, (byte) 17, (byte) 71,
-			(byte) 104, (byte) 75, (byte) 116, (byte) 61, (byte) 94, (byte) 125, (byte) 71, (byte) 124, (byte) 5,
-			(byte) -87, (byte) -104, (byte) -51, (byte) -69, (byte) -35 };
+	private byte[] certCA = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -39, (byte) 48, (byte) -126, (byte) 1, (byte) -125, (byte) -96, (byte) 3, (byte) 2, (byte) 1, (byte) 2, (byte) 2, (byte) 9, (byte) 0, (byte) -93, (byte) 38, (byte) 118, (byte) 61, (byte) 72, (byte) -98, (byte) 45, (byte) 71, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 30, (byte) 23, (byte) 13, (byte) 49, (byte) 55, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 49, (byte) 52, (byte) 52, (byte) 53, (byte) 53, (byte) 90, (byte) 23, (byte) 13, (byte) 50, (byte) 50, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 49, (byte) 52, (byte) 52, (byte) 53, (byte) 53, (byte) 90, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -81, (byte) -118, (byte) -116, (byte) 28, (byte) 68, (byte) -91, (byte) -115, (byte) 18, (byte) 104, (byte) 21, (byte) 18, (byte) -81, (byte) 116, (byte) -39, (byte) 84, (byte) 58, (byte) -24, (byte) 36, (byte) -53, (byte) 35, (byte) 2, (byte) 31, (byte) -49, (byte) -29, (byte) -104, (byte) 28, (byte) -58, (byte) -120, (byte) 59, (byte) -127, (byte) -3, (byte) -75, (byte) 118, (byte) 126, (byte) -24, (byte) 67, (byte) -11, (byte) 31, (byte) -13, (byte) -8, (byte) 119, (byte) 67, (byte) -114, (byte) 106, (byte) -114, (byte) 84, (byte) 11, (byte) -77, (byte) 5, (byte) -116, (byte) -67, (byte) 126, (byte) -4, (byte) -76, (byte) 125, (byte) -28, (byte) -128, (byte) -32, (byte) -81, (byte) -54, (byte) 81, (byte) -46, (byte) 40, (byte) -17, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) -93, (byte) 80, (byte) 48, (byte) 78, (byte) 48, (byte) 29, (byte) 6, (byte) 3, (byte) 85, (byte) 29, (byte) 14, (byte) 4, (byte) 22, (byte) 4, (byte) 20, (byte) -26, (byte) 45, (byte) 119, (byte) 26, (byte) -45, (byte) -52, (byte) -1, (byte) -54, (byte) 104, (byte) 103, (byte) -92, (byte) 4, (byte) -85, (byte) 68, (byte) -111, (byte) -65, (byte) 87, (byte) -23, (byte) -55, (byte) 61, (byte) 48, (byte) 31, (byte) 6, (byte) 3, (byte) 85, (byte) 29, (byte) 35, (byte) 4, (byte) 24, (byte) 48, (byte) 22, (byte) -128, (byte) 20, (byte) -26, (byte) 45, (byte) 119, (byte) 26, (byte) -45, (byte) -52, (byte) -1, (byte) -54, (byte) 104, (byte) 103, (byte) -92, (byte) 4, (byte) -85, (byte) 68, (byte) -111, (byte) -65, (byte) 87, (byte) -23, (byte) -55, (byte) 61, (byte) 48, (byte) 12, (byte) 6, (byte) 3, (byte) 85, (byte) 29, (byte) 19, (byte) 4, (byte) 5, (byte) 48, (byte) 3, (byte) 1, (byte) 1, (byte) -1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 33, (byte) 75, (byte) 28, (byte) -22, (byte) -58, (byte) 81, (byte) -78, (byte) -99, (byte) -3, (byte) -102, (byte) 0, (byte) 84, (byte) 76, (byte) -83, (byte) 51, (byte) -67, (byte) -31, (byte) -51, (byte) 107, (byte) 102, (byte) 49, (byte) 1, (byte) 124, (byte) 0, (byte) 14, (byte) 8, (byte) 120, (byte) -80, (byte) 117, (byte) 15, (byte) 32, (byte) -47, (byte) -65, (byte) -89, (byte) 18, (byte) -34, (byte) 124, (byte) 47, (byte) 114, (byte) -86, (byte) -104, (byte) -21, (byte) -79, (byte) 13, (byte) -29, (byte) -93, (byte) -99, (byte) 61, (byte) 17, (byte) 71, (byte) 104, (byte) 75, (byte) 116, (byte) 61, (byte) 94, (byte) 125, (byte) 71, (byte) 124, (byte) 5, (byte) -87, (byte) -104, (byte) -51, (byte) -69, (byte) -35 };
 
 	// private SSLServerSocketFactory sslServerSocketFactory;
 
@@ -195,11 +124,11 @@ public class MiddlewareController {
 			sendNewTime(fetchNewTime());
 			System.out.println("Complete! \n");
 		}
-		
-//
-//		// Nu connectie opzetten met SP
-//		SSLConnectionServiceProvider sslCon = new SSLConnectionServiceProvider(this, connection);
-//		sslCon.connect();
+
+		//
+		// // Nu connectie opzetten met SP
+		SSLConnectionServiceProvider sslCon = new SSLConnectionServiceProvider(this, connection);
+		sslCon.connect();
 	}
 
 	@FXML
@@ -251,15 +180,13 @@ public class MiddlewareController {
 			this.connection.connect();
 
 			// 0. create applet (only for simulator!!!)
-			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
-					new byte[] { (byte) 0xa0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x08, 0x01 }, 0x7f);
+			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00, new byte[] { (byte) 0xa0, 0x00, 0x00, 0x00, 0x62, 0x03, 0x01, 0x08, 0x01 }, 0x7f);
 			r = this.connection.transmit(a);
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
 				throw new Exception("select installer applet failed");
 
-			a = new CommandAPDU(0x80, 0xB8, 0x00, 0x00,
-					new byte[] { 0xb, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00, 0x00 }, 0x7f);
+			a = new CommandAPDU(0x80, 0xB8, 0x00, 0x00, new byte[] { 0xb, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00, 0x00 }, 0x7f);
 			r = this.connection.transmit(a);
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
@@ -267,8 +194,7 @@ public class MiddlewareController {
 
 			// 1. Select applet (not required on a real card, applet is selected
 			// by default)
-			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00,
-					new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00 }, 0x7f);
+			a = new CommandAPDU(0x00, 0xa4, 0x04, 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00, 0x00 }, 0x7f);
 			r = this.connection.transmit(a);
 			System.out.println(r);
 			if (r.getSW() != 0x9000)
@@ -505,33 +431,69 @@ public class MiddlewareController {
 				}
 			}
 
-			System.out.println("\tSending (" + send.length + "): " + Arrays.toString(send));
-			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, (byte) 1, 0x00, send);
+			// System.out.println("\tSending (" + send.length + "): " +
+			// Arrays.toString(send));
+			// a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, (byte) 1,
+			// 0x00, send);
+			// r = connection.transmit(a);
+			//
+			// if (r.getSW() == SW_VERIFICATION_FAILED) {
+			// addText("PIN INVALID");
+			// throw new Exception("PIN INVALID");
+			// } else if (r.getSW() != 0x9000)
+			// throw new Exception("Exception on the card: " +
+			// Integer.toHexString(r.getSW()));
+			//
+			// send = new byte[cert.length - 250];
+			// for (int i = 0; i < cert.length - 250; i++) {
+			// send[i] = cert[i + 250];
+			// }
+			//
+			// System.out.println("\tSending (" + send.length + "): " +
+			// Arrays.toString(send));
+			// a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, (byte) 2,
+			// 0x00, send);
+			// r = connection.transmit(a);
+			//
+			// if (r.getSW() == SW_VERIFICATION_FAILED) {
+			// addText("PIN INVALID");
+			// throw new Exception("PIN INVALID");
+			// } else if (r.getSW() != 0x9000)
+			// throw new Exception("Exception on the card: " +
+			// Integer.toHexString(r.getSW()));
+			//
+			// System.out.println("\tCert was sent to card, no exceptions met");
+
+			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
+			InputStream is = new ByteArrayInputStream(cert);
+			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
+			
+			RSAPublicKey pk = (RSAPublicKey) certCA.getPublicKey();
+
+			
+			
+			
+			
+			/** PUSH MODULUS **/
+			System.out.println("Modulus: " + Arrays.toString(pk.getModulus().toByteArray()));
+			a = new CommandAPDU(IDENTITY_CARD_CLA, PUSH_MODULUS, 0x00, 0x00, pk.getModulus().toByteArray());
 			r = connection.transmit(a);
 
-			if (r.getSW() == SW_VERIFICATION_FAILED) {
-				addText("PIN INVALID");
-				throw new Exception("PIN INVALID");
-			} else if (r.getSW() != 0x9000)
+			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-			send = new byte[cert.length - 250];
-			for (int i = 0; i < cert.length - 250; i++) {
-				send[i] = cert[i + 250];
-			}
-
-			System.out.println("\tSending (" + send.length + "): " + Arrays.toString(send));
-			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, (byte) 2, 0x00, send);
+			
+			
+			/** PUSH EXPONENT **/
+			System.out.println("Exponent: " + Arrays.toString(pk.getPublicExponent().toByteArray()));
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_KEY_INS, 0x00, 0x00, pk.getPublicExponent().toByteArray());
 			r = connection.transmit(a);
 
-			if (r.getSW() == SW_VERIFICATION_FAILED) {
-				addText("PIN INVALID");
-				throw new Exception("PIN INVALID");
-			} else if (r.getSW() != 0x9000)
+			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-			System.out.println("\tCert was sent to card, no exceptions met");
-
+			
+			
 			/** FETCH SYMMETRIC KEY **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_KEY_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
@@ -540,7 +502,7 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-			
+
 			// System.out.println("\tPayload SYMMETRIC KEY: " +
 			// Arrays.toString(inc));
 			// SecretKey originalKey = new SecretKeySpec(returnData, 0,
@@ -692,9 +654,7 @@ public class MiddlewareController {
 			return r.getData();
 	}
 
-	public static byte[] decryptWithPrivateKey(byte[] data)
-			throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException,
-			InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+	public static byte[] decryptWithPrivateKey(byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		Cipher asymCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
 
@@ -702,9 +662,7 @@ public class MiddlewareController {
 		return asymCipher.doFinal(data);
 	}
 
-	public static byte[] encryptWithPublicKeySC(byte[] data)
-			throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException,
-			InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+	public static byte[] encryptWithPublicKeySC(byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
 		System.out.println("\n \t Data to encrypt: " + Arrays.toString(data));
 
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -750,8 +708,7 @@ public class MiddlewareController {
 		return builder.toString();
 	}
 
-	public static PrivateKey generatePrivateKey(String mod, String exp)
-			throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public static PrivateKey generatePrivateKey(String mod, String exp) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		RSAPrivateKeySpec keySpec = new RSAPrivateKeySpec(new BigInteger(mod, 16), new BigInteger(exp, 16));
 		KeyFactory fact = KeyFactory.getInstance("RSA");
 		PrivateKey privKey = fact.generatePrivate(keySpec);
@@ -772,9 +729,7 @@ public class MiddlewareController {
 		return null;
 	}
 
-	public static byte[] decryptWithPrivateKey(RSAPrivateKey privatekey, byte[] data)
-			throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException,
-			InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+	public static byte[] decryptWithPrivateKey(RSAPrivateKey privatekey, byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		Cipher asymCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
 

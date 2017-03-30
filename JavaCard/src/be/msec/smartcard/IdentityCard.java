@@ -38,6 +38,9 @@ public class IdentityCard extends Applet {
 	private static final byte SEND_CERT_INS = 0x50;
 	private static final byte GET_KEY_INS = 0x52;
 	private static final byte GET_MSG_INS = 0x54;
+	
+	private static final byte PUSH_MODULUS = 0x56;
+	private static final byte PUSH_EXPONENT = 0x58;
 
 	private final static byte PIN_TRY_LIMIT = (byte) 0x03;
 	private final static byte PIN_SIZE = (byte) 0x04;
@@ -48,15 +51,7 @@ public class IdentityCard extends Applet {
 	private final static short VERIFY_FAILED = 0x6338;
 	private final static short ALG_FAILED = 0x6340;
 	private final static short SEQUENTIAL_FAILURE = 0x6341;
-	private final static short SW_CERT_PARSE_FAILED = 0x6301;
-	private final static short SW_MATCH1_FAILED = 0x6302;
-	private final static short SW_MATCH2_FAILED = 0x6303;
-	private final static short SW_LEN_1_ERROR = 0x6304;
-	private final static short SW_LEN_2_ERROR = 0x6305;
-	private final static short SW_CERT_DATA_INVALID = 0x630A;
-    private final static short SW_CERT_ISSUER_INVALID = 0x630B;
-    private final static short SW_CERT_SUBJECT_INVALID = 0x630C;
-    /** Invalid key ID. */
+	/** Invalid key ID. */
 	public static final byte INVALID_KEY = (byte) -1;
 
 	/** Invalid pair of key IDs. */
@@ -107,7 +102,6 @@ public class IdentityCard extends Applet {
 	// gebruik momenteel overal dezelfde
 	private byte[] dummyPrivExponent = new byte[] { (byte) 0x64, (byte) 0xc2, (byte) 0x8d, (byte) 0xcf, (byte) 0xa1, (byte) 0x1a, (byte) 0x7e, (byte) 0x6a, (byte) 0xc9, (byte) 0x42, (byte) 0xf7, (byte) 0xb6, (byte) 0xad, (byte) 0x86, (byte) 0xdb, (byte) 0xf5, (byte) 0x20, (byte) 0x7c, (byte) 0xcd, (byte) 0x4d, (byte) 0xe9, (byte) 0xfb, (byte) 0x2e, (byte) 0x2b, (byte) 0x99, (byte) 0xfa, (byte) 0x29, (byte) 0x1e, (byte) 0xd9, (byte) 0xbd, (byte) 0xf9, (byte) 0xb2, (byte) 0x77, (byte) 0x9e, (byte) 0x3e, (byte) 0x1a, (byte) 0x60, (byte) 0x67, (byte) 0x8e, (byte) 0xbd, (byte) 0xae, (byte) 0x36, (byte) 0x54, (byte) 0x4a, (byte) 0x11, (byte) 0xc2, (byte) 0x2e, (byte) 0x7c, (byte) 0x9e, (byte) 0xc3, (byte) 0xcb, (byte) 0xba, (byte) 0x65, (byte) 0x2b, (byte) 0xc5, (byte) 0x1b, (byte) 0x6f, (byte) 0x4f, (byte) 0x54, (byte) 0xe1, (byte) 0xff, (byte) 0xc3, (byte) 0x18, (byte) 0x81 };
 	private byte[] dummyPrivModulus = new byte[] { (byte) 0x8d, (byte) 0x08, (byte) 0x00, (byte) 0x7e, (byte) 0x39, (byte) 0xb1, (byte) 0x52, (byte) 0x4e, (byte) 0xc8, (byte) 0x90, (byte) 0x90, (byte) 0x37, (byte) 0x93, (byte) 0xd1, (byte) 0xcc, (byte) 0x33, (byte) 0xa8, (byte) 0x8d, (byte) 0xd5, (byte) 0x88, (byte) 0x7d, (byte) 0x5c, (byte) 0xcc, (byte) 0x8a, (byte) 0x26, (byte) 0xaa, (byte) 0x05, (byte) 0x2d, (byte) 0x7c, (byte) 0xed, (byte) 0xd9, (byte) 0xc4, (byte) 0xec, (byte) 0x89, (byte) 0x4e, (byte) 0x27, (byte) 0x85, (byte) 0x9b, (byte) 0x33, (byte) 0x43, (byte) 0x72, (byte) 0xae, (byte) 0xe2, (byte) 0xc8, (byte) 0x4d, (byte) 0x7c, (byte) 0x04, (byte) 0x02, (byte) 0xcd, (byte) 0x46, (byte) 0xf0, (byte) 0x3b, (byte) 0xd8, (byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa, (byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
-	
 
 	// private byte[] certificate = new byte[] { (byte) 48, (byte) -126, (byte)
 	// 1, (byte) -67, (byte) 48, (byte) -126, (byte) 1, (byte) 103, (byte) -96,
@@ -205,87 +199,11 @@ public class IdentityCard extends Applet {
 	/** The number of entries in the keys file. */
 	public static final short NUM_KEYS = 8;
 
-	public static final short MISSING_PATH_LENGTH_CONSTRAINT = -1;
-	/** Indicates there is no limit to the server certificate chain length. */
-	public static final short UNLIMITED_CERT_CHAIN_LENGTH = 32767;
-
-	/** ASN ANY_STRING type used in certificate parsing (0x00). */
-	private static final byte ANY_STRING_TYPE = 0x00; // our own impl
-
-	/** ASN INTEGER type used in certificate parsing (0x02). */
-	private static final byte INTEGER_TYPE = 0x02;
-	/** ASN BIT STRING type used in certificate parsing (0x03). */
-	private static final byte BITSTRING_TYPE = 0x03;
-	/** ASN UTF8 STRING type used in certificate parsing (0x0c). */
-	private static final byte UTF8STR_TYPE = 0x0c;
-	/** ASN UNICODE STRING type used in certificate parsing (0x12). */
-	private static final byte UNIVSTR_TYPE = 0x12;
-	/** ASN PRINT STRING type used in certificate parsing (0x13). */
-	private static final byte PRINTSTR_TYPE = 0x13;
-	/** ASN TELETEX STRING type used in certificate parsing (0x14). */
-	private static final byte TELETEXSTR_TYPE = 0x14;
-
-	/** ASN IA5 STRING type used in certificate parsing (0x16). */
-	private static final byte IA5STR_TYPE = 0x16; // Used for EmailAddress
-	/** ASN SEQUENCE type used in certificate parsing (0x30). */
-	private static final byte SEQUENCE_TYPE = 0x30;
-	/** Email address (rfc 822) alternative name type code. */
-	public static final byte TYPE_EMAIL_ADDRESS = 1;
-	/** DNS name alternative name type code. */
-	public static final byte TYPE_DNS_NAME = 2;
-	/** URI alternative name type code. */
-	public static final byte TYPE_URI = 6;
-
-	/** Bit mask for digital signature key usage. */
-	public static final short DIGITAL_SIG_KEY_USAGE = 0x00000001;
-	/** Bit mask for non repudiation key usage. */
-	public static final short NON_REPUDIATION_KEY_USAGE = 0x00000002;
-	/** Bit mask for key encipherment key usage. */
-	public static final short KEY_ENCIPHER_KEY_USAGE = 0x00000004;
-	/** Bit mask for data encipherment key usage. */
-	public static final short DATA_ENCIPHER_KEY_USAGE = 0x00000008;
-	/** Bit mask for key agreement key usage. */
-	public static final short KEY_AGREEMENT_KEY_USAGE = 0x00000010;
-	/** Bit mask for key certificate sign key usage. */
-	public static final short CERT_SIGN_KEY_USAGE = 0x00000020;
-	/** Bit mask for CRL sign key usage. */
-	public static final short CRL_SIGN_KEY_USAGE = 0x00000040;
-	/** Bit mask for encipher only key usage. */
-	public static final short ENCIPHER_ONLY_KEY_USAGE = 0x00000080;
-	/** Bit mask for decipher only key usage. */
-	public static final short DECIPHER_ONLY_KEY_USAGE = 0x00000100;
-
-	/** Bit mask server auth for extended key usage. */
-	public static final short SERVER_AUTH_EXT_KEY_USAGE = 0x00000002;
-	/** Bit mask client auth for extended key usage. */
-	public static final short CLIENT_AUTH_EXT_KEY_USAGE = 0x00000004;
-	/** Bit code signing mask for extended key usage. */
-	public static final short CODE_SIGN_EXT_KEY_USAGE = 0x00000008;
-	/** Bit email protection mask for extended key usage. */
-	public static final short EMAIL_EXT_KEY_USAGE = 0x00000010;
-	/** Bit IPSEC end system mask for extended key usage. */
-	public static final short IPSEC_END_SYS_EXT_KEY_USAGE = 0x00000020;
-	/** Bit IPSEC tunnel mask for extended key usage. */
-	public static final short IPSEC_TUNNEL_EXT_KEY_USAGE = 0x00000040;
-	/** Bit IPSEC user mask for extended key usage. */
-	public static final short IPSEC_USER_EXT_KEY_USAGE = 0x00000080;
-	/** Bit time stamping mask for extended key usage. */
-	public static final short TIME_STAMP_EXT_KEY_USAGE = 0x00000100;
-
-	/** Includes DER encoding for OID 1.2.840.113549.1.1. */
-	private static final byte[] PKCS1Seq = { (byte) 0x30, (byte) 0x0d, (byte) 0x06, (byte) 0x09, (byte) 0x2a, (byte) 0x86, (byte) 0x48, (byte) 0x86, (byte) 0xf7, (byte) 0x0d, (byte) 0x01, (byte) 0x01, };
-
-	/** RAS ENCRYPTION (0x01). */
-	private static final byte RSA_ENCRYPTION = 0x01;
-
-	/** ASN encoding for NULL. */
-	private static final byte[] NullSeq = { (byte) 0x05, (byte) 0x00 };
-
 	/** Certificate RSA Public key. */
 	private RSAPublicKey pubCertKey = null;
 
-	/** Index inside encoding. */
-	private short idx = 0;
+	private byte[] pubCertExponent;
+	private byte[] pubCertModulus;
 
 	private IdentityCard() {
 		/* During instantiation of the applet, all objects are created. */
@@ -412,58 +330,14 @@ public class IdentityCard extends Applet {
 		case GET_MSG_INS:
 			fetchMessage(apdu);
 			break;
+		case PUSH_EXPONENT:
+			receiveExponent(apdu);
+			break;
+		case PUSH_MODULUS:
+			receiveModulus(apdu);
+			break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
-		}
-	}
-
-	private void receiveCert(APDU apdu) {
-		if (!pin.isValidated())
-			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
-		else {
-			byte[] buffer = apdu.getBuffer();
-
-			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
-
-			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
-			short bytesLeft;
-			short readCount;
-			short offSet = 0x00;
-
-			if (teller == (short) 1) {
-				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
-				readCount = apdu.setIncomingAndReceive();
-				while (bytesLeft > 0) {
-					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
-					bytesLeft -= readCount;
-					offSet += readCount;
-					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
-				}
-
-				certServiceProvider = new byte[(short) incomingData.length];
-				Util.arrayCopy(incomingData, (short) 0, certServiceProvider, (short) 0, (short) incomingData.length);
-				certServiceProvider = cutOffNulls(certServiceProvider);
-			} else if (teller == (short) 2) {
-				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
-				readCount = apdu.setIncomingAndReceive();
-				while (bytesLeft > 0) {
-					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
-					bytesLeft -= readCount;
-					offSet += readCount;
-					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
-				}
-
-				// certServiceProvider = new byte[(short) incomingData.length];
-				// Util.arrayCopy(incomingData, (short) 0, certServiceProvider,
-				// (short) 0, (short) incomingData.length);
-				cutOffNulls(certServiceProvider);
-				byte[] temp = new byte[(short) (incomingData.length + certServiceProvider.length)];
-				Util.arrayCopy(certServiceProvider, (short) 0, temp, (short) 0, (short) certServiceProvider.length);
-				Util.arrayCopy(incomingData, (short) 0, temp, (short) certServiceProvider.length, (short) incomingData.length);
-
-				certServiceProvider = temp;
-				certServiceProvider = cutOffNulls(certServiceProvider);
-			}
 		}
 	}
 
@@ -585,14 +459,122 @@ public class IdentityCard extends Applet {
 		}
 	}
 
+	private void receiveCert(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			byte[] buffer = apdu.getBuffer();
+
+			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
+
+			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
+			short bytesLeft;
+			short readCount;
+			short offSet = 0x00;
+
+			if (teller == (short) 1) {
+				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+				readCount = apdu.setIncomingAndReceive();
+				while (bytesLeft > 0) {
+					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+					bytesLeft -= readCount;
+					offSet += readCount;
+					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+				}
+
+				certServiceProvider = new byte[(short) incomingData.length];
+				Util.arrayCopy(incomingData, (short) 0, certServiceProvider, (short) 0, (short) incomingData.length);
+				certServiceProvider = cutOffNulls(certServiceProvider);
+			} else if (teller == (short) 2) {
+				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+				readCount = apdu.setIncomingAndReceive();
+				while (bytesLeft > 0) {
+					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+					bytesLeft -= readCount;
+					offSet += readCount;
+					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+				}
+
+				// certServiceProvider = new byte[(short) incomingData.length];
+				// Util.arrayCopy(incomingData, (short) 0, certServiceProvider,
+				// (short) 0, (short) incomingData.length);
+				cutOffNulls(certServiceProvider);
+				byte[] temp = new byte[(short) (incomingData.length + certServiceProvider.length)];
+				Util.arrayCopy(certServiceProvider, (short) 0, temp, (short) 0, (short) certServiceProvider.length);
+				Util.arrayCopy(incomingData, (short) 0, temp, (short) certServiceProvider.length, (short) incomingData.length);
+
+				certServiceProvider = temp;
+				certServiceProvider = cutOffNulls(certServiceProvider);
+			}
+		}
+	}
+
+	private void receiveModulus(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			byte[] buffer = apdu.getBuffer();
+
+			/* TODO fix dit */
+			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
+			short bytesLeft;
+			short readCount;
+			short offSet = 0x00;
+
+			bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+			readCount = apdu.setIncomingAndReceive();
+			while (bytesLeft > 0) {
+				Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+				bytesLeft -= readCount;
+				offSet += readCount;
+				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+			}
+			
+			pubCertExponent = cutOffNulls(incomingData);
+		}
+	}
+	
+	private void receiveExponent(APDU apdu) {
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			byte[] buffer = apdu.getBuffer();
+
+			/* TODO fix dit */
+			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
+			short bytesLeft;
+			short readCount;
+			short offSet = 0x00;
+
+			bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+			readCount = apdu.setIncomingAndReceive();
+			while (bytesLeft > 0) {
+				Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+				bytesLeft -= readCount;
+				offSet += readCount;
+				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+			}
+			
+			pubCertModulus = cutOffNulls(incomingData);
+
+			ISOException.throwIt(ALG_FAILED);
+		}
+	}
+
 	public void generateKey(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
+			short offset = 0;
+			short keySizeInBytes = 64;
+			short keySizeInBits = (short) (keySizeInBytes * 8);
+			pubCertKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits, false);
+			pubCertKey.setExponent(dummyPrivExponent, offset, keySizeInBytes);
+			pubCertKey.setModulus(dummyPrivModulus, offset, keySizeInBytes);
+			
 			// TODO if (verifyCert(CertSP)==false) abort()
 			// TODO if (CertSP.validEndTime < lastValidationTime) abort()
 
-			
 			// DONE Ks := genNewSymKey(getSecureRand())
 			byte privKeyIndex = findFreeKeySlot();
 			if (privKeyIndex == INVALID_KEY)
@@ -745,7 +727,7 @@ public class IdentityCard extends Applet {
 			apdu.sendBytesLong(output, (short) 0, (short) output.length);
 		}
 	}
-	
+
 	/**
 	 * Identifies an available key slot. This does not mark the slot busy
 	 * (allocation), it merely identifies it.
