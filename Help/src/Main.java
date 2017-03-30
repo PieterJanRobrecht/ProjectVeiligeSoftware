@@ -92,8 +92,8 @@ public class Main {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		FileReader fr = null, fr2 = null;
 		try {
-			fr = new FileReader("../Certificaten2/oth2.crt");
-			fr2 = new FileReader("../Certificaten2/g.key");
+			fr = new FileReader("../Certificaten2/co.crt");
+			fr2 = new FileReader("../Certificaten2/co.key");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -114,7 +114,16 @@ public class Main {
 		}
 //		byte[] b = pk.getModulus().toByteArray();
 		intToByteArray(sk.getPrivateExponent());
+		System.out.println(sk.getPrivateExponent().toByteArray().length);
 		intToByteArray(sk.getModulus());
+		System.out.println(sk.getModulus().toByteArray().length);
+		
+		try {
+			intToByteArray(fromByteArray(cert.getEncoded()));
+		} catch (CertificateEncodingException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 
 		RSAPublicKeySpec spec = new RSAPublicKeySpec(new BigInteger(1, timePubMod), new BigInteger(1, timePubExp));
 		KeyFactory factory = null;

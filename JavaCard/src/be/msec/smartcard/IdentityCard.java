@@ -181,8 +181,16 @@ public class IdentityCard extends Applet {
 	private byte[] timePubExp = new byte[] { (byte) 1, (byte) 0, (byte) 1 };
 	private byte[] timePubMod = new byte[] { (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
 
+	private byte[] coSecExp = new byte[] { (byte) 94, (byte) -55, (byte) 95, (byte) 12, (byte) 106, (byte) -122, (byte) -23, (byte) -30, (byte) 15, (byte) -36, (byte) -110, (byte) -14, (byte) -55, (byte) -38, (byte) -115, (byte) -123, (byte) -96, (byte) -28, (byte) 5, (byte) 85, (byte) -109, (byte) -121, (byte) 50, (byte) -63, (byte) -100, (byte) 72, (byte) -128, (byte) 27, (byte) -58, (byte) 88, (byte) -100, (byte) -8, (byte) 12, (byte) -108, (byte) -11, (byte) 117, (byte) -64, (byte) -119, (byte) 120, (byte) 46, (byte) 90, (byte) 4, (byte) 57, (byte) 13, (byte) -109, (byte) 30, (byte) -32, (byte) -82, (byte) 10, (byte) -66, (byte) 26, (byte) -81, (byte) 37, (byte) -114, (byte) -94, (byte) -7, (byte) -21, (byte) 40, (byte) 69, (byte) -67, (byte) 8, (byte) 92, (byte) 64, (byte) -55 };
+	private byte[] coSecMod = new byte[] { (byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28, (byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80, (byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118, (byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71, (byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90, (byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73, (byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77, (byte) -33 };
+	private byte[] coCert = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -121, (byte) 48, (byte) -126, (byte) 1, (byte) 49, (byte) 2, (byte) 1, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 30, (byte) 23, (byte) 13, (byte) 49, (byte) 55, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 50, (byte) 53, (byte) 48, (byte) 50, (byte) 56, (byte) 90, (byte) 23, (byte) 13, (byte) 49, (byte) 57, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 50, (byte) 53, (byte) 48, (byte) 50, (byte) 56, (byte) 90, (byte) 48, (byte) 85, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28, (byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80, (byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118, (byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71, (byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90, (byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73, (byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77, (byte) -33, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 99, (byte) -110, (byte) 69, (byte) -43, (byte) -84, (byte) 34, (byte) -83, (byte) -65, (byte) 10, (byte) 81, (byte) -23, (byte) -21, (byte) -32, (byte) -43, (byte) 1, (byte) 20, (byte) 98, (byte) -128, (byte) -40, (byte) 92, (byte) -54, (byte) 124, (byte) 48, (byte) 29, (byte) 98, (byte) -52, (byte) 47, (byte) 114, (byte) 91, (byte) -22, (byte) -35, (byte) -80, (byte) 98, (byte) -75, (byte) -9, (byte) 48, (byte) 115, (byte) -57, (byte) -109, (byte) 62, (byte) -31, (byte) -18, (byte) -2, (byte) -101, (byte) 79, (byte) 78, (byte) 3, (byte) 86, (byte) 79, (byte) 7, (byte) 50, (byte) -34, (byte) -39, (byte) -86, (byte) -23, (byte) 80, (byte) 5, (byte) -117, (byte) -119, (byte) 112, (byte) -38, (byte) 36, (byte) -41, (byte) -58 };
+	
 	private RSAPublicKey timePublicKey;
+	private RSAPrivateKey coPrivateKey;
 	private OwnerPIN pin;
+	
+	private short signLength;
+	private byte[] sign;
 
 	private byte[] lastTime;
 	private byte[] tempTime;
@@ -231,6 +239,12 @@ public class IdentityCard extends Applet {
 		secretKey = (RSAPrivateKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits, false);
 		secretKey.setExponent(dummyPrivExponent, offset, keySizeInBytes);
 		secretKey.setModulus(dummyPrivModulus, offset, keySizeInBytes);
+		
+		keySizeInBytes = 64;
+		keySizeInBits = (short) (keySizeInBytes * 8);
+		coPrivateKey = (RSAPrivateKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PRIVATE, keySizeInBits, false);
+		coPrivateKey.setExponent(coSecExp, offset, keySizeInBytes);
+		coPrivateKey.setModulus(coSecMod, offset, keySizeInBytes);
 
 		/* Build public RSA Key based on dummy */
 		// offset = 0;
@@ -404,7 +418,7 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		// TODO TempTime aanpassen kut
-		if (tempTimeUpdate == null) {
+		if (sign == null) {
 			
 			byte[] buffer = apdu.getBuffer();
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
@@ -415,7 +429,9 @@ public class IdentityCard extends Applet {
 			
 			byte[] decryptedData = new byte[256];
 			symCipher.doFinal(challenge, (short) 0, (short) challenge.length, decryptedData, (short) 0);
-			decryptedData = slice(decryptedData, (short) 0, (short) 8);
+			decryptedData = slice(decryptedData, (short) 0, (short) 1);
+			sign = new byte[240];
+			signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
 			
 //			= challenge;
 		} else {

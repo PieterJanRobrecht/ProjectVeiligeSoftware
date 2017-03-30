@@ -395,8 +395,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 	private int generateChallenge() {
 		Random rand = new Random();
-		int Low = -128;
-		int High = 128;
+		int Low = -128; //inclusief
+		int High = 128; //exclusief
 		int challenge = rand.nextInt(High-Low) + Low;
 //		int challenge = rand.nextInt(255);
 		return challenge;
