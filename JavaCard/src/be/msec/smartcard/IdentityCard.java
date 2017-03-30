@@ -41,6 +41,9 @@ public class IdentityCard extends Applet {
 
 	private static final byte PUSH_MODULUS = 0x56;
 	private static final byte PUSH_EXPONENT = 0x58;
+	
+	private static final byte GET_CHAL_INS = 0x60;
+	private static final byte GET_ANSWER_CHAL_INS = 0x62;
 
 	private final static byte PIN_TRY_LIMIT = (byte) 0x03;
 	private final static byte PIN_SIZE = (byte) 0x04;
@@ -337,6 +340,12 @@ public class IdentityCard extends Applet {
 			break;
 		case PUSH_MODULUS:
 			receiveModulus(apdu);
+			break;
+		case GET_CHAL_INS:
+			getChallenge(apdu);
+			break;
+		case GET_ANSWER_CHAL_INS:
+			getAnswerChallenge(apdu);
 			break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);

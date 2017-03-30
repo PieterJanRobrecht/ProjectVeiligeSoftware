@@ -81,6 +81,7 @@ public class MiddlewareController {
 	private static final byte PUSH_EXPONENT = 0x58;
 	
 	private static final byte GET_CHAL_INS = 0x60;
+	private static final byte GET_ANSWER_CHAL_INS = 0x62;
 
 	private final static short SW_VERIFICATION_FAILED = 0x6322;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
@@ -580,7 +581,15 @@ public class MiddlewareController {
 		
 		try {
 			
-			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CHAL_INS, subject[0], 0x00, 0xff);
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CHAL_INS, 0x00, 0x00, challenge);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+			
+			
+
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_ANSWER_CHAL_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
 
 			if (r.getSW() != 0x9000)
