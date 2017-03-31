@@ -310,10 +310,12 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			inc = hexStringToByteArray(msg);
 
 			System.out.println("debug - " + Arrays.toString(inc));
-			data = slice(inc, 0, 8);
+			data = slice(inc, 0, 16);
 
 			Cipher symCipher = Cipher.getInstance("AES/CBC/NoPadding");
-			symCipher.init(Cipher.DECRYPT_MODE, Ks);
+			byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		    IvParameterSpec ivspec = new IvParameterSpec(iv);
+			symCipher.init(Cipher.DECRYPT_MODE, Ks, ivspec);
 
 			decryptedData = new byte[256];
 			symCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
@@ -325,7 +327,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			if(returnData[1] == subject[0]) {
 				int kappa = ((short) returnData[0]) + 1;
 				System.out.println(kappa);
-				byte[] kappaSend = new byte[1];
+				byte[] kappaSend = new byte[16];
 				kappaSend[0] = (byte)(kappa & 0xff);
 				System.out.println(kappaSend[0]);
 				
@@ -358,6 +360,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			e.printStackTrace();
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
+		} catch (InvalidAlgorithmParameterException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -386,7 +390,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				| ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
 			e.printStackTrace();
 		} catch (InvalidAlgorithmParameterException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
