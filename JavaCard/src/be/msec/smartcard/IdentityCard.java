@@ -429,9 +429,7 @@ public class IdentityCard extends Applet {
 	private void getChallenge(APDU apdu) {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
-		// TODO TempTime aanpassen kut
 		if (sign == null) {
-
 			byte[] buffer = apdu.getBuffer();
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
 			challenge = slice(challenge, (short) 0, (short) 8);
@@ -445,7 +443,6 @@ public class IdentityCard extends Applet {
 			sign = new byte[240];
 			signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
 
-			// = challenge;
 		} else {
 			ISOException.throwIt(SEQUENTIAL_FAILURE);
 		}
@@ -507,11 +504,11 @@ public class IdentityCard extends Applet {
 	}
 
 	private void getAnswerChallenge(APDU apdu) {
-		// TODO Auto-generated method stub
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
-
+			// TODO sym encrypt sig en certificaat en dan doorsturen
+			
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) name.length);
 			apdu.sendBytesLong(name, (short) 0, (short) name.length);
