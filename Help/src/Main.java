@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +29,12 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.openssl.PEMReader;
@@ -68,10 +75,27 @@ public class Main {
 	private static byte[] timeSecExp = new byte[] { (byte) 0, (byte) -105, (byte) -124, (byte) 117, (byte) 48, (byte) -93, (byte) -89, (byte) -60, (byte) -33, (byte) 18, (byte) 113, (byte) -64, (byte) -40, (byte) 57, (byte) -20, (byte) -66, (byte) -62, (byte) 81, (byte) -21, (byte) -6, (byte) 1, (byte) 48, (byte) -16, (byte) 9, (byte) -127, (byte) 112, (byte) -28, (byte) 68, (byte) -8, (byte) 108, (byte) 71, (byte) 60, (byte) -118, (byte) 10, (byte) -27, (byte) -119, (byte) -102, (byte) -106, (byte) 111, (byte) 4, (byte) -99, (byte) -114, (byte) -101, (byte) -48, (byte) -68, (byte) -43, (byte) -43, (byte) 18, (byte) -113, (byte) -108, (byte) 80, (byte) 16, (byte) 24, (byte) -19, (byte) 64, (byte) 22, (byte) -75, (byte) -36, (byte) -44, (byte) -117, (byte) -4, (byte) 16, (byte) -88, (byte) 0, (byte) 1 };
 	private static byte[] timeSecMod = new byte[] { (byte) 0, (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
 			
+	private static byte[] testAESKey = new byte[] { (byte) 89, (byte) 93, (byte) -96, (byte) 94, (byte) 97, (byte) -115, (byte) -91, (byte) -90, (byte) 100, (byte) -17, (byte) 106, (byte) -109, (byte) 18, (byte) 114, (byte) -11, (byte) 3};
+	
 	public static void main(String[] args) {
 //		intToByteArray(1490635770);
 		byte[] test = new byte[] { (byte) 88, (byte) -38, (byte) -71, (byte) -18 }; //Komt binnen
 		byte[] future = new byte[] { (byte) 88, (byte) -39, (byte) 75, (byte) -6 }; //Staat op kaart
+		
+
+
+        try {
+    		SecretKey originalKey = new SecretKeySpec(testAESKey, 0, testAESKey.length, "AES");
+    		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, originalKey);
+            
+            byte[] value = new byte[] { (byte) 125, (byte) 12};
+			byte[] encrypted = cipher.doFinal(value);
+			System.out.println(Arrays.toString(encrypted));
+		} catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
 //		System.out.println(checkIfPast(future, past));
 //		byte[] test = { (byte) 1, (byte) 81, (byte) -128 };
 		// System.out.println(fromByteArray(test).toString());

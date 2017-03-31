@@ -289,10 +289,11 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
 
 			byte[] returnData = cutOffNulls(decryptedData);
-			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
+			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "AES");
 			Ks = originalKey;
-			System.out.println(Arrays.toString(Ks.getEncoded()));
+			System.out.println("KS:"+Arrays.toString(Ks.getEncoded()));
 
+			
 			gaan = true;
 			while (gaan) {
 				String first = queue.peek();
@@ -309,7 +310,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			System.out.println("debug - " + Arrays.toString(inc));
 			data = slice(inc, 0, 8);
 
-			Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+			Cipher symCipher = Cipher.getInstance("AES/CBC/NoPadding");
 			symCipher.init(Cipher.DECRYPT_MODE, Ks);
 
 			decryptedData = new byte[256];
@@ -326,7 +327,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				kappaSend[0] = (byte)(kappa & 0xff);
 				System.out.println(kappaSend[0]);
 				
-				Cipher symCipher2 = Cipher.getInstance("DES/ECB/PKCS5Padding");
+				Cipher symCipher2 = Cipher.getInstance("AES/CBC/NoPadding");
 				symCipher2.init(Cipher.ENCRYPT_MODE, Ks);
 
 				byte[] encryptedData = new byte[256];
@@ -411,7 +412,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 	private byte[] symEncrypt(int c, SecretKey ks2) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
-		Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+		Cipher symCipher = Cipher.getInstance("AES/CBC/NoPadding");
 		symCipher.init(Cipher.ENCRYPT_MODE, ks2);
 
 		BigInteger bigInt = BigInteger.valueOf(c);

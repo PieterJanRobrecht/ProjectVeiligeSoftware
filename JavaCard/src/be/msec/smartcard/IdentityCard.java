@@ -7,7 +7,7 @@ import javacard.framework.ISOException;
 import javacard.framework.JCSystem;
 import javacard.framework.OwnerPIN;
 import javacard.framework.Util;
-import javacard.security.DESKey;
+import javacard.security.AESKey;
 import javacard.security.Key;
 import javacard.security.KeyBuilder;
 import javacard.security.MessageDigest;
@@ -514,8 +514,8 @@ public class IdentityCard extends Applet {
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
 			challenge = cutOffNulls(challenge);
 
-			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
-			DESKey ks = (DESKey) keys[privKeyKs];
+			Cipher symCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
+			AESKey ks = (AESKey) keys[privKeyKs];
 			symCipher.init(ks, Cipher.MODE_DECRYPT);
 
 			byte[] decryptedData = new byte[256];
@@ -722,7 +722,7 @@ public class IdentityCard extends Applet {
 			if (privKeyIndex == INVALID_KEY)
 				ISOException.throwIt(INVALID_KEY_PAIR);
 
-			DESKey Ks = (DESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_DES, KeyBuilder.LENGTH_DES, false);
+			AESKey Ks = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES, KeyBuilder.LENGTH_AES_128, false);
 			short keySize = (short) (Ks.getSize() / 8);
 			random(randomMaterial, (short) 0, keySize);
 			Ks.setKey(randomMaterial, (short) 0);
@@ -764,10 +764,13 @@ public class IdentityCard extends Applet {
 			byte certSubject = (byte) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
 			// DONE Emsg := symEncrypt([c, CertSP:Subject], Ks)
-			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
-			symCipher.init(keys[privKeyKs], Cipher.MODE_ENCRYPT);
-			byte[] encryptedData = new byte[256];
-			byte[] sendData = new byte[2];
+			Cipher symCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
+			AESKey ks = (AESKey) keys[privKeyKs];
+			byte[] b = new byte[1024];
+			byte d = ks.getKey(b, (short) 0);
+			symCipher.init(ks, Cipher.MODE_ENCRYPT);
+			byte[] encryptedData = new byte[16];
+			byte[] sendData = new byte[16];
 			sendData[0] = c[0];
 			sendData[1] = certSubject;
 
@@ -803,7 +806,7 @@ public class IdentityCard extends Applet {
 
 			byte[] response = cutOffNulls(incomingData);
 
-			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
+			Cipher symCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
 			symCipher.init(keys[privKeyKs], Cipher.MODE_DECRYPT);
 
 			byte[] decryptedData = new byte[256];

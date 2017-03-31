@@ -446,7 +446,7 @@ public class MiddlewareController {
 			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
 			InputStream is = new ByteArrayInputStream(cert);
 			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
-
+			
 			RSAPublicKey pk = (RSAPublicKey) certCA.getPublicKey();
 
 			/** PUSH MODULUS **/
