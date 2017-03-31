@@ -110,6 +110,7 @@ public class MiddlewareController {
 	// private SSLServerSocketFactory sslServerSocketFactory;
 
 	private SecretKey Ks;
+	private boolean isSimulator = false;
 
 	@FXML
 	private TextArea communicationArea;
@@ -118,6 +119,8 @@ public class MiddlewareController {
 
 	@FXML
 	void loginSimulator(ActionEvent event) {
+		isSimulator = true;
+		
 		startSimulator();
 		System.out.println("Sending Pin..");
 		sendPin();
@@ -475,6 +478,10 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
+			if(isSimulator){
+				inc = slice(inc, 6, inc.length);
+			}
+			
 			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -501,7 +508,7 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
+			System.out.println("\tPayload Emsg: " + Arrays.toString(inc) +"\n\t with length " +inc.length);
 			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -437,14 +437,19 @@ public class IdentityCard extends Applet {
 		if (sign == null) {
 			byte[] buffer = apdu.getBuffer();
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
-			challenge = slice(challenge, (short) 0, (short) 8);
+			challenge = cutOffNulls(challenge);
 
 			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
 			symCipher.init(keys[privKeyKs], Cipher.MODE_DECRYPT);
 
 			byte[] decryptedData = new byte[256];
-			symCipher.doFinal(challenge, (short) 0, (short) challenge.length, decryptedData, (short) 0);
-			decryptedData = slice(decryptedData, (short) 0, (short) 1);
+			// TODO nog fout in dofinal want gooit 6f00 op
+			short dataLen = (short) decryptedData.length;
+			symCipher.doFinal(decryptedData, (short) 0, dataLen, challenge, (short) 0);
+//			symCipher.doFinal(challenge, (short) 0, (short) challenge.length, decryptedData, (short) 0);
+//			decryptedData = cutOffNulls(decryptedData);
+			ISOException.throwIt(KAPPA);
+			
 			sign = new byte[240];
 			signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
 
@@ -703,7 +708,7 @@ public class IdentityCard extends Applet {
 			sendData[1] = certSubject;
 
 			try {
-				symCipher.doFinal(sendData, (short) 0, (short) 2, encryptedData, (short) 0);
+				symCipher.doFinal(sendData, (short) 0, (short) sendData.length, encryptedData, (short) 0);
 			} catch (Exception e) {
 				ISOException.throwIt(ALG_FAILED);
 			}
