@@ -78,24 +78,25 @@ public class Main {
 	private static byte[] testAESKey = new byte[] { (byte) 89, (byte) 93, (byte) -96, (byte) 94, (byte) 97, (byte) -115, (byte) -91, (byte) -90, (byte) 100, (byte) -17, (byte) 106, (byte) -109, (byte) 18, (byte) 114, (byte) -11, (byte) 3};
 	
 	public static void main(String[] args) {
+		System.out.println(512%16);
 //		intToByteArray(1490635770);
-		byte[] test = new byte[] { (byte) 88, (byte) -38, (byte) -71, (byte) -18 }; //Komt binnen
-		byte[] future = new byte[] { (byte) 88, (byte) -39, (byte) 75, (byte) -6 }; //Staat op kaart
-		
-
-
-        try {
-    		SecretKey originalKey = new SecretKeySpec(testAESKey, 0, testAESKey.length, "AES");
-    		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
-            cipher.init(Cipher.ENCRYPT_MODE, originalKey);
-            
-            byte[] value = new byte[] { (byte) 125, (byte) 12};
-			byte[] encrypted = cipher.doFinal(value);
-			System.out.println(Arrays.toString(encrypted));
-		} catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		}
+//		byte[] test = new byte[] { (byte) 88, (byte) -38, (byte) -71, (byte) -18 }; //Komt binnen
+//		byte[] future = new byte[] { (byte) 88, (byte) -39, (byte) 75, (byte) -6 }; //Staat op kaart
+//		
+//
+//
+//        try {
+//    		SecretKey originalKey = new SecretKeySpec(testAESKey, 0, testAESKey.length, "AES");
+//    		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+//            cipher.init(Cipher.ENCRYPT_MODE, originalKey);
+//            
+//            byte[] value = new byte[] { (byte) 125, (byte) 12};
+//			byte[] encrypted = cipher.doFinal(value);
+//			System.out.println(Arrays.toString(encrypted));
+//		} catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e3) {
+//			// TODO Auto-generated catch block
+//			e3.printStackTrace();
+//		}
 //		System.out.println(checkIfPast(future, past));
 //		byte[] test = { (byte) 1, (byte) 81, (byte) -128 };
 		// System.out.println(fromByteArray(test).toString());
@@ -112,91 +113,91 @@ public class Main {
 		// int getal = 1489084085 - 1489076666;
 		// System.out.println(getal);
 		// intToByteArray(getal);
-
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		FileReader fr = null, fr2 = null;
-		try {
-			fr = new FileReader("../Certificaten2/co.crt");
-			fr2 = new FileReader("../Certificaten2/co.key");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		PEMReader pemReader = new PEMReader(fr);
-		X509Certificate cert = null;
-		RSAPrivateKey sk = null;
-		RSAPublicKey pk = null;
-		try {
-			cert = (X509Certificate) pemReader.readObject();
-			pemReader = new PEMReader(fr2);
-			KeyPair kp = (KeyPair) pemReader.readObject();
-			sk = (RSAPrivateKey) kp.getPrivate();
-			pk = (RSAPublicKey) cert.getPublicKey();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-//		byte[] b = pk.getModulus().toByteArray();
-		intToByteArray(sk.getPrivateExponent());
-		System.out.println(sk.getPrivateExponent().toByteArray().length);
-		intToByteArray(sk.getModulus());
-		System.out.println(sk.getModulus().toByteArray().length);
-		
-		try {
-			intToByteArray(fromByteArray(cert.getEncoded()));
-		} catch (CertificateEncodingException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-
-		RSAPublicKeySpec spec = new RSAPublicKeySpec(new BigInteger(1, timePubMod), new BigInteger(1, timePubExp));
-		KeyFactory factory = null;
-		try {
-			factory = KeyFactory.getInstance("RSA");
-		} catch (NoSuchAlgorithmException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
-			pk = (RSAPublicKey) factory.generatePublic(spec);
-		} catch (InvalidKeySpecException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		RSAPrivateKeySpec spac = new RSAPrivateKeySpec(new BigInteger(1, timeSecMod), new BigInteger(1, timeSecExp));
-		factory = null;
-		try {
-			factory = KeyFactory.getInstance("RSA");
-		} catch (NoSuchAlgorithmException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
-			sk = (RSAPrivateKey) factory.generatePrivate(spac);
-		} catch (InvalidKeySpecException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		
-		 byte[] digitalSignature = null;
-		 try {
-		 digitalSignature = signData(test, sk);
-		 } catch (Exception e) {
-		 // TODO Auto-generated catch block
-		 e.printStackTrace();
-		 }
-		
-		 boolean verified = false;
-		
-		 try {
-		 verified = verifySig(test, pk, digitalSignature);
-		 } catch (Exception e) {
-		 // TODO Auto-generated catch block
-		 e.printStackTrace();
-		 }
-		 System.out.println(verified) ;
+//
+//		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+//		FileReader fr = null, fr2 = null;
+//		try {
+//			fr = new FileReader("../Certificaten2/co.crt");
+//			fr2 = new FileReader("../Certificaten2/co.key");
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		PEMReader pemReader = new PEMReader(fr);
+//		X509Certificate cert = null;
+//		RSAPrivateKey sk = null;
+//		RSAPublicKey pk = null;
+//		try {
+//			cert = (X509Certificate) pemReader.readObject();
+//			pemReader = new PEMReader(fr2);
+//			KeyPair kp = (KeyPair) pemReader.readObject();
+//			sk = (RSAPrivateKey) kp.getPrivate();
+//			pk = (RSAPublicKey) cert.getPublicKey();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+////		byte[] b = pk.getModulus().toByteArray();
+//		intToByteArray(sk.getPrivateExponent());
+//		System.out.println(sk.getPrivateExponent().toByteArray().length);
+//		intToByteArray(sk.getModulus());
+//		System.out.println(sk.getModulus().toByteArray().length);
+//		
+//		try {
+//			intToByteArray(fromByteArray(cert.getEncoded()));
+//		} catch (CertificateEncodingException e2) {
+//			// TODO Auto-generated catch block
+//			e2.printStackTrace();
+//		}
+//
+//		RSAPublicKeySpec spec = new RSAPublicKeySpec(new BigInteger(1, timePubMod), new BigInteger(1, timePubExp));
+//		KeyFactory factory = null;
+//		try {
+//			factory = KeyFactory.getInstance("RSA");
+//		} catch (NoSuchAlgorithmException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		try {
+//			pk = (RSAPublicKey) factory.generatePublic(spec);
+//		} catch (InvalidKeySpecException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		
+//		RSAPrivateKeySpec spac = new RSAPrivateKeySpec(new BigInteger(1, timeSecMod), new BigInteger(1, timeSecExp));
+//		factory = null;
+//		try {
+//			factory = KeyFactory.getInstance("RSA");
+//		} catch (NoSuchAlgorithmException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		try {
+//			sk = (RSAPrivateKey) factory.generatePrivate(spac);
+//		} catch (InvalidKeySpecException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		
+//		
+//		 byte[] digitalSignature = null;
+//		 try {
+//		 digitalSignature = signData(test, sk);
+//		 } catch (Exception e) {
+//		 // TODO Auto-generated catch block
+//		 e.printStackTrace();
+//		 }
+//		
+//		 boolean verified = false;
+//		
+//		 try {
+//		 verified = verifySig(test, pk, digitalSignature);
+//		 } catch (Exception e) {
+//		 // TODO Auto-generated catch block
+//		 e.printStackTrace();
+//		 }
+//		 System.out.println(verified) ;
 	}
 	
 	private static boolean checkIfPast(byte[] lastTime, byte[] tempTimeUpdate) {

@@ -83,6 +83,9 @@ public class MiddlewareController {
 	private static final byte PUSH_EXPONENT = 0x58;
 
 	private static final byte GET_CHAL_INS = 0x72;
+	private static final byte GET_ANSWER_CHAL_PART1 = 0x74;
+	private static final byte GET_ANSWER_CHAL_PART2 = 0x76;
+	private static final byte GET_ANSWER_CHAL_PART3 = 0x78;
 	private static final byte GET_ANSWER_CHAL_INS = 0x62;
 
 	private static final byte FINAL_AUTH_INS = 0x64;
@@ -566,17 +569,33 @@ public class MiddlewareController {
 			r = connection.transmit(a);
 			
 			if(r.getSW() == KAPPA){
-				System.out.println("Signatur aangemaakt op de kaart");
+				System.out.println("Signature aangemaakt op de kaart");
 			}
 			else if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 
-			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_ANSWER_CHAL_INS, 0x00, 0x00, 0xff);
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_ANSWER_CHAL_PART1, 0x00, 0x00, 0xff);
+			r = connection.transmit(a);
+			
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+			byte[] part1 = r.getData();
+			
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_ANSWER_CHAL_PART2, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
 
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+			byte[] part2 = r.getData();
+			
+			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_ANSWER_CHAL_PART3, 0x00, 0x00, 0xff);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+			byte[] part3 = r.getData();
+
 
 			byte[] inc = r.getData();
 			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));

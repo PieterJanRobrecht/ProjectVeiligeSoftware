@@ -1,5 +1,7 @@
 package be.msec.smartcard;
 
+import com.sun.javacard.crypto.e;
+
 import javacard.framework.APDU;
 import javacard.framework.Applet;
 import javacard.framework.ISO7816;
@@ -44,6 +46,10 @@ public class IdentityCard extends Applet {
 
 	private static final byte GET_CHAL_INS = 0x72;
 	private static final byte GET_ANSWER_CHAL_INS = 0x62;
+
+	private static final byte GET_ANSWER_CHAL_PART1 = 0x74;
+	private static final byte GET_ANSWER_CHAL_PART2 = 0x76;
+	private static final byte GET_ANSWER_CHAL_PART3 = 0x78;
 
 	private static final byte FINAL_AUTH_INS = 0x64;
 
@@ -236,7 +242,8 @@ public class IdentityCard extends Applet {
 	private byte[] pubCertModulus;
 
 	private byte messageChallenge;
-
+	private byte[] endStepThree;
+ 
 	private byte authenticated;
 
 	private IdentityCard() {
@@ -385,9 +392,31 @@ public class IdentityCard extends Applet {
 		case FINAL_AUTH_INS:
 			validateFinalAuth(apdu);
 			break;
+		case GET_ANSWER_CHAL_PART1:
+			returnAnswerChallenge(apdu, (short) 0);
+			break;
+		case GET_ANSWER_CHAL_PART2:
+			returnAnswerChallenge(apdu,(short)  1);
+			break;
+		case GET_ANSWER_CHAL_PART3:
+			returnAnswerChallenge(apdu,(short)  2);
+			break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 		}
+	}
+
+	private void returnAnswerChallenge(APDU apdu, short j) {
+		short start = (short) (0 + j * 250);
+		byte[] result = new byte[250];
+		for(short i = 0;i<(short) 250;i++){
+			short index = (short) (i + 250*j);
+			result[i] = endStepThree[index];
+		}
+		
+		apdu.setOutgoing();
+		apdu.setOutgoingLength((short) result.length);
+		apdu.sendBytesLong(result, (short) 0, (short) result.length);
 	}
 
 	/*
@@ -438,7 +467,7 @@ public class IdentityCard extends Applet {
 	}
 
 	private void getChallenge(APDU apdu) {
-		if (sign == null) {
+		if (endStepThree == null) {
 			byte[] buffer = apdu.getBuffer();
 			apdu.setIncomingAndReceive();
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
@@ -456,6 +485,36 @@ public class IdentityCard extends Applet {
 			sign = new byte[240];
 			signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
 			sign = cutOffNulls(sign);
+			
+			short totLength = (short) (coCert.length + signLength + 1);
+			byte[] eMsg = new byte[totLength];
+			eMsg[0] = (byte)(signLength & 0xff);
+			for(short i= 0;i<signLength; i++){
+				short index = (short) (i + 1);
+				eMsg[index] = sign[i];
+			}
+			short halfway = (short) (1 + signLength);
+			short certLength = (short) coCert.length;
+			for(short i = 0; i< certLength;i++){
+				short index = (short) (i + halfway);
+				eMsg[index] = coCert[i];
+			}
+			byte[] result = new byte[512];
+			for(short i =0;i<totLength;i++){
+				result[i] = eMsg[i];
+			}
+			eMsg = result;
+			
+			symCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
+			symCipher.init(keys[privKeyKs], Cipher.MODE_ENCRYPT);
+			
+			byte[] encryptedData = new byte[750];
+			try {
+				symCipher.doFinal(eMsg, (short) 0, (short) eMsg.length, encryptedData, (short) 0);
+			} catch (Exception e) {
+				ISOException.throwIt(ALG_FAILED);
+			}
+			endStepThree = encryptedData;
 			ISOException.throwIt(KAPPA);
 
 		} else {
@@ -517,15 +576,13 @@ public class IdentityCard extends Applet {
 	}
 
 	private void getAnswerChallenge(APDU apdu) {
-		if(sign != null) {
+		if(endStepThree != null) {
 			// TODO sym encrypt sig en certificaat en dan doorsturen
-			short totLength = (short) (coCert.length + signLength + 1);
-			byte[] eMsg = new byte[totLength];
-			eMsg[0] = (byte)(signLength & 0xff);
+
 			
 			apdu.setOutgoing();
-			apdu.setOutgoingLength((short) name.length);
-			apdu.sendBytesLong(name, (short) 0, (short) name.length);
+			apdu.setOutgoingLength((short) endStepThree.length);
+			apdu.sendBytesLong(endStepThree, (short) 0, (short) endStepThree.length);
 		}else{
 			ISOException.throwIt(SEQUENTIAL_FAILURE);
 		}
@@ -563,47 +620,7 @@ public class IdentityCard extends Applet {
 		Util.arrayCopy(incomingData, (short) 0, certServiceProvider, (short) 0, (short) incomingData.length);
 		certServiceProvider = cutOffNulls(certServiceProvider);
 
-		// if (teller == (short) 1) {
-		// bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
-		// readCount = apdu.setIncomingAndReceive();
-		// while (bytesLeft > 0) {
-		// Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData,
-		// offSet, readCount);
-		// bytesLeft -= readCount;
-		// offSet += readCount;
-		// readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
-		// }
-		//
-		// certServiceProvider = new byte[(short) incomingData.length];
-		// Util.arrayCopy(incomingData, (short) 0, certServiceProvider, (short)
-		// 0, (short) incomingData.length);
-		// certServiceProvider = cutOffNulls(certServiceProvider);
-		// } else if (teller == (short) 2) {
-		// bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
-		// readCount = apdu.setIncomingAndReceive();
-		// while (bytesLeft > 0) {
-		// Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData,
-		// offSet, readCount);
-		// bytesLeft -= readCount;
-		// offSet += readCount;
-		// readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
-		// }
-		//
-		// // certServiceProvider = new byte[(short) incomingData.length];
-		// // Util.arrayCopy(incomingData, (short) 0, certServiceProvider,
-		// // (short) 0, (short) incomingData.length);
-		// cutOffNulls(certServiceProvider);
-		// byte[] temp = new byte[(short) (incomingData.length +
-		// certServiceProvider.length)];
-		// Util.arrayCopy(certServiceProvider, (short) 0, temp, (short) 0,
-		// (short) certServiceProvider.length);
-		// Util.arrayCopy(incomingData, (short) 0, temp, (short)
-		// certServiceProvider.length, (short) incomingData.length);
-		//
-		// certServiceProvider = temp;
-		// certServiceProvider = cutOffNulls(certServiceProvider);
-		// }
-
+		
 	}
 
 	private void receiveModulus(APDU apdu) {
