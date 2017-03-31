@@ -100,7 +100,15 @@ public class ServiceProviderController {
 				+ " for " + output;
 		addText(submit);
 
-		sps.setTask("1");
+		byte[] query = new byte[7];
+		query[0] = (name) ? (byte) 1 : (byte) 0;
+		query[1] = (adress) ? (byte) 1 : (byte) 0;
+		query[2] = (foto) ? (byte) 1 : (byte) 0;
+		query[3] = (age) ? (byte) 1 : (byte) 0;
+		query[4] = (country) ? (byte) 1 : (byte) 0;
+		query[5] = (gender) ? (byte) 1 : (byte) 0;
+		query[6] = (birthday) ? (byte) 1 : (byte) 0;
+		sps.releaseAttributes(query);
 	}
 
 	private RSAPrivateKey getKey(String output) throws IOException {
