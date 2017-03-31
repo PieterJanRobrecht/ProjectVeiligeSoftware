@@ -339,7 +339,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 			send("ReleaseAttributes", outputStream);
 			send(bytesToHex(query), outputStream);
-
+			System.out.println("sent reqs");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
