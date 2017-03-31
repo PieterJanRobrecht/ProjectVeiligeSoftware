@@ -39,7 +39,7 @@ public class HandlingThread extends Communicator implements Runnable {
 						authenticateServiceProvider2();
 						break;
 					case "AuthCard":
-						//authenticateCard();
+						authenticateCard();
 						break;
 					case "ReleasingAttributes":
 						releaseAttributes();
@@ -89,6 +89,7 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		byte[] Ks = mwc.authenticateServiceProvider(certInBytes);
 		Ks = cutOffNulls(Ks);
+		System.out.println("Lengte = "+Ks.length);
 
 		String ks = bytesToHex(Ks);
 		System.out.println(ks.length() + " || " + ks);
@@ -97,7 +98,7 @@ public class HandlingThread extends Communicator implements Runnable {
 		System.out.println(send1 + send2);
 		send(send1, outputStream);
 		send(send2, outputStream);
-
+ 
 		byte[] Emsg = mwc.getEmsg();
 
 		Emsg = cutOffNulls(Emsg);

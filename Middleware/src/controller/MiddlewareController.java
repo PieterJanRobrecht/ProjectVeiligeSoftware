@@ -112,6 +112,7 @@ public class MiddlewareController {
 	// private SSLServerSocketFactory sslServerSocketFactory;
 
 	private SecretKey Ks;
+	private boolean isSimulator = false;
 
 	@FXML
 	private TextArea communicationArea;
@@ -120,10 +121,12 @@ public class MiddlewareController {
 
 	@FXML
 	void loginSimulator(ActionEvent event) {
+		isSimulator = true;
+		
 		startSimulator();
-		System.out.println("Sending Pin..");
-		sendPin();
-		System.out.println("Complete! \n");
+//		System.out.println("Sending Pin..");
+//		sendPin();
+//		System.out.println("Complete! \n");
 
 		System.out.println("Sending Time..");
 		boolean isValid = isValid();
@@ -154,9 +157,9 @@ public class MiddlewareController {
 			e.printStackTrace();
 		}
 
-		System.out.println("Sending Pin..");
-		sendPin();
-		System.out.println("Complete! \n");
+//		System.out.println("Sending Pin..");
+//		sendPin();
+//		System.out.println("Complete! \n");
 
 		/*** STAP 1 ***/
 		System.out.println("Sending Time..");
@@ -211,7 +214,7 @@ public class MiddlewareController {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Applet selection failed");
 
-			sendPin();
+//			sendPin();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -444,7 +447,7 @@ public class MiddlewareController {
 			CertificateFactory certFac = CertificateFactory.getInstance("X.509");
 			InputStream is = new ByteArrayInputStream(cert);
 			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
-
+			
 			byte[] fakeCert = createFakeCertificate(certCA);
 
 			// SEND_CERT_INS
@@ -492,6 +495,10 @@ public class MiddlewareController {
 
 			byte[] inc = r.getData();
 			System.out.println("Result authenticating card: " + Arrays.toString(inc));
+			if(isSimulator){
+				inc = slice(inc, 6, inc.length);
+			}
+			
 			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -518,7 +525,7 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
+			System.out.println("\tPayload Emsg: " + Arrays.toString(inc) +"\n\t with length " +inc.length);
 			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();

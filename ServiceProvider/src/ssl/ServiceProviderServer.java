@@ -6,6 +6,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -16,6 +17,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.io.*;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -289,10 +291,11 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
 
 			byte[] returnData = cutOffNulls(decryptedData);
-			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "DES");
+			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "AES");
 			Ks = originalKey;
-			System.out.println(Arrays.toString(Ks.getEncoded()));
+			System.out.println("KS:"+Arrays.toString(Ks.getEncoded()));
 
+			
 			gaan = true;
 			while (gaan) {
 				String first = queue.peek();
@@ -307,10 +310,12 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			inc = hexStringToByteArray(msg);
 
 			System.out.println("debug - " + Arrays.toString(inc));
-			data = slice(inc, 0, 8);
+			data = slice(inc, 0, 16);
 
-			Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-			symCipher.init(Cipher.DECRYPT_MODE, Ks);
+			Cipher symCipher = Cipher.getInstance("AES/CBC/NoPadding");
+			byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		    IvParameterSpec ivspec = new IvParameterSpec(iv);
+			symCipher.init(Cipher.DECRYPT_MODE, Ks, ivspec);
 
 			decryptedData = new byte[256];
 			symCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
@@ -322,11 +327,11 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			if(returnData[1] == subject[0]) {
 				int kappa = ((short) returnData[0]) + 1;
 				System.out.println(kappa);
-				byte[] kappaSend = new byte[1];
+				byte[] kappaSend = new byte[16];
 				kappaSend[0] = (byte)(kappa & 0xff);
 				System.out.println(kappaSend[0]);
 				
-				Cipher symCipher2 = Cipher.getInstance("DES/ECB/PKCS5Padding");
+				Cipher symCipher2 = Cipher.getInstance("AES/CBC/NoPadding");
 				symCipher2.init(Cipher.ENCRYPT_MODE, Ks);
 
 				byte[] encryptedData = new byte[256];
@@ -346,25 +351,20 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ShortBufferException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidAlgorithmParameterException e) {
 			e.printStackTrace();
 		}
 	}
@@ -393,6 +393,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		} catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 				| ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
 			e.printStackTrace();
+		} catch (InvalidAlgorithmParameterException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -414,13 +416,20 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 	}
 
 	private byte[] symEncrypt(int c, SecretKey ks2) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
-		Cipher symCipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-		symCipher.init(Cipher.ENCRYPT_MODE, ks2);
+			InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+		Cipher symCipher = Cipher.getInstance("AES/CBC/NoPadding");
+		byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	    IvParameterSpec ivspec = new IvParameterSpec(iv);
+		symCipher.init(Cipher.ENCRYPT_MODE, ks2, ivspec);
 
 		BigInteger bigInt = BigInteger.valueOf(c);
+		byte[] b = bigInt.toByteArray();
+		byte[] toEncrypt = new byte[16];
+		for(int i=0;i<b.length;i++){
+			toEncrypt[i] = b[i];
+		}
 
-		byte[] cipherText = symCipher.doFinal(bigInt.toByteArray());
+		byte[] cipherText = symCipher.doFinal(toEncrypt);
 
 		return cipherText;
 	}
@@ -436,8 +445,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 	private int generateChallenge() {
 		Random rand = new Random();
-		int Low = -128;
-		int High = 128;
+		int Low = -128; //inclusief
+		int High = 128; //exclusief
 		int challenge = rand.nextInt(High-Low) + Low;
 //		int challenge = rand.nextInt(255);
 		return challenge;
