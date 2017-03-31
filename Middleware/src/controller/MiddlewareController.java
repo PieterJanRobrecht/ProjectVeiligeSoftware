@@ -451,7 +451,6 @@ public class MiddlewareController {
 			byte[] fakeCert = createFakeCertificate(certCA);
 
 			// SEND_CERT_INS
-			System.out.println("Send_cert_ins: " + Arrays.toString(fakeCert));
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, 0x00, 0x00, fakeCert);
 			r = connection.transmit(a);
 
@@ -494,10 +493,10 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-			System.out.println("Result authenticating card: " + Arrays.toString(inc));
 			if(isSimulator){
 				inc = slice(inc, 6, inc.length);
 			}
+			System.out.println("Result authenticating card: " + Arrays.toString(inc));
 			
 			return inc;
 		} catch (Exception e) {
@@ -525,7 +524,8 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-			System.out.println("\tPayload Emsg: " + Arrays.toString(inc) +"\n\t with length " +inc.length);
+			if(isSimulator) inc = slice(inc, (short) 5, inc.length);
+			System.out.println("\tPayload Emsg: " + Arrays.toString(inc) +"\t with length " +inc.length);
 			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -793,7 +793,7 @@ public class MiddlewareController {
 		}
 		list.addAll(temp);
 
-		System.out.println("DEBUG \t MODULUS: " + temp.toString());
+		System.out.println("\tDEBUG MODULUS: " + temp.toString());
 
 		/** EXPONENT **/
 		temp = new ArrayList<Byte>();
@@ -803,11 +803,10 @@ public class MiddlewareController {
 		}
 		list.addAll(temp);
 
-		System.out.println("DEBUG \t EXPONENT: " + temp.toString());
+		System.out.println("\tDEBUG EXPONENT: " + temp.toString());
 
 		/** validEndTime **/
 		int time = (int) (cert.getNotAfter().getTime()) / 1000;
-		System.out.println(time);
 
 		temp = new ArrayList<Byte>();
 		valseKappa = intToByteArray(time);
@@ -816,7 +815,7 @@ public class MiddlewareController {
 		}
 		list.addAll(temp);
 
-		System.out.println("DEBUG \t VALIDENDTIME: " + temp.toString());
+		System.out.println("\tDEBUG VALIDENDTIME: " + temp.toString());
 
 		/** subject **/
 		temp = new ArrayList<Byte>();
@@ -826,7 +825,7 @@ public class MiddlewareController {
 		}
 		list.addAll(temp);
 
-		System.out.println("DEBUG \t SUBJECT: " + temp.toString());
+		System.out.println("\tDEBUG SUBJECT: " + temp.toString());
 
 		/** type **/
 		temp = new ArrayList<Byte>();
@@ -836,13 +835,13 @@ public class MiddlewareController {
 		}
 		list.addAll(temp);
 
-		System.out.println("DEBUG \t TYPE: " + temp.toString());
+		System.out.println("\tDEBUG TYPE: " + temp.toString());
 
 		byte[] returnValue = new byte[list.size()];
 		for (int i = 0; i < list.size(); i++) {
 			returnValue[i] = list.get(i);
 		}
-		System.out.println("Final.." + Arrays.toString(returnValue));
+		System.out.println("\tFinal.. \t" + Arrays.toString(returnValue));
 		return returnValue;
 	}
 }

@@ -73,7 +73,6 @@ public class HandlingThread extends Communicator implements Runnable {
 			String first = queue.peek();
 			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard") && !first.equals("AuthSP2") && !first.equals("ReleasingAttributes")) {
 				cert += queue.take();
-				System.out.println(i + " -\t " + cert);
 			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2") || first.equals("ReleasingAttributes"))) {
 				first = queue.take();
 				queue.put(first);
@@ -81,30 +80,26 @@ public class HandlingThread extends Communicator implements Runnable {
 		}
 		cert = cert.split("null")[1];
 
-		System.out.println(cert);
 		byte[] certInBytes = hexStringToByteArray(cert);
-
-		System.out.println("Cert in hex: " + cert);
-		System.out.println("Cert: " + Arrays.toString(certInBytes));
 
 		byte[] Ks = mwc.authenticateServiceProvider(certInBytes);
 		Ks = cutOffNulls(Ks);
-		System.out.println("Lengte = "+Ks.length);
+		System.out.println("\tLength in bytes: " + Ks.length);
 
 		String ks = bytesToHex(Ks);
-		System.out.println(ks.length() + " || " + ks);
+		System.out.println("\tks value: " + ks.length() + " || " + ks);
 		String send1 = ks.substring(0, 95);
 		String send2 = ks.substring(95, ks.length());
 		System.out.println(send1 + send2);
 		send(send1, outputStream);
 		send(send2, outputStream);
- 
+
 		byte[] Emsg = mwc.getEmsg();
 
 		Emsg = cutOffNulls(Emsg);
 
 		String EMsg = bytesToHex(Emsg);
-		System.out.println(EMsg.length() + " || " + EMsg);
+		System.out.println("\tEMsg value: " + EMsg.length() + " || " + EMsg);
 		send(EMsg, outputStream);
 	}
 
@@ -145,7 +140,6 @@ public class HandlingThread extends Communicator implements Runnable {
 			String first = queue.peek();
 			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard") && !first.equals("AuthSP2") && !first.equals("ReleasingAttributes")) {
 				challenge += queue.take();
-				System.out.println(i + " -\t " + challenge);
 			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2") || first.equals("ReleasingAttributes"))) {
 				first = queue.take();
 				queue.put(first);
@@ -158,11 +152,12 @@ public class HandlingThread extends Communicator implements Runnable {
 		byte[] Emsg = mwc.authenticateCard(hexStringToByteArray(challenge));
 
 	}
-	
+
 	/**
 	 * STAP 4: TODO
-	 * @throws IOException 
-	 * @throws InterruptedException 
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
 	 */
 	public void releaseAttributes() throws IOException, InterruptedException {
 		System.out.println("Requesting release of Attributes");
@@ -172,11 +167,10 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		Thread.sleep(1000);
 		String inc = queue.take();
-		System.out.println(inc);
 
 		byte[] rec = hexStringToByteArray(inc);
 
-		System.out.println(Arrays.toString(rec));
+		System.out.println("\t release attributes - rec: " + Arrays.toString(rec));
 
 		byte[] resp = mwc.requestReleaseOfAttributes(rec);
 	}
