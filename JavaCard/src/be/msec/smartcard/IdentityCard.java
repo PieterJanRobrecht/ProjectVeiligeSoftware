@@ -439,6 +439,7 @@ public class IdentityCard extends Applet {
 
 	private void getChallenge(APDU apdu) {
 		if (sign == null) {
+			// TODO nog ergens iets fout?
 			byte[] buffer = apdu.getBuffer();
 			apdu.setIncomingAndReceive();
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
@@ -449,7 +450,6 @@ public class IdentityCard extends Applet {
 			symCipher.init(ks, Cipher.MODE_DECRYPT);
 
 			byte[] decryptedData = new byte[16];
-			// TODO nog fout in dofinal want gooit 6f00 op
 			short dataLen = (short) challenge.length;
 			symCipher.doFinal(challenge, (short) 0, dataLen, decryptedData, (short) 0);
 			decryptedData = cutOffNulls(decryptedData);
@@ -750,7 +750,7 @@ public class IdentityCard extends Applet {
 		Cipher symCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
 		symCipher.init(keys[privKeyKs], Cipher.MODE_DECRYPT);
 
-		byte[] decryptedData = new byte[256];
+		byte[] decryptedData = new byte[16];
 		symCipher.doFinal(response, (short) 0, (short) response.length, decryptedData, (short) 0);
 		decryptedData = cutOffNulls(decryptedData);
 		/** TODO WERKEN HIERZO **/
