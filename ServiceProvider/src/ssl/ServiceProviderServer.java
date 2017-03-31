@@ -6,6 +6,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -16,6 +17,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.io.*;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -343,25 +345,18 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ShortBufferException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -390,6 +385,9 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		} catch (IOException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 				| ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
 			e.printStackTrace();
+		} catch (InvalidAlgorithmParameterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -411,13 +409,20 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 	}
 
 	private byte[] symEncrypt(int c, SecretKey ks2) throws NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
+			InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 		Cipher symCipher = Cipher.getInstance("AES/CBC/NoPadding");
-		symCipher.init(Cipher.ENCRYPT_MODE, ks2);
+		byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	    IvParameterSpec ivspec = new IvParameterSpec(iv);
+		symCipher.init(Cipher.ENCRYPT_MODE, ks2, ivspec);
 
 		BigInteger bigInt = BigInteger.valueOf(c);
+		byte[] b = bigInt.toByteArray();
+		byte[] toEncrypt = new byte[16];
+		for(int i=0;i<b.length;i++){
+			toEncrypt[i] = b[i];
+		}
 
-		byte[] cipherText = symCipher.doFinal(bigInt.toByteArray());
+		byte[] cipherText = symCipher.doFinal(toEncrypt);
 
 		return cipherText;
 	}
