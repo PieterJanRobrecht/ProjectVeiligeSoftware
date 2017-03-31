@@ -453,6 +453,7 @@ public class IdentityCard extends Applet {
 			short dataLen = (short) challenge.length;
 			symCipher.doFinal(challenge, (short) 0, dataLen, decryptedData, (short) 0);
 			decryptedData = cutOffNulls(decryptedData);
+			ISOException.throwIt(KAPPA);
 
 			sign = new byte[240];
 			signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
