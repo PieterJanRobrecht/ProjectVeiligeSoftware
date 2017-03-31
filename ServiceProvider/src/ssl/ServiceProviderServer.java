@@ -105,8 +105,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			(byte) 0xa0, (byte) 0xb9, (byte) 0xd1, (byte) 0x9d, (byte) 0x33, (byte) 0x44, (byte) 0xe1, (byte) 0xfa,
 			(byte) 0x0d, (byte) 0xf6, (byte) 0x69 };
 
-	String task = null;
-
 	final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 	private X509Certificate x509Certificate;
 	private RSAPrivateKey spPrivateKey;
@@ -393,6 +391,23 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			e.printStackTrace();
 		}
 	}
+	
+	/*** STAP 4 ***/
+	public void releaseAttributes(byte[] query) {
+		System.out.println("Requesting release of attributes Card");
+		InputStream inputStream = null;
+		OutputStream outputStream = null;
+		try {
+			inputStream = sslSocket.getInputStream();
+			outputStream = sslSocket.getOutputStream();
+
+			send("ReleaseAttributes", outputStream);
+			send(bytesToHex(query), outputStream);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	private byte[] symEncrypt(int c, SecretKey ks2) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, ShortBufferException, IllegalBlockSizeException, BadPaddingException {
@@ -459,10 +474,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		}
 
 		return cleanedData;
-	}
-
-	public void setTask(String task) {
-		this.task = task;
 	}
 
 	public X509Certificate getX509Certificate() {

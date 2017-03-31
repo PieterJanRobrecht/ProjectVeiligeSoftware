@@ -73,6 +73,11 @@ public class IdentityCard extends Applet {
 	/** Holds random material for creating symmetric keys. */
 	private static byte[] randomMaterial;
 
+	private byte[] permsOverheid = new byte[] { (byte) 1, (byte) 1, (byte) 1, (byte) 1, (byte) 1, (byte) 1, (byte) 0 };
+	private byte[] permsSocial = new byte[] { (byte) 1, (byte) 0, (byte) 1, (byte) 0, (byte) 1, (byte) 1, (byte) 1 };
+	private byte[] permsDefault = new byte[] { (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 1, (byte) 0, (byte) 0 };
+	private byte[] permsKappa = new byte[] { (byte) 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 1 };
+
 	// 86400 seconden ofwel 24 uur als threshold
 	private byte[] threshold = new byte[] { (byte) 0, (byte) 1, (byte) 81, (byte) -128 };
 
@@ -215,8 +220,7 @@ public class IdentityCard extends Applet {
 	private byte[] pubCertModulus;
 
 	private byte messageChallenge;
-	
-	
+
 	private byte authenticated;
 
 	private IdentityCard() {
@@ -404,6 +408,7 @@ public class IdentityCard extends Applet {
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		if (tempTimeUpdate == null) {
 			byte[] buffer = apdu.getBuffer();
+			apdu.setIncomingAndReceive();
 			byte[] time = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
 			time = slice(time, (short) 0, (short) 4);
 			tempTimeUpdate = time;
@@ -726,13 +731,13 @@ public class IdentityCard extends Applet {
 			decryptedData = cutOffNulls(decryptedData);
 			/** TODO WERKEN HIERZO **/
 
-			if(messageChallenge + 1 == decryptedData[0]) {
+			if (messageChallenge + 1 == decryptedData[0]) {
 				authenticated = (byte) 1;
 			} else {
 				authenticated = (byte) 0;
 				ISOException.throwIt(AUTH_FAILED);
 			}
-		} 
+		}
 	}
 
 	public void setTempTime(APDU apdu) {

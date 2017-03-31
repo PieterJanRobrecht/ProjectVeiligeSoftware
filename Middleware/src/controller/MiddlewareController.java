@@ -84,6 +84,9 @@ public class MiddlewareController {
 	private static final byte GET_ANSWER_CHAL_INS = 0x62;
 
 	private static final byte FINAL_AUTH_INS = 0x64;
+	
+	private static final byte SEND_REQ_ATT_INS = 0x66;
+	private static final byte FETCH_REQ_ATT_INS = 0x68;
 
 	private final static short SW_VERIFICATION_FAILED = 0x6322;
 	private final static short SW_PIN_VERIFICATION_REQUIRED = 0x6323;
@@ -520,7 +523,6 @@ public class MiddlewareController {
 
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -551,6 +553,36 @@ public class MiddlewareController {
 			e.printStackTrace();
 		}
 
+		return null;
+	}
+	
+
+	public byte[] requestReleaseOfAttributes(byte[] resp) {
+		CommandAPDU a;
+		ResponseAPDU r;
+		//TODO HIERZO WERKEN
+		try {
+			/** send req to JC **/
+			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_REQ_ATT_INS, 0x00, 0x00, resp);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+			
+			
+			/** fetch answer from req to JC **/
+			a = new CommandAPDU(IDENTITY_CARD_CLA, FETCH_REQ_ATT_INS, 0x00, 0x00, 0xff);
+			r = connection.transmit(a);
+
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			byte[] inc = r.getData();
+			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
