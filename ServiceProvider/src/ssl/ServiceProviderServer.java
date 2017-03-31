@@ -259,27 +259,25 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			if (returnData[1] == subject[0]) {
 				int kappa = ((short) returnData[0]) + 1;
 				System.out.println(kappa);
-				byte[] kappaSend = new byte[16];
-				// for (int i = 0; i < kappaSend.length; i++)
-				// kappaSend[i] = 0;
-				kappaSend[0] = (byte) (kappa & 0xff);
-				System.out.println(kappaSend[0]);
+				byte[] encryptedData = symEncrypt(kappa, Ks);
+//				byte[] kappaSend = new byte[16];
+//				kappaSend[0] = (byte) (kappa & 0xff);
+//				System.out.println(kappaSend[0]);
+//
+//				Cipher symCipher2 = Cipher.getInstance("AES/CBC/NoPadding");
+//				symCipher2.init(Cipher.ENCRYPT_MODE, Ks);
+//
+//				byte[] encryptedData = new byte[256];
+//				symCipher2.doFinal(kappaSend, (short) 0, (short) kappaSend.length, encryptedData, (short) 0);
+//
+//				encryptedData = cutOffNulls(encryptedData);
 
-				Cipher symCipher2 = Cipher.getInstance("AES/CBC/NoPadding");
-				symCipher2.init(Cipher.ENCRYPT_MODE, Ks);
-
-				System.out.println("\tDebug unencryptedData: " + Arrays.toString(kappaSend));
-				byte[] encryptedData = new byte[256];
-				symCipher2.doFinal(kappaSend, (short) 0, (short) kappaSend.length, encryptedData, (short) 0);
-
-				encryptedData = cutOffNulls(encryptedData);
-
-				System.out.println("\tDebug encryptedData - " + Arrays.toString(encryptedData));
+				System.out.println("\tdebug encryptedData - " + Arrays.toString(encryptedData));
 				send("AuthSP2", outputStream);
 				send(bytesToHex(encryptedData), outputStream);
 			} else {
-				System.out.println("\t!!\tReturndata is not subject[0]");
-				System.out.println("\tSubject byte[]: " + Arrays.toString(subject));
+				System.out.println("\t!!\treturndata is not subject[0]");
+				System.out.println("\tsubject byte[]: " + Arrays.toString(subject));
 			}
 
 		} catch (IOException e) {

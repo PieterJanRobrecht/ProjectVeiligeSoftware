@@ -540,7 +540,7 @@ public class MiddlewareController {
 
 		try {
 
-			System.out.println("\tauthenticateServiceProvider2");
+			System.out.println("\tAuthenticateServiceProvider2");
 			/** send resp to JC **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, FINAL_AUTH_INS, 0x00, 0x00, resp);
 			r = connection.transmit(a);
