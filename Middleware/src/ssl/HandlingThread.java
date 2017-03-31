@@ -28,7 +28,7 @@ public class HandlingThread extends Communicator implements Runnable {
 			try {
 				// Thread.sleep(500);
 				String first = queue.peek();
-				if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2") || first.equals("ReleasingAttributes"))) {
+				if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2") || first.equals("ReleaseAttributes"))) {
 					String message = queue.take();
 
 					switch (message) {
@@ -39,9 +39,10 @@ public class HandlingThread extends Communicator implements Runnable {
 						authenticateServiceProvider2();
 						break;
 					case "AuthCard":
-						authenticateCard();
+						//authenticateCard();
 						break;
-					case "ReleasingAttributes":
+					case "ReleaseAttributes":
+						System.out.println("wtf..");
 						releaseAttributes();
 						break;
 					default:
@@ -71,9 +72,9 @@ public class HandlingThread extends Communicator implements Runnable {
 		int kappa = queue.size();
 		for (int i = 0; i < kappa; i++) {
 			String first = queue.peek();
-			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard") && !first.equals("AuthSP2") && !first.equals("ReleasingAttributes")) {
+			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard") && !first.equals("AuthSP2") && !first.equals("ReleaseAttributes")) {
 				cert += queue.take();
-			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2") || first.equals("ReleasingAttributes"))) {
+			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2") || first.equals("ReleaseAttributes"))) {
 				first = queue.take();
 				queue.put(first);
 			}
@@ -138,9 +139,9 @@ public class HandlingThread extends Communicator implements Runnable {
 		} while (kappa == 0);
 		for (int i = 0; i < kappa; i++) {
 			String first = queue.peek();
-			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard") && !first.equals("AuthSP2") && !first.equals("ReleasingAttributes")) {
+			if (first != null && !first.equals("AuthSP") && !first.equals("AuthCard") && !first.equals("AuthSP2") && !first.equals("ReleaseAttributes")) {
 				challenge += queue.take();
-			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2") || first.equals("ReleasingAttributes"))) {
+			} else if (first != null && (first.equals("AuthSP") || first.equals("AuthCard") || first.equals("AuthSP2") || first.equals("ReleaseAttributes"))) {
 				first = queue.take();
 				queue.put(first);
 			}
@@ -170,7 +171,7 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		byte[] rec = hexStringToByteArray(inc);
 
-		System.out.println("\t release attributes - rec: " + Arrays.toString(rec));
+		System.out.println("\tRelease attributes - rec: " + Arrays.toString(rec));
 
 		byte[] resp = mwc.requestReleaseOfAttributes(rec);
 	}
