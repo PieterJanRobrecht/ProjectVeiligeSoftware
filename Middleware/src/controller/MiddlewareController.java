@@ -122,9 +122,9 @@ public class MiddlewareController {
 		isSimulator = true;
 		
 		startSimulator();
-		System.out.println("Sending Pin..");
-		sendPin();
-		System.out.println("Complete! \n");
+//		System.out.println("Sending Pin..");
+//		sendPin();
+//		System.out.println("Complete! \n");
 
 		System.out.println("Sending Time..");
 		boolean isValid = isValid();
@@ -155,9 +155,9 @@ public class MiddlewareController {
 			e.printStackTrace();
 		}
 
-		System.out.println("Sending Pin..");
-		sendPin();
-		System.out.println("Complete! \n");
+//		System.out.println("Sending Pin..");
+//		sendPin();
+//		System.out.println("Complete! \n");
 
 		/*** STAP 1 ***/
 		System.out.println("Sending Time..");
@@ -212,7 +212,7 @@ public class MiddlewareController {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Applet selection failed");
 
-			sendPin();
+//			sendPin();
 
 		} catch (Exception e) {
 			e.printStackTrace();
