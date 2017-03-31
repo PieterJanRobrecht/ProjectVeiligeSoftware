@@ -511,6 +511,7 @@ public class IdentityCard extends Applet {
 	private void getChallenge(APDU apdu) {
 		if (sign == null) {
 			byte[] buffer = apdu.getBuffer();
+			apdu.setIncomingAndReceive();
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
 			challenge = cutOffNulls(challenge);
 
@@ -522,7 +523,7 @@ public class IdentityCard extends Applet {
 			// TODO nog fout in dofinal want gooit 6f00 op
 			short dataLen = (short) challenge.length;
 			symCipher.doFinal(challenge, (short) 0, dataLen, decryptedData, (short) 0);
-			// decryptedData = cutOffNulls(decryptedData);
+			decryptedData = cutOffNulls(decryptedData);
 
 			sign = new byte[240];
 			signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
