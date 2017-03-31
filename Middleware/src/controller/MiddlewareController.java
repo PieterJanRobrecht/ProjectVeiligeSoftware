@@ -82,7 +82,7 @@ public class MiddlewareController {
 	private static final byte PUSH_MODULUS = 0x56;
 	private static final byte PUSH_EXPONENT = 0x58;
 
-	private static final byte GET_CHAL_INS = 0x60;
+	private static final byte GET_CHAL_INS = 0x72;
 	private static final byte GET_ANSWER_CHAL_INS = 0x62;
 
 	private static final byte FINAL_AUTH_INS = 0x64;
@@ -560,12 +560,17 @@ public class MiddlewareController {
 		ResponseAPDU r;
 
 		try {
+			// TODO Hier voor pj
 
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CHAL_INS, 0x00, 0x00, challenge);
 			r = connection.transmit(a);
-
-			if (r.getSW() != 0x9000)
+			
+			if(r.getSW() == KAPPA){
+				System.out.println("Signatur aangemaakt op de kaart");
+			}
+			else if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
 
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_ANSWER_CHAL_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);

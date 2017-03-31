@@ -42,7 +42,7 @@ public class IdentityCard extends Applet {
 	private static final byte PUSH_MODULUS = 0x56;
 	private static final byte PUSH_EXPONENT = 0x58;
 
-	private static final byte GET_CHAL_INS = 0x60;
+	private static final byte GET_CHAL_INS = 0x72;
 	private static final byte GET_ANSWER_CHAL_INS = 0x62;
 
 	private static final byte FINAL_AUTH_INS = 0x64;
@@ -439,7 +439,6 @@ public class IdentityCard extends Applet {
 
 	private void getChallenge(APDU apdu) {
 		if (sign == null) {
-			// TODO nog ergens iets fout?
 			byte[] buffer = apdu.getBuffer();
 			apdu.setIncomingAndReceive();
 			byte[] challenge = slice(buffer, ISO7816.OFFSET_CDATA, (short) buffer.length);
@@ -453,10 +452,11 @@ public class IdentityCard extends Applet {
 			short dataLen = (short) challenge.length;
 			symCipher.doFinal(challenge, (short) 0, dataLen, decryptedData, (short) 0);
 			decryptedData = cutOffNulls(decryptedData);
-			ISOException.throwIt(KAPPA);
-
+			
 			sign = new byte[240];
 			signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
+			sign = cutOffNulls(sign);
+			ISOException.throwIt(KAPPA);
 
 		} else {
 			ISOException.throwIt(SEQUENTIAL_FAILURE);
@@ -517,15 +517,17 @@ public class IdentityCard extends Applet {
 	}
 
 	private void getAnswerChallenge(APDU apdu) {
-		// TODO pin validate weghalen
-		if (!pin.isValidated())
-			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
-		else {
+		if(sign != null) {
 			// TODO sym encrypt sig en certificaat en dan doorsturen
-
+			short totLength = (short) (coCert.length + signLength + 1);
+			byte[] eMsg = new byte[totLength];
+			eMsg[0] = (byte)(signLength & 0xff);
+			
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) name.length);
 			apdu.sendBytesLong(name, (short) 0, (short) name.length);
+		}else{
+			ISOException.throwIt(SEQUENTIAL_FAILURE);
 		}
 	}
 
