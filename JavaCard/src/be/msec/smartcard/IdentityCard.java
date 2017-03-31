@@ -84,6 +84,14 @@ public class IdentityCard extends Applet {
 	private byte[] serial = new byte[] { (byte) 0x4A, (byte) 0x61, (byte) 0x6e };
 	private byte[] name = new byte[] { 0x4A, 0x61, 0x6E, 0x20, 0x56, 0x6F, 0x73, 0x73, 0x61, 0x65, 0x72, 0x74 };
 
+	byte[] naam = new byte[] { (byte) 75, (byte) 97, (byte) 112, (byte) 112, (byte) 97, (byte) 75, (byte) 111, (byte) 110, (byte) 105, (byte) 110, (byte) 103, };
+
+	byte[] adres = new byte[] { (byte) 71, (byte) 101, (byte) 98, (byte) 114, (byte) 111, (byte) 101, (byte) 100, (byte) 101, (byte) 114, (byte) 115, (byte) 100, (byte) 101, (byte) 115, (byte) 109, (byte) 101, (byte) 116, (byte) 32, (byte) 115, (byte) 116, (byte) 114, (byte) 97, (byte) 97, (byte) 116, (byte) 32, (byte) 49, };
+	byte[] land = new byte[] { (byte) 66, (byte) 101, (byte) 108, (byte) 103, (byte) 105, (byte) 101, };
+	byte[] geboorteDatum = new byte[] { (byte) 50, (byte) 48, (byte) 47, (byte) 48, (byte) 49, (byte) 47, (byte) 50, (byte) 48, (byte) 49, (byte) 55, };
+	byte[] leeftijd = new byte[] { (byte) 49, (byte) 55, };
+	byte[] geslacht = new byte[] { (byte) 68, (byte) 105, (byte) 100, (byte) 89, (byte) 111, (byte) 117, (byte) 74, (byte) 117, (byte) 115, (byte) 116, (byte) 65, (byte) 115, (byte) 115, (byte) 117, (byte) 109, (byte) 101, (byte) 77, (byte) 121, (byte) 71, (byte) 101, (byte) 110, (byte) 100, (byte) 101, (byte) 114, };
+
 	// eigen
 	// private byte[] privModulus = new byte[] { (byte) -73, (byte) -43, (byte)
 	// 96, (byte) -107, (byte) 82, (byte) 25, (byte) -66, (byte) 34, (byte) 5,
@@ -523,53 +531,63 @@ public class IdentityCard extends Applet {
 	}
 
 	private void receiveCert(APDU apdu) {
-		/** DEPRECATED **/
+		/** TODO DEPRECATED **/
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
 			byte[] buffer = apdu.getBuffer();
 
-			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
+			//short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
 			byte[] incomingData = JCSystem.makeTransientByteArray((short) 256, JCSystem.CLEAR_ON_RESET);
-			short bytesLeft;
-			short readCount;
 			short offSet = 0x00;
-
-			if (teller == (short) 1) {
-				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
-				readCount = apdu.setIncomingAndReceive();
-				while (bytesLeft > 0) {
-					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
-					bytesLeft -= readCount;
-					offSet += readCount;
-					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
-				}
-
-				certServiceProvider = new byte[(short) incomingData.length];
-				Util.arrayCopy(incomingData, (short) 0, certServiceProvider, (short) 0, (short) incomingData.length);
-				certServiceProvider = cutOffNulls(certServiceProvider);
-			} else if (teller == (short) 2) {
-				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
-				readCount = apdu.setIncomingAndReceive();
-				while (bytesLeft > 0) {
-					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
-					bytesLeft -= readCount;
-					offSet += readCount;
-					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
-				}
-
-				// certServiceProvider = new byte[(short) incomingData.length];
-				// Util.arrayCopy(incomingData, (short) 0, certServiceProvider,
-				// (short) 0, (short) incomingData.length);
-				cutOffNulls(certServiceProvider);
-				byte[] temp = new byte[(short) (incomingData.length + certServiceProvider.length)];
-				Util.arrayCopy(certServiceProvider, (short) 0, temp, (short) 0, (short) certServiceProvider.length);
-				Util.arrayCopy(incomingData, (short) 0, temp, (short) certServiceProvider.length, (short) incomingData.length);
-
-				certServiceProvider = temp;
-				certServiceProvider = cutOffNulls(certServiceProvider);
+			short bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+			short readCount = apdu.setIncomingAndReceive();
+			while (bytesLeft > 0) {
+				Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+				bytesLeft -= readCount;
+				offSet += readCount;
+				readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
 			}
+
+			certServiceProvider = new byte[(short) incomingData.length];
+			Util.arrayCopy(incomingData, (short) 0, certServiceProvider, (short) 0, (short) incomingData.length);
+			certServiceProvider = cutOffNulls(certServiceProvider);
+
+//			if (teller == (short) 1) {
+//				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+//				readCount = apdu.setIncomingAndReceive();
+//				while (bytesLeft > 0) {
+//					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+//					bytesLeft -= readCount;
+//					offSet += readCount;
+//					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+//				}
+//
+//				certServiceProvider = new byte[(short) incomingData.length];
+//				Util.arrayCopy(incomingData, (short) 0, certServiceProvider, (short) 0, (short) incomingData.length);
+//				certServiceProvider = cutOffNulls(certServiceProvider);
+//			} else if (teller == (short) 2) {
+//				bytesLeft = (short) (buffer[ISO7816.OFFSET_LC] & 0x00FF);
+//				readCount = apdu.setIncomingAndReceive();
+//				while (bytesLeft > 0) {
+//					Util.arrayCopyNonAtomic(buffer, ISO7816.OFFSET_CDATA, incomingData, offSet, readCount);
+//					bytesLeft -= readCount;
+//					offSet += readCount;
+//					readCount = apdu.receiveBytes(ISO7816.OFFSET_CDATA);
+//				}
+//
+//				// certServiceProvider = new byte[(short) incomingData.length];
+//				// Util.arrayCopy(incomingData, (short) 0, certServiceProvider,
+//				// (short) 0, (short) incomingData.length);
+//				cutOffNulls(certServiceProvider);
+//				byte[] temp = new byte[(short) (incomingData.length + certServiceProvider.length)];
+//				Util.arrayCopy(certServiceProvider, (short) 0, temp, (short) 0, (short) certServiceProvider.length);
+//				Util.arrayCopy(incomingData, (short) 0, temp, (short) certServiceProvider.length, (short) incomingData.length);
+//
+//				certServiceProvider = temp;
+//				certServiceProvider = cutOffNulls(certServiceProvider);
+//			}
 		}
 	}
 
@@ -623,12 +641,11 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
-			short offset = 0;
 			short keySizeInBytes = (short) 64;
 			short keySizeInBits = (short) (keySizeInBytes * 8);
 			pubCertKey = (RSAPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_RSA_PUBLIC, keySizeInBits, false);
-			pubCertKey.setExponent(pubCertExponent, offset, (short) 3);
-			pubCertKey.setModulus(pubCertModulus, offset, keySizeInBytes);
+			pubCertKey.setExponent(certServiceProvider, (short) 64, (short) 3);
+			pubCertKey.setModulus(certServiceProvider, (short) 0, (short) 64);
 
 			// TODO if (verifyCert(CertSP)==false) abort()
 			// TODO if (CertSP.validEndTime < lastValidationTime) abort()
@@ -679,8 +696,9 @@ public class IdentityCard extends Applet {
 
 			messageChallenge = c[0];
 
-			byte certSubject = (byte) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
+			//byte certSubject = (byte) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
+			byte certSubject = certServiceProvider[(short) (64+3+3+1)];
 			// DONE Emsg := symEncrypt([c, CertSP:Subject], Ks)
 			Cipher symCipher = Cipher.getInstance(Cipher.ALG_DES_ECB_PKCS5, false);
 			symCipher.init(keys[privKeyKs], Cipher.MODE_ENCRYPT);
