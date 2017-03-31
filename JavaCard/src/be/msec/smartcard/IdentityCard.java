@@ -620,6 +620,10 @@ public class IdentityCard extends Applet {
 
 	private void receiveCert(APDU apdu) {
 		/** TODO DEPRECATED **/
+		if (!pin.isValidated())
+			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
+		else {
+			byte[] buffer = apdu.getBuffer();
 
 			//short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
@@ -673,7 +677,6 @@ public class IdentityCard extends Applet {
 //				certServiceProvider = cutOffNulls(certServiceProvider);
 //			}
 		}
-
 	}
 
 	private void receiveModulus(APDU apdu) {
