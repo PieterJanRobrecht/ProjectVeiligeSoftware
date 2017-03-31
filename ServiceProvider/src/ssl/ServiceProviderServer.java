@@ -342,6 +342,10 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				System.out.println("debug - " + Arrays.toString(encryptedData));
 				send("AuthSP2", outputStream);
 				send(bytesToHex(encryptedData), outputStream);
+			} else {
+				System.out.println("returndata is not subject[0]");
+				System.out.println(Arrays.toString(returnData));
+				System.out.println(Arrays.toString(subject));
 			}
 
 		} catch (IOException e) {

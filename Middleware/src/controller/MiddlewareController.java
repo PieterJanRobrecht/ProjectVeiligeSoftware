@@ -14,6 +14,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -35,6 +36,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -84,7 +86,7 @@ public class MiddlewareController {
 	private static final byte GET_ANSWER_CHAL_INS = 0x62;
 
 	private static final byte FINAL_AUTH_INS = 0x64;
-	
+
 	private static final byte SEND_REQ_ATT_INS = 0x66;
 	private static final byte FETCH_REQ_ATT_INS = 0x68;
 
@@ -427,7 +429,6 @@ public class MiddlewareController {
 		CommandAPDU a;
 		ResponseAPDU r;
 
-		/** send cert part 1 to JC **/
 		try {
 			byte[] send = null;
 			if (cert.length > 250) {
@@ -447,28 +448,43 @@ public class MiddlewareController {
 			InputStream is = new ByteArrayInputStream(cert);
 			X509Certificate certCA = (X509Certificate) certFac.generateCertificate(is);
 			
-			RSAPublicKey pk = (RSAPublicKey) certCA.getPublicKey();
+			byte[] fakeCert = createFakeCertificate(certCA);
 
-			/** PUSH MODULUS **/
-			byte[] modulus = new byte[64];
-			byte[] valseKappa = pk.getModulus().toByteArray();
-			for (int i = 0; i < 64; i++) {
-				modulus[i] = valseKappa[i + 1];
-			}
-			System.out.println("Modulus: " + Arrays.toString(modulus));
-			a = new CommandAPDU(IDENTITY_CARD_CLA, PUSH_MODULUS, 0x00, 0x00, modulus);
+			// SEND_CERT_INS
+			System.out.println("Send_cert_ins: " + Arrays.toString(fakeCert));
+			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, 0x00, 0x00, fakeCert);
 			r = connection.transmit(a);
 
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-			/** PUSH EXPONENT **/
-			System.out.println("Exponent: " + Arrays.toString(pk.getPublicExponent().toByteArray()));
-			a = new CommandAPDU(IDENTITY_CARD_CLA, PUSH_EXPONENT, 0x00, 0x00, pk.getPublicExponent().toByteArray());
-			r = connection.transmit(a);
-
-			if (r.getSW() != 0x9000)
-				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+			// RSAPublicKey pk = (RSAPublicKey) certCA.getPublicKey();
+			//
+			// /** PUSH MODULUS **/
+			// byte[] modulus = new byte[64];
+			// byte[] valseKappa = pk.getModulus().toByteArray();
+			// for (int i = 0; i < 64; i++) {
+			// modulus[i] = valseKappa[i + 1];
+			// }
+			// System.out.println("Modulus: " + Arrays.toString(modulus));
+			// a = new CommandAPDU(IDENTITY_CARD_CLA, PUSH_MODULUS, 0x00, 0x00,
+			// modulus);
+			// r = connection.transmit(a);
+			//
+			// if (r.getSW() != 0x9000)
+			// throw new Exception("Exception on the card: " +
+			// Integer.toHexString(r.getSW()));
+			//
+			// /** PUSH EXPONENT **/
+			// System.out.println("Exponent: " +
+			// Arrays.toString(pk.getPublicExponent().toByteArray()));
+			// a = new CommandAPDU(IDENTITY_CARD_CLA, PUSH_EXPONENT, 0x00, 0x00,
+			// pk.getPublicExponent().toByteArray());
+			// r = connection.transmit(a);
+			//
+			// if (r.getSW() != 0x9000)
+			// throw new Exception("Exception on the card: " +
+			// Integer.toHexString(r.getSW()));
 
 			/** FETCH SYMMETRIC KEY **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_KEY_INS, 0x00, 0x00, 0xff);
@@ -478,6 +494,7 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
+			System.out.println("Result authenticating card: " + Arrays.toString(inc));
 			if(isSimulator){
 				inc = slice(inc, 6, inc.length);
 			}
@@ -521,6 +538,8 @@ public class MiddlewareController {
 		ResponseAPDU r;
 
 		try {
+
+			System.out.println("\tauthenticateServiceProvider2");
 			/** send resp to JC **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, FINAL_AUTH_INS, 0x00, 0x00, resp);
 			r = connection.transmit(a);
@@ -528,7 +547,7 @@ public class MiddlewareController {
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-			
+			System.out.println("\tIf no error, the card was succesfully authenticated!");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -562,12 +581,11 @@ public class MiddlewareController {
 
 		return null;
 	}
-	
 
 	public byte[] requestReleaseOfAttributes(byte[] resp) {
 		CommandAPDU a;
 		ResponseAPDU r;
-		//TODO HIERZO WERKEN
+		// TODO HIERZO WERKEN
 		try {
 			/** send req to JC **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_REQ_ATT_INS, 0x00, 0x00, resp);
@@ -575,8 +593,7 @@ public class MiddlewareController {
 
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
-			
-			
+
 			/** fetch answer from req to JC **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, FETCH_REQ_ATT_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
@@ -586,7 +603,7 @@ public class MiddlewareController {
 
 			byte[] inc = r.getData();
 			System.out.println("\tPayload Emsg: " + Arrays.toString(inc));
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -763,4 +780,69 @@ public class MiddlewareController {
 		return asymCipher.doFinal(data);
 	}
 
+	public byte[] createFakeCertificate(X509Certificate cert) {
+		List<Byte> list = new ArrayList<Byte>();
+
+		RSAPublicKey pk = (RSAPublicKey) cert.getPublicKey();
+
+		/** MODULUS **/
+		List<Byte> temp = new ArrayList<Byte>();
+		byte[] valseKappa = pk.getModulus().toByteArray();
+		for (int i = 0; i < 64; i++) {
+			temp.add(valseKappa[i + 1]);
+		}
+		list.addAll(temp);
+
+		System.out.println("DEBUG \t MODULUS: " + temp.toString());
+
+		/** EXPONENT **/
+		temp = new ArrayList<Byte>();
+		valseKappa = pk.getPublicExponent().toByteArray();
+		for (int i = 0; i < valseKappa.length; i++) {
+			temp.add(valseKappa[i]);
+		}
+		list.addAll(temp);
+
+		System.out.println("DEBUG \t EXPONENT: " + temp.toString());
+
+		/** validEndTime **/
+		int time = (int) (cert.getNotAfter().getTime()) / 1000;
+		System.out.println(time);
+
+		temp = new ArrayList<Byte>();
+		valseKappa = intToByteArray(time);
+		for (int i = 0; i < valseKappa.length; i++) {
+			temp.add(valseKappa[i]);
+		}
+		list.addAll(temp);
+
+		System.out.println("DEBUG \t VALIDENDTIME: " + temp.toString());
+
+		/** subject **/
+		temp = new ArrayList<Byte>();
+		valseKappa = cert.getSubjectDN().getName().getBytes();
+		for (int i = 0; i < valseKappa.length; i++) {
+			temp.add(valseKappa[i]);
+		}
+		list.addAll(temp);
+
+		System.out.println("DEBUG \t SUBJECT: " + temp.toString());
+
+		/** type **/
+		temp = new ArrayList<Byte>();
+		valseKappa = cert.getType().getBytes();
+		for (int i = 0; i < valseKappa.length; i++) {
+			temp.add(valseKappa[i]);
+		}
+		list.addAll(temp);
+
+		System.out.println("DEBUG \t TYPE: " + temp.toString());
+
+		byte[] returnValue = new byte[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			returnValue[i] = list.get(i);
+		}
+		System.out.println("Final.." + Arrays.toString(returnValue));
+		return returnValue;
+	}
 }
