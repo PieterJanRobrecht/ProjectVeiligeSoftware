@@ -413,6 +413,9 @@ public class IdentityCard extends Applet {
 			short index = (short) (i + 250*j);
 			result[i] = endStepThree[index];
 		}
+		if(j == (short) 2){
+			endStepThree = null;
+		}
 		
 		apdu.setOutgoing();
 		apdu.setOutgoingLength((short) result.length);
@@ -514,7 +517,8 @@ public class IdentityCard extends Applet {
 			} catch (Exception e) {
 				ISOException.throwIt(ALG_FAILED);
 			}
-			endStepThree = encryptedData;
+			byte[] b = cutOffNulls(encryptedData);
+ 			endStepThree = encryptedData;
 			ISOException.throwIt(KAPPA);
 
 		} else {
