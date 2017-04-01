@@ -373,7 +373,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 					+ Arrays.toString(BigInteger.valueOf(c).toByteArray()));
 			byte[] encrypted = symEncrypt(c, Ks);
 			String message = bytesToHex(encrypted);
-			System.out.println("Sending challenge: " + Arrays.toString(encrypted));
+			System.out.println("Sending encrypted challenge: " + Arrays.toString(encrypted));
 			System.out.println("Or in hex: " + message + " with length " + message.length());
 			send(message, outputStream);
 
