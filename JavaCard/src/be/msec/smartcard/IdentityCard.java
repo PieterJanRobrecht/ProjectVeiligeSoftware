@@ -551,7 +551,6 @@ public class IdentityCard extends Applet {
 
 			boolean verified = verifyPublic(timePublicKey, tempTimeUpdate, signature);
 			if (verified) {
-				// TODO enable pastcheck
 				boolean past = checkIfPast(lastTime, tempTimeUpdate);
 				if (past)
 					ISOException.throwIt(VERIFY_FAILED);
