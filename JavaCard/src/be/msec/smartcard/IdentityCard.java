@@ -129,6 +129,8 @@ public class IdentityCard extends Applet {
 
 	private byte[] request;
 
+	private byte[] queryResponse;
+
 	/**
 	 * Randomizer instance.
 	 * 
@@ -573,6 +575,89 @@ public class IdentityCard extends Applet {
 				}
 
 				request = incomingData;
+
+				byte type = certServiceProvider[(short) (64 + 3 + 3 + 35 + 1)];
+				byte[] rechten = null;
+				if (type == (byte) 71) {
+					rechten = permsOverheid;
+				} else if (type == (byte) 83) {
+					rechten = permsSocial;
+				} else if (type == (byte) 68) {
+					rechten = permsDefault;
+				} else if (type == (byte) 79) {
+					rechten = permsKappa;
+				} else {
+					ISOException.throwIt(TYPE_UNKNOWN);
+				}
+
+				short i;
+				byte[] partialSubject = new byte[(short) 12];
+				for (i = 0; i < 12; i++) {
+					partialSubject[i] = certServiceProvider[(short) (i + (short) (64 + 3 + 3))];
+				}
+
+				byte[] out = append(Ku, partialSubject); // byte[16]
+				out = hash(out);
+				byte[] filler;
+				for (i = 0; i < 7; i++) {
+					if (request[i] > rechten[i])
+						ISOException.throwIt(INSUFFICIENT_RIGHTS);
+					else if (request[i] != (byte) 0) {
+						switch (i) {
+						case 0:
+							filler = new byte[] { (byte) naam.length };
+							out = append(out, filler);
+							out = append(out, naam);
+							break;
+						case 1:
+							filler = new byte[] { (byte) adres.length };
+							out = append(out, filler);
+							out = append(out, adres);
+							break;
+						case 2:
+							filler = new byte[] { (byte) land.length };
+							out = append(out, filler);
+							out = append(out, land);
+							break;
+						case 3:
+							filler = new byte[] { (byte) geboorteDatum.length };
+							out = append(out, filler);
+							out = append(out, geboorteDatum);
+							break;
+						case 4:
+							filler = new byte[] { (byte) leeftijd.length };
+							out = append(out, filler);
+							out = append(out, leeftijd);
+							break;
+						case 5:
+							filler = new byte[] { (byte) geslacht.length };
+							out = append(out, filler);
+							out = append(out, geslacht);
+							break;
+						case 6:
+							filler = new byte[] { (byte) foto.length };
+							out = append(out, filler);
+							out = append(out, foto);
+							break;
+						}
+					}
+				}
+
+				byte[] needsEncrypt = new byte[256];
+				Util.arrayCopy(out, (short) 0, needsEncrypt, (short) 0, (short) out.length);
+
+				Cipher symCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
+				symCipher.init(keys[privKeyKs], Cipher.MODE_ENCRYPT);
+
+				byte[] encryptedData = new byte[500];
+				try {
+					symCipher.doFinal(needsEncrypt, (short) 0, (short) needsEncrypt.length, encryptedData, (short) 0);
+				} catch (Exception e) {
+					ISOException.throwIt(ALG_FAILED);
+				}
+
+				queryResponse = encryptedData;
+
 				ISOException.throwIt(KAPPA);
 			} else {
 				ISOException.throwIt(AUTH_FAILED);
@@ -586,85 +671,27 @@ public class IdentityCard extends Applet {
 		if (!pin.isValidated())
 			ISOException.throwIt(SW_PIN_VERIFICATION_REQUIRED);
 		else {
-			// TODO
-			if (request == null || authenticated != (byte) 1)
-				ISOException.throwIt(AUTH_FAILED);
+			byte[] buffer = apdu.getBuffer();
+			short teller = (short) (buffer[ISO7816.OFFSET_P1] & (short) 0xFF); // test?
 
-			byte type = certServiceProvider[(short) (64 + 3 + 3 + 35 + 1)];
-			byte[] rechten = null;
-			if (type == (byte) 71) {
-				rechten = permsOverheid;
-			} else if (type == (byte) 83) {
-				rechten = permsSocial;
-			} else if (type == (byte) 68) {
-				rechten = permsDefault;
-			} else if (type == (byte) 79) {
-				rechten = permsKappa;
-			} else {
-				ISOException.throwIt(TYPE_UNKNOWN);
+			if (teller == (byte) 0) {
+				byte[] encryptedData = new byte[250];
+				Util.arrayCopy(queryResponse, (short) 0, encryptedData, (short) 0, (short) 250);
+
+				apdu.setOutgoing();
+				apdu.setOutgoingLength((short) encryptedData.length);
+				apdu.sendBytesLong(encryptedData, (short) 0, (short) encryptedData.length);
+			} else if (teller == (byte) 1) {
+				byte[] encryptedData = new byte[250];
+				Util.arrayCopy(queryResponse, (short) encryptedData.length, encryptedData, (short) 0, (short) encryptedData.length);
+
+				queryResponse = null;
+				request = null;
+
+				apdu.setOutgoing();
+				apdu.setOutgoingLength((short) encryptedData.length);
+				apdu.sendBytesLong(encryptedData, (short) 0, (short) encryptedData.length);
 			}
-
-			short i;
-			byte[] partialSubject = new byte[(short) 12];
-			for (i = 0; i < 12; i++) {
-				partialSubject[i] = certServiceProvider[(short) (i + (short) (64 + 3 + 3))];
-			}
-
-			byte[] out = append(Ku, partialSubject); // byte[16]
-			byte[] filler = new byte[] { (byte) 0, (byte) 0, (byte) 0 };
-			for (i = 0; i < 7; i++) {
-				if (request[i] > rechten[i])
-					ISOException.throwIt(INSUFFICIENT_RIGHTS);
-				else {
-					switch (i) {
-					case 0:
-						out = append(out, filler);
-						out = append(out, naam);
-						break;
-					case 1:
-						out = append(out, filler);
-						out = append(out, adres);
-						break;
-					case 2:
-						out = append(out, filler);
-						out = append(out, land);
-						break;
-					case 3:
-						out = append(out, filler);
-						out = append(out, geboorteDatum);
-						break;
-					case 4:
-						out = append(out, filler);
-						out = append(out, leeftijd);
-						break;
-					case 5:
-						out = append(out, filler);
-						out = append(out, foto);
-						break;
-					case 6:
-						out = append(out, filler);
-						out = append(out, adres);
-						break;
-					}
-				}
-			}
-
-			byte[] needsEncrypt = new byte[256];
-			Util.arrayCopy(out, (short) 0, needsEncrypt, (short) 0, (short) out.length);
-
-			Cipher symCipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
-			symCipher.init(keys[privKeyKs], Cipher.MODE_ENCRYPT);
-
-			byte[] encryptedData = new byte[128];
-			try {
-				symCipher.doFinal(needsEncrypt, (short) 0, (short) needsEncrypt.length, encryptedData, (short) 0);
-			} catch (Exception e) {
-				ISOException.throwIt(ALG_FAILED);
-			}
-
-			apdu.setOutgoing();
-			apdu.setOutgoingLength((short) encryptedData.length);
-			apdu.sendBytesLong(encryptedData, (short) 0, (short) encryptedData.length);
 		}
 	}
 

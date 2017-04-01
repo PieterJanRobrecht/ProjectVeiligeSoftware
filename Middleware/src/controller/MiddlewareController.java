@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.rmi.server.SocketSecurityException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Observable;
@@ -130,7 +131,7 @@ public class MiddlewareController {
 		isSimulator = true;
 
 		startSimulator();
-		
+
 		/*** STAP 1 ***/
 		System.out.println("Sending Time..");
 		boolean isValid = isValid();
@@ -229,21 +230,21 @@ public class MiddlewareController {
 			// 0x00, encryptedPin);
 			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_PIN_INS, 0x00, 0x00, new byte[] { 0x01, 0x02, 0x03, 0x04 });
 
-			//addText("Sending PIN to card");
+			// addText("Sending PIN to card");
 			r = connection.transmit(a);
-			//addText("Received response on PIN instruction");
+			// addText("Received response on PIN instruction");
 
 			System.out.println("\t Response: " + r);
 			System.out.println("\t Response: " + Arrays.toString(r.getData()));
 			if (r.getSW() == SW_VERIFICATION_FAILED) {
-				//addText("PIN INVALID");
+				// addText("PIN INVALID");
 				addText("SC -> MW \n\t PIN incorrect ingegeven");
 				throw new Exception("PIN INVALID");
 			} else if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 			System.out.println("PIN Verified");
 			addText("SC -> MW \n\t PIN correct ingegeven");
-			//addText("PIN Verified");
+			// addText("PIN Verified");
 		} catch (Exception e) {
 			System.out.println("You fucked up the pin");
 			e.printStackTrace();
@@ -260,7 +261,7 @@ public class MiddlewareController {
 			// Seconden sinds epoch
 			int unixTime = (int) (System.currentTimeMillis() / 1000);
 			byte[] bytes = intToByteArray(unixTime);
-			
+
 			addText("MW -> SC \n\t Huidige tijd " + unixTime + "\n\t In bytes " + Arrays.toString(bytes));
 			intToByteArray(unixTime + 200000);
 			intToByteArray(unixTime - 90000);
@@ -270,29 +271,29 @@ public class MiddlewareController {
 				r = connection.transmit(a);
 
 				if (r.getSW() == SW_VERIFICATION_FAILED) {
-//					addText("PIN INVALID");
+					// addText("PIN INVALID");
 					throw new Exception("PIN INVALID");
 				} else if (r.getSW() != 0x9000)
 					throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-//				addText("Receive an answer regarding time (" + i + ")");
+				// addText("Receive an answer regarding time (" + i + ")");
 				System.out.println("\t Response: " + r);
 			}
 
 			a = new CommandAPDU(IDENTITY_CARD_CLA, VALIDATE_TIME_INS, 0x00, 0x00, 0xff);
 			r = connection.transmit(a);
 
-			//addText("Received final answer regarding time");
+			// addText("Received final answer regarding time");
 
 			System.out.println("\t Response: " + r);
-			if(r.getData()[0] == (byte) 0 ){
+			if (r.getData()[0] == (byte) 0) {
 				addText("SC -> MW \n\t Hervalidatie is nodig");
-			}else{
+			} else {
 				addText("SC -> MW \n\t Hervalidatie is niet nodig");
 			}
-			//addText(Arrays.toString(r.getData()));
+			// addText(Arrays.toString(r.getData()));
 			if (r.getSW() == SW_VERIFICATION_FAILED) {
-				//addText("PIN INVALID");
+				// addText("PIN INVALID");
 				throw new Exception("PIN INVALID");
 			} else if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
@@ -302,7 +303,7 @@ public class MiddlewareController {
 			System.out.println("\t Payload: " + Arrays.toString(inc));
 			System.out.println("\t Payload: " + new BigInteger(1, inc).toString(16));
 
-			//addText("Action performed correctly");
+			// addText("Action performed correctly");
 
 			if (inc[0] == (byte) 1)
 				return true;
@@ -318,9 +319,9 @@ public class MiddlewareController {
 	private String[] fetchNewTime() {
 		SSLConnectionTimeServer c = new SSLConnectionTimeServer();
 		addText("MW -> G \n\t Nieuwe tijd opvragen");
-		String [] b = c.fetchTime();
-		addText("G -> MW \n\t Nieuwe tijd " + b[1] + " \n\t In bytes " + Arrays.toString(b[1].getBytes())+" \n\t Signature " + Arrays.toString(b[0].getBytes()));
-		return b; 
+		String[] b = c.fetchTime();
+		addText("G -> MW \n\t Nieuwe tijd " + b[1] + " \n\t In bytes " + Arrays.toString(b[1].getBytes()) + " \n\t Signature " + Arrays.toString(b[0].getBytes()));
+		return b;
 	}
 
 	private void sendNewTime(String[] time) {
@@ -330,9 +331,9 @@ public class MiddlewareController {
 
 			// time[0] = sig;
 			// time[1] = time;
-			
+
 			addText("MW -> SC \n\t Nieuwe tijd doorsturen");
-			
+
 			/** send signature to JC **/
 			byte[] bytes = intToByteArray(Integer.parseInt(time[1]));
 
@@ -340,7 +341,7 @@ public class MiddlewareController {
 			r = connection.transmit(a);
 
 			if (r.getSW() == SW_VERIFICATION_FAILED) {
-				//addText("PIN INVALID");
+				// addText("PIN INVALID");
 				throw new Exception("PIN INVALID");
 			} else if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
@@ -354,23 +355,23 @@ public class MiddlewareController {
 			r = connection.transmit(a);
 
 			if (r.getSW() == SW_VERIFICATION_FAILED) {
-				//addText("PIN INVALID");
+				// addText("PIN INVALID");
 				throw new Exception("PIN INVALID");
 			} else if (r.getSW() == VERIFY_EXCEPTION_THROWN) {
-				//addText("VERIFY EXCEPTION WAS THROWN, RIP ALGORITHM?");
+				// addText("VERIFY EXCEPTION WAS THROWN, RIP ALGORITHM?");
 				throw new Exception("VERIFY EXCEPTION WAS THROWN, RIP ALGORITHM?");
 			} else if (r.getSW() == VERIFY_FAILED) {
-				//addText("SIGNATURE INVALID");
+				// addText("SIGNATURE INVALID");
 				addText("SC -> MW \n\t Signature is niet goedgekeurd");
 				throw new Exception("SIGNATURE INVALID");
 			} else if (r.getSW() == KAPPA) {
-				//addText("SIGNATURE VALID");
+				// addText("SIGNATURE VALID");
 				addText("SC -> MW \n\tSignature is goedgekeurd en de tijd is aangepast");
 				System.out.println("Signature was valid! Time was updated on card.");
 			} else if (r.getSW() != 0x9000)
 				throw new Exception("\tException on the card: " + Integer.toHexString(r.getSW()));
 
-			//addText("sendNewTime performed correctly");
+			// addText("sendNewTime performed correctly");
 		} catch (Exception e) {
 			// do nothing... TODO fix deze shit
 			System.out.println("\t" + e.getMessage());
@@ -481,8 +482,8 @@ public class MiddlewareController {
 				inc = slice(inc, 6, inc.length);
 			}
 			System.out.println("Result authenticating card: " + Arrays.toString(inc));
-			addText("SC -> MW \n\t Nieuwe symmetrisch sleutel gemaakt \n\t In encrypted bytes "+Arrays.toString(inc));
-			
+			addText("SC -> MW \n\t Nieuwe symmetrisch sleutel gemaakt \n\t In encrypted bytes " + Arrays.toString(inc));
+
 			return inc;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -593,7 +594,7 @@ public class MiddlewareController {
 			outputStream.write(part3);
 
 			byte[] eMsg = outputStream.toByteArray();
-			
+
 			addText("SC -> MW \n\t Ontvangen van Emsg \n\t In bytes " + Arrays.toString(eMsg));
 			System.out.println("Emsg: " + Arrays.toString(eMsg));
 			return eMsg;
@@ -607,12 +608,12 @@ public class MiddlewareController {
 	public byte[] requestReleaseOfAttributes(byte[] resp) {
 		CommandAPDU a;
 		ResponseAPDU r;
-		// TODO HIERZO WERKEN
+		byte[] response = new byte[256];
 		try {
 			addText("### START STAP 4 ###");
 			addText("MW -> SC \n\t Verzenden van PIN");
 			sendPin();
-			
+
 			addText("MW -> SC \n\t Verzenden query \n\t Query " + Arrays.toString(resp));
 			/** send req to JC **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_REQ_ATT_INS, 0x00, 0x00, resp);
@@ -621,20 +622,40 @@ public class MiddlewareController {
 			if (r.getSW() != 0x9000 && r.getSW() != KAPPA)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-			/** fetch answer from req to JC **/
-			a = new CommandAPDU(IDENTITY_CARD_CLA, FETCH_REQ_ATT_INS, 0x00, 0x00, 0xff);
+			/** fetch answer from req to JC part 1 **/
+			a = new CommandAPDU(IDENTITY_CARD_CLA, FETCH_REQ_ATT_INS, (byte) 0, 0x00, 0xff);
 			r = connection.transmit(a);
 
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			byte[] inc = r.getData();
-			System.out.println("\tPayload query: " + Arrays.toString(inc));
+			System.out.println("\tPayload query1: " + Arrays.toString(inc));
+			
+			for(int i = 0; i < 250; i++) {
+				response[i] = inc[i];
+			}
+				
+			/** fetch answer from req to JC part 2 **/
+			a = new CommandAPDU(IDENTITY_CARD_CLA, FETCH_REQ_ATT_INS, (byte) 1, 0x00, 0xff);
+			r = connection.transmit(a);
 
+			if (r.getSW() != 0x9000)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			inc = r.getData();
+			System.out.println("\tPayload query2: " + Arrays.toString(inc));
+
+			for(int i = 0; i < 6; i++) {
+				response[i+250] = inc[i];
+			}
+			System.out.println("\tTotal payload: " + Arrays.toString(response));
+
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return response;
 	}
 
 	public byte[] slice(byte[] original, int offset, int end) {
@@ -671,14 +692,14 @@ public class MiddlewareController {
 	void logout(ActionEvent event) {
 		try {
 			connection.close();
-			//addText("Connection closed");
+			// addText("Connection closed");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void addText(String text) {
-		javafx.application.Platform.runLater( () -> communicationArea.appendText(text + "\n"));
+		javafx.application.Platform.runLater(() -> communicationArea.appendText(text + "\n"));
 	}
 
 	public IConnection getConnection() {
