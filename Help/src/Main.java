@@ -1,7 +1,11 @@
 import java.awt.Checkbox;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -28,6 +32,7 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -35,6 +40,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.openssl.PEMReader;
@@ -78,7 +84,15 @@ public class Main {
 	private static byte[] testAESKey = new byte[] { (byte) 89, (byte) 93, (byte) -96, (byte) 94, (byte) 97, (byte) -115, (byte) -91, (byte) -90, (byte) 100, (byte) -17, (byte) 106, (byte) -109, (byte) 18, (byte) 114, (byte) -11, (byte) 3};
 	
 	public static void main(String[] args) {
-		System.out.println(512%16);
+//		System.out.println(512%16);
+		byte[] foto = null;
+		try {
+			foto = extractBytes("C:\\Users\\Pieter-Jan\\Downloads\\Emoticon-Kappa.png");
+			System.out.println(bytesToString(foto));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		intToByteArray(1490635770);
 //		byte[] test = new byte[] { (byte) 88, (byte) -38, (byte) -71, (byte) -18 }; //Komt binnen
 //		byte[] future = new byte[] { (byte) 88, (byte) -39, (byte) 75, (byte) -6 }; //Staat op kaart
@@ -198,6 +212,29 @@ public class Main {
 //		 e.printStackTrace();
 //		 }
 //		 System.out.println(verified) ;
+	}
+	public static byte[] extractBytes(String ImageName) throws IOException {
+		// open image
+		File imgPath = new File(ImageName);
+		BufferedImage bufferedImage = ImageIO.read(imgPath);
+
+		// get DataBufferBytes from Raster
+		WritableRaster raster = bufferedImage.getRaster();
+		DataBufferByte data = (DataBufferByte) raster.getDataBuffer();
+		byte[] b = data.getData();
+		return (b);
+	}
+	
+	private static String bytesToString(byte[] b){
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		for(int i = 0;i<b.length;i++){
+			sb.append(" (byte) " + b[i]);
+			if(i< b.length -1)
+				sb.append(",");
+		}
+		sb.append("}");
+		return sb.toString();
 	}
 	
 	private static boolean checkIfPast(byte[] lastTime, byte[] tempTimeUpdate) {
