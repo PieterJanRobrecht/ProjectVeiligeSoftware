@@ -12,6 +12,11 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+
+import org.bouncycastle.asn1.isismtt.x509.AdditionalInformationSyntax;
+
+import controller.ServiceProviderController;
+
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
@@ -115,10 +120,12 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 	final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 	private X509Certificate x509Certificate;
 	private RSAPrivateKey spPrivateKey;
+	private ServiceProviderController controller;
 
-	public ServiceProviderServer(X509Certificate x509Certificate, RSAPrivateKey rsaPrivateKey) {
+	public ServiceProviderServer(X509Certificate x509Certificate, RSAPrivateKey rsaPrivateKey, ServiceProviderController serviceProviderController) {
 		this.x509Certificate = x509Certificate;
 		this.spPrivateKey = rsaPrivateKey;
+		this.controller = serviceProviderController;
 	}
 
 	public static String bytesToHex(byte[] in) {
@@ -167,14 +174,17 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		startListeningThread();
 
 		try {
+			controller.addText("### BEGIN STAP 2 ###");
 			// Begin Stap 2
 			authenticateServiceProvider();
+			controller.addText("### EINDE STAP 2 ###");
 
+			controller.addText("### BEGIN STAP 3 ###");
 			// Begin stap 3
 			authenticateCard();
+			controller.addText("### EINDE STAP 3 ###");
 
 		} catch (CertificateEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -198,11 +208,15 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 		} else {
 			try {
+				controller.addText("### BEGIN STAP 2 ###");
 				// Begin Stap 2
 				authenticateServiceProvider();
+				controller.addText("### EINDE STAP 2 ###");
 
+				controller.addText("### BEGIN STAP 3 ###");
 				// Begin stap 3
 				authenticateCard();
+				controller.addText("### EINDE STAP 3 ###");
 
 			} catch (CertificateEncodingException e) {
 				e.printStackTrace();
@@ -247,7 +261,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		try {
 			inputStream = sslSocket.getInputStream();
 			outputStream = sslSocket.getOutputStream();
-
+			
+			controller.addText("SP -> MW \n\t Authentiseer Service Provider \n\t Met certificaat " + Arrays.toString(x509Certificate.getEncoded()));
 			send("AuthSP", outputStream);
 
 			System.out.println("Client connected to fetch certificate, returning "
@@ -276,7 +291,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			String msg = queue.take();
 			msg += queue.take();
 			byte[] inc = hexStringToByteArray(msg);
-
+			
+			controller.addText("MW -> SP \n\t Ontvangen van de symmetrische sleutel \n\t In encrypted bytes " + Arrays.toString(inc));
 			System.out.println("\tPayload SYMMETRIC KEY: " + Arrays.toString(inc));
 
 			// String mod = bytesToHex(dummyPrivModulus);
@@ -291,6 +307,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 			byte[] decryptedData = new byte[256];
 			asymCipher.doFinal(data, (short) 0, (short) data.length, decryptedData, (short) 0);
+			controller.addText("SP \n\t Symmetrische sleutel decrypteren \n\t In bytes " + Arrays.toString(decryptedData));
 
 			byte[] returnData = cutOffNulls(decryptedData);
 			SecretKey originalKey = new SecretKeySpec(returnData, 0, returnData.length, "AES");
@@ -309,7 +326,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 			msg = queue.take();
 			inc = hexStringToByteArray(msg);
-
+			controller.addText("MW -> SP \n\t Ontvangen van Emsg \n\t In encrypted bytes " + Arrays.toString(inc));
 			System.out.println("debug - " + Arrays.toString(inc));
 			data = slice(inc, 0, 16);
 
@@ -323,15 +340,19 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 
 			returnData = cutOffNulls(decryptedData);
 			System.out.println("\treturnData: " + Arrays.toString(returnData));
+			controller.addText("SP \n\t Decrypteren van de subject en challenge \n\t Subject " + returnData[1] +" \n\t Challenge " + returnData[0]);
 			byte[] subject = x509Certificate.getSubjectDN().getName().getBytes();
 
 			if (returnData[1] == subject[0]) {
+				controller.addText("SP \n\t Subjects zijn gelijk, tijd om challenge uit te voeren");
 				int kappa = ((short) returnData[0]) + 1;
 				System.out.println(kappa);
+				controller.addText("SP \n\t Challenge met 1 verhoogt \n\t Response " + kappa);
 				byte[] encryptedData = symEncrypt(kappa, Ks);
-
+				controller.addText("SP \n\t Symmetrisch encrypteren van de response \n\t In bytes "+Arrays.toString(encryptedData));
 				System.out.println("\tdebug encryptedData - " + Arrays.toString(encryptedData));
 				send("AuthSP2", outputStream);
+				controller.addText("SP -> MW \n\t Verzenden van de response \n\t In bytes " + Arrays.toString(encryptedData));
 				send(bytesToHex(encryptedData), outputStream);
 			} else {
 				System.out.println("\t!!\treturndata is not subject[0]");

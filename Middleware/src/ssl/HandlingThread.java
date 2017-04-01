@@ -85,11 +85,11 @@ public class HandlingThread extends Communicator implements Runnable {
 		cert = cert.split("null")[1];
 
 		byte[] certInBytes = hexStringToByteArray(cert);
-
+		
 		byte[] Ks = mwc.authenticateServiceProvider(certInBytes);
 		Ks = cutOffNulls(Ks);
 		System.out.println("\tLength in bytes: " + Ks.length);
-
+		mwc.addText("MW -> SP \n\t Versturen van de nieuwe symmetrische sleutel \n\t In bytes " + Arrays.toString(Ks));
 		String ks = bytesToHex(Ks);
 		System.out.println("\tks value: " + ks.length() + " || " + ks);
 		String send1 = ks.substring(0, 95);
@@ -104,6 +104,7 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		String EMsg = bytesToHex(Emsg);
 		System.out.println("\tEMsg value: " + EMsg.length() + " || " + EMsg);
+		mwc.addText("MW -> SP \n\t Versturen van Emsg \n\t In bytes " + Arrays.toString(Emsg));
 		send(EMsg, outputStream);
 	}
 
@@ -118,6 +119,7 @@ public class HandlingThread extends Communicator implements Runnable {
 		System.out.println(inc);
 
 		byte[] rec = hexStringToByteArray(inc);
+		mwc.addText("SP -> MW \n\t Ontvangen van de response \n\t In bytes " + Arrays.toString(rec));
 
 		System.out.println(Arrays.toString(rec));
 
