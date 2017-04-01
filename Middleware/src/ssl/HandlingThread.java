@@ -199,7 +199,7 @@ public class HandlingThread extends Communicator implements Runnable {
 		String inc = queue.take();
 
 		byte[] rec = hexStringToByteArray(inc);
-
+		mwc.addText("SP -> MW \n\t Ontvangen query \n\t Query " + Arrays.toString(rec));
 		System.out.println("\tRelease attributes - rec: " + Arrays.toString(rec));
 
 		byte[] resp = mwc.requestReleaseOfAttributes(rec);

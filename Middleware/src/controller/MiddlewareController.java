@@ -239,10 +239,12 @@ public class MiddlewareController {
 			System.out.println("\t Response: " + Arrays.toString(r.getData()));
 			if (r.getSW() == SW_VERIFICATION_FAILED) {
 				//addText("PIN INVALID");
+				addText("SC -> MW \n\t PIN incorrect ingegeven");
 				throw new Exception("PIN INVALID");
 			} else if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 			System.out.println("PIN Verified");
+			addText("SC -> MW \n\t PIN correct ingegeven");
 			//addText("PIN Verified");
 		} catch (Exception e) {
 			System.out.println("You fucked up the pin");
@@ -319,7 +321,7 @@ public class MiddlewareController {
 		SSLConnectionTimeServer c = new SSLConnectionTimeServer();
 		addText("MW -> G \n\t Nieuwe tijd opvragen");
 		String [] b = c.fetchTime();
-		addText("G -> MW \n\t Nieuwe tijd " + b[1] + " \n\t In bytes" + Arrays.toString(b[1].getBytes())+" \n\t Met signature " + b[0]);
+		addText("G -> MW \n\t Nieuwe tijd " + b[1] + " \n\t In bytes " + Arrays.toString(b[1].getBytes())+" \n\t Signature " + Arrays.toString(b[0].getBytes()));
 		return b; 
 	}
 
@@ -609,8 +611,10 @@ public class MiddlewareController {
 		ResponseAPDU r;
 		// TODO HIERZO WERKEN
 		try {
+			addText("MW -> SC \n\t Verzenden van PIN");
 			sendPin();
-
+			
+			addText("MW -> SC \n\t Verzenden query \n\t Query " + Arrays.toString(resp));
 			/** send req to JC **/
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_REQ_ATT_INS, 0x00, 0x00, resp);
 			r = connection.transmit(a);

@@ -98,7 +98,7 @@ public class ServiceProviderController {
 
 		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday
 				+ " for " + output;
-		//addText(submit);
+		// addText(submit);
 
 		byte[] query = new byte[7];
 		query[0] = (name) ? (byte) 1 : (byte) 0;
@@ -108,6 +108,10 @@ public class ServiceProviderController {
 		query[4] = (country) ? (byte) 1 : (byte) 0;
 		query[5] = (gender) ? (byte) 1 : (byte) 0;
 		query[6] = (birthday) ? (byte) 1 : (byte) 0;
+		addText("### START STAP 4 ###");
+		addText("SP \n\t Opstellen query \n\t Naam " + query[0] + " \n\t Adres " + query[1] + " \n\t Foto " + query[2]
+				+ " \n\t Leeftijd " + query[3] + " \n\t Land " + query[4] + " \n\t Geslacht " + query[5]
+				+ " \n\t Verjaardag" + query[6]);
 		sps.releaseAttributes(query);
 	}
 

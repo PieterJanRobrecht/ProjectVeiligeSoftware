@@ -460,7 +460,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				boolean verified = verifySig(BigInteger.valueOf(c).toByteArray(), coPubKey, sign);
 				if (verified) {
 					controller.addText("SP \n\t Kaart is correct geauthenticeerd");
-					System.out.println("The card had been verifie'd");
+					System.out.println("The card had been verified");
 				} else {
 					controller.addText("SP \n\t Kaart is niet geauthenticeerd");
 					System.out.println("The card was not verified");
@@ -484,7 +484,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		try {
 			inputStream = sslSocket.getInputStream();
 			outputStream = sslSocket.getOutputStream();
-
+			controller.addText("SP -> MW \n\t Verzenden query \n\t Query " + Arrays.toString(query));
 			send("ReleaseAttributes", outputStream);
 			send(bytesToHex(query), outputStream);
 			System.out.println("sent reqs");
