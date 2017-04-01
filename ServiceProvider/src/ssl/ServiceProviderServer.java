@@ -14,7 +14,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.io.*;
 import java.math.BigInteger;
@@ -404,7 +406,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				}
 			}
 			responseString = responseString.split("null")[1];
-			
+
 			byte[] response = hexStringToByteArray(responseString);
 			response = symDecrypt(response, Ks);
 			byte signLength = response[0];
@@ -424,15 +426,18 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			InputStream in = new ByteArrayInputStream(cert);
 			X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(in);
 
-			// TODO verify certificate
+			try {
+				certificate.checkValidity();
+				RSAPublicKey coPubKey = (RSAPublicKey) certificate.getPublicKey();
 
-			RSAPublicKey coPubKey = (RSAPublicKey) certificate.getPublicKey();
-
-			boolean verified = verifySig(BigInteger.valueOf(c).toByteArray(), coPubKey, sign);
-			if(verified){
-				System.out.println("The card had been verified");
-			}else{
-				System.out.println("The card was not verified");
+				boolean verified = verifySig(BigInteger.valueOf(c).toByteArray(), coPubKey, sign);
+				if (verified) {
+					System.out.println("The card had been verified");
+				} else {
+					System.out.println("The card was not verified");
+				}
+			} catch (CertificateExpiredException | CertificateNotYetValidException e) {
+				System.out.println("The certificate was no longer valid");
 			}
 
 		} catch (Exception e) {
@@ -456,7 +461,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static boolean verifySig(byte[] data, PublicKey key, byte[] sig) throws Exception {
 		Signature signer = Signature.getInstance("SHA1withRSA");
 		signer.initVerify(key);
