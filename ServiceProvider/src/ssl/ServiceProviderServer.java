@@ -465,7 +465,6 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 					controller.addText("SP \n\t Kaart is niet geauthenticeerd");
 					System.out.println("The card was not verified");
 				}
-				controller.addText("### EINDE STAP 3 ###");
 			} catch (CertificateExpiredException | CertificateNotYetValidException e) {
 				System.out.println("The certificate was no longer valid");
 				controller.addText("SP \n\t Certificaat is ongeldig");

@@ -611,6 +611,7 @@ public class MiddlewareController {
 		ResponseAPDU r;
 		// TODO HIERZO WERKEN
 		try {
+			addText("### START STAP 4 ###");
 			addText("MW -> SC \n\t Verzenden van PIN");
 			sendPin();
 			
