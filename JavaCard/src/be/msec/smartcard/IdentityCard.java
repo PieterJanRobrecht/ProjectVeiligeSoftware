@@ -617,7 +617,7 @@ public class IdentityCard extends Applet {
 				sign = new byte[240];
 				byte[] hash = hash(decryptedData);
 				hash = cutOffNulls(hash);
-				short signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
+				short signLength = generateSignature(coPrivateKey, hash, (short) 0, (short) hash.length, sign);
 				sign = cutOffNulls(sign);
 
 				short totLength = (short) (coCert.length + signLength + 1);

@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -457,7 +458,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				certificate.checkValidity();
 				RSAPublicKey coPubKey = (RSAPublicKey) certificate.getPublicKey();
 				controller.addText("SP \n\t Certificaat is geldig");
-				boolean verified = verifySig(BigInteger.valueOf(c).toByteArray(), coPubKey, sign);
+				byte[] hash = hash(BigInteger.valueOf(c).toByteArray());
+ 				boolean verified = verifySig(hash, coPubKey, sign);
 				if (verified) {
 					controller.addText("SP \n\t Kaart is correct geauthenticeerd");
 					System.out.println("The card had been verified");
@@ -473,6 +475,13 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	private byte[] hash(byte[] c) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-1");
+        md.update(c);
+
+        byte byteData[] = md.digest();
+		return byteData;
 	}
 
 	/*** STAP 4 ***/
