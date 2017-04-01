@@ -486,7 +486,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tName: " + new String(name));
-						controller.addText("\n\t Naam " + new String(name));
+						controller.addText("\t\t Naam " + new String(name));
 						break;
 					case 1:
 						oudeTeller = teller;
@@ -494,7 +494,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tAdress: " + new String(adress));
-						controller.addText("\n\t Adres " + new String(adress));
+						controller.addText("\t\t Adres " + new String(adress));
 						break;
 					case 2:
 						oudeTeller = teller;
@@ -502,7 +502,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tCountry: " + new String(country));
-						controller.addText("\n\t Land " + new String(country));
+						controller.addText("\t\t Land " + new String(country));
 						break;
 					case 3:
 						oudeTeller = teller;
@@ -510,7 +510,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tBirthday: " + new String(birthday));
-						controller.addText("\n\t Verjaardag " + new String(birthday));
+						controller.addText("\t\t Verjaardag " + new String(birthday));
 						break;
 					case 4:
 						oudeTeller = teller;
@@ -518,7 +518,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tAge: " + new String(age));
-						controller.addText("\n\t Leeftijd " + new String(age));
+						controller.addText("\t\t Leeftijd " + new String(age));
 						break;
 					case 5:
 						oudeTeller = teller;
@@ -526,7 +526,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tGender: " + new String(gender));
-						controller.addText("\n\t Geslacht " + new String(gender));
+						controller.addText("\t\t Geslacht " + new String(gender));
 						break;
 					case 6:
 						oudeTeller = teller;
@@ -534,7 +534,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tFoto: " + Arrays.toString(foto));
-						controller.addText("\n\t Foto " + Arrays.toString(foto));
+						controller.addText("\t\t Foto " + Arrays.toString(foto));
 						break;
 					default:
 						break;

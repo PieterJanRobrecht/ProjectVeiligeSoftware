@@ -186,6 +186,8 @@ public class HandlingThread extends Communicator implements Runnable {
 	public void releaseAttributes() throws IOException, InterruptedException {
 		System.out.println("Requesting release of Attributes");
 
+		mwc.addText("### START STAP 4 ###");
+
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
 

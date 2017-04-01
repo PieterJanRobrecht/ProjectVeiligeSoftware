@@ -611,7 +611,6 @@ public class MiddlewareController {
 		ResponseAPDU r;
 		byte[] response = new byte[256];
 		try {
-			addText("### START STAP 4 ###");
 			addText("MW -> SC \n\t Verzenden van PIN");
 			sendPin();
 
