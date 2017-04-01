@@ -386,9 +386,6 @@ public class IdentityCard extends Applet {
 		case GET_CHAL_INS:
 			getChallenge(apdu);
 			break;
-		case GET_ANSWER_CHAL_INS:
-			getAnswerChallenge(apdu);
-			break;
 		case FINAL_AUTH_INS:
 			validateFinalAuth(apdu);
 			break;
@@ -575,19 +572,6 @@ public class IdentityCard extends Applet {
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) name.length);
 			apdu.sendBytesLong(name, (short) 0, (short) name.length);
-		}
-	}
-
-	private void getAnswerChallenge(APDU apdu) {
-		if(endStepThree != null) {
-			// TODO sym encrypt sig en certificaat en dan doorsturen
-
-			
-			apdu.setOutgoing();
-			apdu.setOutgoingLength((short) endStepThree.length);
-			apdu.sendBytesLong(endStepThree, (short) 0, (short) endStepThree.length);
-		}else{
-			ISOException.throwIt(SEQUENTIAL_FAILURE);
 		}
 	}
 
