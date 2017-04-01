@@ -685,7 +685,7 @@ public class MiddlewareController {
 	}
 
 	public void addText(String text) {
-		communicationArea.appendText(text + "\n");
+		javafx.application.Platform.runLater( () -> communicationArea.appendText(text + "\n"));
 	}
 
 	public IConnection getConnection() {
