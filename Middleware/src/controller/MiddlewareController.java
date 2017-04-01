@@ -116,8 +116,6 @@ public class MiddlewareController {
 
 	// private SSLServerSocketFactory sslServerSocketFactory;
 
-	private byte[] Ku = new byte[] { (byte) 1, (byte) 3, (byte) 3, (byte) 7 };
-
 	private SecretKey Ks;
 	private boolean isSimulator = false;
 
@@ -632,23 +630,18 @@ public class MiddlewareController {
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_REQ_ATT_INS, 0x00, 0x00, resp);
 			r = connection.transmit(a);
 
+			if (r.getSW() != 0x9000 && r.getSW() != KAPPA)
+				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
+
+			/** fetch answer from req to JC **/
+			a = new CommandAPDU(IDENTITY_CARD_CLA, FETCH_REQ_ATT_INS, 0x00, 0x00, 0xff);
+			r = connection.transmit(a);
+
 			if (r.getSW() != 0x9000)
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
-			for (int i = 0; i < resp.length; i++) {
-				if (resp[i] == (byte) 1) {
-					/** fetch answer from req to JC **/
-					// TODO FIX THIS SHIT
-					a = new CommandAPDU(IDENTITY_CARD_CLA, FETCH_REQ_ATT_INS, (byte) i, 0x00, 0xff);
-					r = connection.transmit(a);
-
-					if (r.getSW() != 0x9000)
-						throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
-
-					byte[] inc = r.getData();
-					System.out.println("\tPayload query[" + i + "]: " + Arrays.toString(inc));
-				}
-			}
+			byte[] inc = r.getData();
+			System.out.println("\tPayload query: " + Arrays.toString(inc));
 
 		} catch (Exception e) {
 			e.printStackTrace();
