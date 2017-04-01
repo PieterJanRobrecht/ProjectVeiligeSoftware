@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -437,8 +438,8 @@ public class MiddlewareController {
 	public byte[] authenticateServiceProvider(byte[] cert) {
 		CommandAPDU a;
 		ResponseAPDU r;
-		
-		addText("MW -> SC \n\t Authentiseer Service Provider \n\t Met certificaat " + cert);
+		addText("### START STAP 2 ###");
+		addText("MW -> SC \n\t Authentiseer Service Provider \n\t Met certificaat " + Arrays.toString(cert));
 		try {
 			byte[] send = null;
 			if (cert.length > 250) {
@@ -460,7 +461,7 @@ public class MiddlewareController {
 
 			byte[] fakeCert = createFakeCertificate(certCA);
 
-			addText("MW \n\t Vorm certificaat om naar eigen format \n\t Certificaat " + fakeCert);
+			addText("MW \n\t Vorm certificaat om naar eigen format \n\t Certificaat " + Arrays.toString(fakeCert));
 			// SEND_CERT_INS
 			a = new CommandAPDU(IDENTITY_CARD_CLA, SEND_CERT_INS, 0x00, 0x00, fakeCert);
 			r = connection.transmit(a);
@@ -534,6 +535,7 @@ public class MiddlewareController {
 				throw new Exception("Exception on the card: " + Integer.toHexString(r.getSW()));
 
 			addText("SC \n\t De service provider werd correct geauthenticeerd");
+			addText("### EINDE STAP 2 ###");
 			System.out.println("\tIf no error, the SP was succesfully authenticated!");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -546,6 +548,7 @@ public class MiddlewareController {
 		ResponseAPDU r;
 
 		try {
+			addText("MW -> SC \n\t Versturen van de challenge naar de kaart \n\t In bytes " + Arrays.toString(challenge));
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CHAL_INS, 0x00, 0x00, challenge);
 			r = connection.transmit(a);
 
@@ -590,7 +593,8 @@ public class MiddlewareController {
 			outputStream.write(part3);
 
 			byte[] eMsg = outputStream.toByteArray();
-
+			
+			addText("SC -> MW \n\t Ontvangen van Emsg \n\t In bytes " + Arrays.toString(eMsg));
 			System.out.println("Emsg: " + Arrays.toString(eMsg));
 			return eMsg;
 		} catch (Exception e) {

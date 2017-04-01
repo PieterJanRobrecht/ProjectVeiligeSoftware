@@ -104,7 +104,7 @@ public class HandlingThread extends Communicator implements Runnable {
 
 		String EMsg = bytesToHex(Emsg);
 		System.out.println("\tEMsg value: " + EMsg.length() + " || " + EMsg);
-		mwc.addText("MW -> SP \n\t Versturen van Emsg \n\t In bytes " + Arrays.toString(Emsg));
+		mwc.addText("MW -> SP \n\t Versturen van Emsg \n\t In encrypted bytes " + Arrays.toString(Emsg));
 		send(EMsg, outputStream);
 	}
 
@@ -133,6 +133,7 @@ public class HandlingThread extends Communicator implements Runnable {
 	 * @throws InterruptedException
 	 ***/
 	private void authenticateCard() throws IOException, InterruptedException {
+		mwc.addText("### START STAP 3 ###");
 		System.out.println("Authenticating Card");
 		InputStream inputStream = sslSocket.getInputStream();
 		OutputStream outputStream = sslSocket.getOutputStream();
@@ -155,6 +156,8 @@ public class HandlingThread extends Communicator implements Runnable {
 		}
 		challenge = challenge.split("null")[1];
 
+
+		mwc.addText("SP -> MW \n\t Ontvangen van de challenge \n\t In encrypted bytes " + Arrays.toString(hexStringToByteArray(challenge)));
 		System.out.println("Sending to card: " + Arrays.toString(hexStringToByteArray(challenge)) + " with length "
 				+ hexStringToByteArray(challenge).length);
 
@@ -163,6 +166,7 @@ public class HandlingThread extends Communicator implements Runnable {
 		Emsg = cutOffNulls(Emsg);
 		System.out.println("Received: " + Arrays.toString(Emsg) + " \n\t with length: " + Emsg.length);
 		
+		mwc.addText("MW -> SP \n\t Verzenden van Emsg \n\t In encrypted bytes " + Arrays.toString(Emsg));
 		String toSend = bytesToHex(Emsg);
 		System.out.println("Sending " + toSend + " \n\t with length "+toSend.length());
 		send(toSend.substring(0,100), outputStream);
@@ -176,6 +180,7 @@ public class HandlingThread extends Communicator implements Runnable {
 		send(toSend.substring(800,900), outputStream);
 		send(toSend.substring(900,1000), outputStream);
 		send(toSend.substring(1000,toSend.length()), outputStream);
+		mwc.addText("### EINDE STAP 3 ###");
 	}
 
 	/**

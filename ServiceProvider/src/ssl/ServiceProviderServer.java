@@ -392,12 +392,15 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			send("AuthCard", outputStream);
 
 			int c = generateChallenge();
+			controller.addText("SP \n\t Challenge gemaakt \n\t Challenge " + c);
 			System.out.println("Original challenge: " + c + "\n\t in bytes: "
 					+ Arrays.toString(BigInteger.valueOf(c).toByteArray()));
 			byte[] encrypted = symEncrypt(c, Ks);
 			String message = bytesToHex(encrypted);
 			System.out.println("Sending encrypted challenge: " + Arrays.toString(encrypted));
 			System.out.println("Or in hex: " + message + " with length " + message.length());
+			controller.addText("SP \n\t Encrypteren van de challenge \n\t In bytes "+ Arrays.toString(encrypted));
+			controller.addText("SP -> MW Verzenden van challenge \n\t In encrypted bytes " + Arrays.toString(encrypted));
 			send(message, outputStream);
 
 			boolean gaan = true;
@@ -429,7 +432,9 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			responseString = responseString.split("null")[1];
 
 			byte[] response = hexStringToByteArray(responseString);
+			controller.addText("MW -> SP \n\t Ontvangen van Emsg \n\t In encrypted bytes " + Arrays.toString(response));
 			response = symDecrypt(response, Ks);
+			controller.addText("SP \n\t Decrypteren van Emsg \n\t In bytes " + Arrays.toString(response));
 			byte signLength = response[0];
 			byte[] sign = new byte[signLength];
 			int certLength = response.length - (1 + signLength);
@@ -442,6 +447,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 				int index = 1 + signLength + i;
 				cert[i] = response[index];
 			}
+			controller.addText("SP \n\t Signature en certificaat bepalen \n\t Signature "+ Arrays.toString(sign) + " \n\t Certificate " + Arrays.toString(cert));
 
 			CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 			InputStream in = new ByteArrayInputStream(cert);
@@ -450,15 +456,19 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			try {
 				certificate.checkValidity();
 				RSAPublicKey coPubKey = (RSAPublicKey) certificate.getPublicKey();
-
+				controller.addText("SP \n\t Certificaat is geldig");
 				boolean verified = verifySig(BigInteger.valueOf(c).toByteArray(), coPubKey, sign);
 				if (verified) {
-					System.out.println("The card had been verified");
+					controller.addText("SP \n\t Kaart is correct geauthenticeerd");
+					System.out.println("The card had been verifie'd");
 				} else {
+					controller.addText("SP \n\t Kaart is niet geauthenticeerd");
 					System.out.println("The card was not verified");
 				}
+				controller.addText("### EINDE STAP 3 ###");
 			} catch (CertificateExpiredException | CertificateNotYetValidException e) {
 				System.out.println("The certificate was no longer valid");
+				controller.addText("SP \n\t Certificaat is ongeldig");
 			}
 
 		} catch (Exception e) {
