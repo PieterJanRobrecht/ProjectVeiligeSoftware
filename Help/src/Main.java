@@ -85,14 +85,14 @@ public class Main {
 	
 	public static void main(String[] args) {
 //		System.out.println(512%16);
-		byte[] foto = null;
-		try {
-			foto = extractBytes("C:\\Users\\Pieter-Jan\\Downloads\\Emoticon-Kappa.png");
-			System.out.println(bytesToString(foto));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		byte[] foto = null;
+//		try {
+//			foto = extractBytes("C:\\Users\\Pieter-Jan\\Downloads\\Emoticon-Kappa.png");
+//			System.out.println(bytesToString(foto));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 //		intToByteArray(1490635770);
 //		byte[] test = new byte[] { (byte) 88, (byte) -38, (byte) -71, (byte) -18 }; //Komt binnen
 //		byte[] future = new byte[] { (byte) 88, (byte) -39, (byte) 75, (byte) -6 }; //Staat op kaart
@@ -128,29 +128,30 @@ public class Main {
 		// System.out.println(getal);
 		// intToByteArray(getal);
 //
-//		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-//		FileReader fr = null, fr2 = null;
-//		try {
-//			fr = new FileReader("../Certificaten2/co.crt");
-//			fr2 = new FileReader("../Certificaten2/co.key");
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		PEMReader pemReader = new PEMReader(fr);
-//		X509Certificate cert = null;
-//		RSAPrivateKey sk = null;
-//		RSAPublicKey pk = null;
-//		try {
-//			cert = (X509Certificate) pemReader.readObject();
-//			pemReader = new PEMReader(fr2);
-//			KeyPair kp = (KeyPair) pemReader.readObject();
-//			sk = (RSAPrivateKey) kp.getPrivate();
-//			pk = (RSAPublicKey) cert.getPublicKey();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		FileReader fr = null, fr2 = null;
+		try {
+			fr = new FileReader("../Certificaten2/soc2.crt");
+			fr2 = new FileReader("../Certificaten2/co.key");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		PEMReader pemReader = new PEMReader(fr);
+		X509Certificate cert = null;
+		RSAPrivateKey sk = null;
+		RSAPublicKey pk = null;
+		try {
+			cert = (X509Certificate) pemReader.readObject();
+			pemReader = new PEMReader(fr2);
+			KeyPair kp = (KeyPair) pemReader.readObject();
+			sk = (RSAPrivateKey) kp.getPrivate();
+			pk = (RSAPublicKey) cert.getPublicKey();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(cert.getSubjectDN().toString().split("CN=")[1]);
 ////		byte[] b = pk.getModulus().toByteArray();
 //		intToByteArray(sk.getPrivateExponent());
 //		System.out.println(sk.getPrivateExponent().toByteArray().length);

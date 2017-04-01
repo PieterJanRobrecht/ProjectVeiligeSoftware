@@ -61,7 +61,7 @@ public class ServiceProviderController {
 		String output = providerCombo.getSelectionModel().getSelectedItem().toString();
 		try {
 			if (serverThread == null) {
-				sps = new ServiceProviderServer(getCertificate(output), getKey(output));
+				sps = new ServiceProviderServer(getCertificate(output), getKey(output), this);
 
 				Thread thread = new Thread(sps);
 				thread.start();
@@ -98,7 +98,7 @@ public class ServiceProviderController {
 
 		String submit = "Selected: " + name + "," + adress + "," + foto + "," + age + "," + country + "," + birthday
 				+ " for " + output;
-		addText(submit);
+		// addText(submit);
 
 		byte[] query = new byte[7];
 		query[0] = (name) ? (byte) 1 : (byte) 0;
@@ -108,11 +108,14 @@ public class ServiceProviderController {
 		query[4] = (age) ? (byte) 1 : (byte) 0;
 		query[5] = (gender) ? (byte) 1 : (byte) 0;
 		query[6] = (foto) ? (byte) 1 : (byte) 0;
+		addText("### START STAP 4 ###");
+		addText("SP \n\t Opstellen query \n\t Naam " + query[0] + " \n\t Adres " + query[1] + " \n\t Foto " + query[2]
+				+ " \n\t Leeftijd " + query[3] + " \n\t Land " + query[4] + " \n\t Geslacht " + query[5]
+				+ " \n\t Verjaardag" + query[6]);
 		sps.releaseAttributes(query);
 	}
 
 	private RSAPrivateKey getKey(String output) throws IOException {
-		// TODO Auto-generated method stub
 		String fileName = null;
 		switch (output) {
 		case "Overheid 1":
@@ -157,35 +160,35 @@ public class ServiceProviderController {
 		// Alle paswoorden zijn gelijk aan password
 		switch (output) {
 		case "Overheid 1":
-			addText("Overheid 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			addText("SP \n\t Overheid 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/gov1.crt";
 			break;
 		case "Overheid 2":
-			addText("Overheid 2 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			addText("SP \n\t Overheid 2 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/gov2.crt";
 			break;
 		case "Sociaal Netwerk 1":
-			addText("Sociaal Netwerk 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			addText("SP \n\t Sociaal Netwerk 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/soc1.crt";
 			break;
 		case "Sociaal Netwerk 2":
-			addText("Sociaal Netwerk 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			addText("SP \n\t Sociaal Netwerk 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/soc2.crt";
 			break;
 		case "Default 1":
-			addText("Default 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			addText("SP \n\t Default 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/def1.crt";
 			break;
 		case "Default 2":
-			addText("Default 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			addText("SP \n\t Default 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/def2.crt";
 			break;
 		case "Keuze 1":
-			addText("Keuze 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			addText("SP \n\t Keuze 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/oth1.crt";
 			break;
 		case "Keuze 2":
-			addText("Keuze 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
+			addText("SP \n\t Keuze 1 werd geselecteerd \n\t Certificaat wordt opgehaald");
 			fileName = "../Certificaten2/oth2.crt";
 			break;
 		default:
@@ -197,7 +200,6 @@ public class ServiceProviderController {
 		try {
 			cert = (X509Certificate) pemReader.readObject();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return cert;
@@ -209,12 +211,10 @@ public class ServiceProviderController {
 				"Default 1", "Default 2", "Keuze 1", "Keuze 2");
 		providerCombo.getSelectionModel().selectFirst();
 
-		// final BlockingQueue<String> queue = new
-		// LinkedBlockingQueue<String>();
 	}
 
 	public void addText(String text) {
-		communicationArea.appendText(text + "\n");
+		javafx.application.Platform.runLater( () -> communicationArea.appendText(text + "\n"));
 	}
 
 	public Thread getServerThread() {

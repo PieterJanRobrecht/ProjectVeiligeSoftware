@@ -95,13 +95,19 @@ public class IdentityCard extends Applet {
 	private byte[] serial = new byte[] { (byte) 0x4A, (byte) 0x61, (byte) 0x6e };
 	private byte[] name = new byte[] { 0x4A, 0x61, 0x6E, 0x20, 0x56, 0x6F, 0x73, 0x73, 0x61, 0x65, 0x72, 0x74 };
 
-	byte[] naam = new byte[] { (byte) 75, (byte) 97, (byte) 112, (byte) 112, (byte) 97, (byte) 75, (byte) 111, (byte) 110, (byte) 105, (byte) 110, (byte) 103, };
+	byte[] naam = new byte[] { (byte) 75, (byte) 97, (byte) 112, (byte) 112, (byte) 97, (byte) 75, (byte) 111,
+			(byte) 110, (byte) 105, (byte) 110, (byte) 103, };
 
-	byte[] adres = new byte[] { (byte) 71, (byte) 101, (byte) 98, (byte) 114, (byte) 111, (byte) 101, (byte) 100, (byte) 101, (byte) 114, (byte) 115, (byte) 100, (byte) 101, (byte) 115, (byte) 109, (byte) 101, (byte) 116, (byte) 32, (byte) 115, (byte) 116, (byte) 114, (byte) 97, (byte) 97, (byte) 116, (byte) 32, (byte) 49, };
+	byte[] adres = new byte[] { (byte) 71, (byte) 101, (byte) 98, (byte) 114, (byte) 111, (byte) 101, (byte) 100,
+			(byte) 101, (byte) 114, (byte) 115, (byte) 100, (byte) 101, (byte) 115, (byte) 109, (byte) 101, (byte) 116,
+			(byte) 32, (byte) 115, (byte) 116, (byte) 114, (byte) 97, (byte) 97, (byte) 116, (byte) 32, (byte) 49, };
 	byte[] land = new byte[] { (byte) 66, (byte) 101, (byte) 108, (byte) 103, (byte) 105, (byte) 101, };
-	byte[] geboorteDatum = new byte[] { (byte) 50, (byte) 48, (byte) 47, (byte) 48, (byte) 49, (byte) 47, (byte) 50, (byte) 48, (byte) 49, (byte) 55, };
+	byte[] geboorteDatum = new byte[] { (byte) 50, (byte) 48, (byte) 47, (byte) 48, (byte) 49, (byte) 47, (byte) 50,
+			(byte) 48, (byte) 49, (byte) 55, };
 	byte[] leeftijd = new byte[] { (byte) 49, (byte) 55, };
-	byte[] geslacht = new byte[] { (byte) 68, (byte) 105, (byte) 100, (byte) 89, (byte) 111, (byte) 117, (byte) 74, (byte) 117, (byte) 115, (byte) 116, (byte) 65, (byte) 115, (byte) 115, (byte) 117, (byte) 109, (byte) 101, (byte) 77, (byte) 121, (byte) 71, (byte) 101, (byte) 110, (byte) 100, (byte) 101, (byte) 114, };
+	byte[] geslacht = new byte[] { (byte) 68, (byte) 105, (byte) 100, (byte) 89, (byte) 111, (byte) 117, (byte) 74,
+			(byte) 117, (byte) 115, (byte) 116, (byte) 65, (byte) 115, (byte) 115, (byte) 117, (byte) 109, (byte) 101,
+			(byte) 77, (byte) 121, (byte) 71, (byte) 101, (byte) 110, (byte) 100, (byte) 101, (byte) 114, };
 	byte[] foto = new byte[] { (byte) 1, (byte) 3, (byte) 3, (byte) 7 };
 	// byte[] foto = new byte[] { (byte) 0, (byte) -1, (byte) -1, (byte) -1,
 	// (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) 0, (byte) 0,
@@ -363,12 +369,253 @@ public class IdentityCard extends Applet {
 	// -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
 	// (byte) -1, (byte) -1, (byte) -1 };
 
-	private byte[] timePubExp = new byte[] { (byte) 1, (byte) 0, (byte) 1 };
-	private byte[] timePubMod = new byte[] { (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74, (byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88, (byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127, (byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65, (byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112, (byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10, (byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56, (byte) -43, (byte) -79, (byte) 113, (byte) 49 };
+	byte[] foto = new byte[] { (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1,
+			(byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 12,
+			(byte) 12, (byte) 12, (byte) 0, (byte) 35, (byte) 35, (byte) 35, (byte) 28, (byte) 37, (byte) 37, (byte) 37,
+			(byte) -100, (byte) -127, (byte) -127, (byte) -127, (byte) -50, (byte) -126, (byte) -126, (byte) -126,
+			(byte) -88, (byte) 101, (byte) 101, (byte) 101, (byte) -68, (byte) 106, (byte) 106, (byte) 106, (byte) -105,
+			(byte) 109, (byte) 109, (byte) 109, (byte) 81, (byte) 107, (byte) 107, (byte) 107, (byte) 49, (byte) -78,
+			(byte) -78, (byte) -78, (byte) 3, (byte) 83, (byte) 83, (byte) 83, (byte) 0, (byte) 0, (byte) 0, (byte) 0,
+			(byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1,
+			(byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1,
+			(byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0,
+			(byte) 0, (byte) 0, (byte) 34, (byte) 34, (byte) 34, (byte) 34, (byte) -91, (byte) 115, (byte) 115,
+			(byte) 115, (byte) -28, (byte) 118, (byte) 118, (byte) 118, (byte) -1, (byte) 119, (byte) 119, (byte) 119,
+			(byte) -1, (byte) 90, (byte) 90, (byte) 90, (byte) -1, (byte) 113, (byte) 113, (byte) 113, (byte) -1,
+			(byte) 105, (byte) 105, (byte) 105, (byte) -1, (byte) 112, (byte) 112, (byte) 112, (byte) -1, (byte) 97,
+			(byte) 97, (byte) 97, (byte) -1, (byte) -123, (byte) -123, (byte) -123, (byte) -76, (byte) -125,
+			(byte) -125, (byte) -125, (byte) 40, (byte) 14, (byte) 14, (byte) 14, (byte) 0, (byte) 0, (byte) 0,
+			(byte) 0, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 71, (byte) 63, (byte) 63, (byte) 63, (byte) -31,
+			(byte) -103, (byte) -103, (byte) -103, (byte) -1, (byte) -99, (byte) -99, (byte) -99, (byte) -1,
+			(byte) -103, (byte) -103, (byte) -103, (byte) -1, (byte) -104, (byte) -104, (byte) -104, (byte) -1,
+			(byte) -127, (byte) -127, (byte) -127, (byte) -1, (byte) 103, (byte) 103, (byte) 103, (byte) -1, (byte) 92,
+			(byte) 92, (byte) 92, (byte) -1, (byte) 74, (byte) 74, (byte) 74, (byte) -1, (byte) 66, (byte) 66,
+			(byte) 66, (byte) -1, (byte) 111, (byte) 111, (byte) 111, (byte) -1, (byte) 80, (byte) 80, (byte) 80,
+			(byte) -31, (byte) 53, (byte) 53, (byte) 53, (byte) 44, (byte) 71, (byte) 71, (byte) 71, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 53,
+			(byte) -126, (byte) -126, (byte) -126, (byte) -9, (byte) -81, (byte) -81, (byte) -81, (byte) -1,
+			(byte) -102, (byte) -102, (byte) -102, (byte) -1, (byte) -112, (byte) -112, (byte) -112, (byte) -1,
+			(byte) -110, (byte) -110, (byte) -110, (byte) -1, (byte) 120, (byte) 120, (byte) 120, (byte) -1, (byte) 96,
+			(byte) 96, (byte) 96, (byte) -1, (byte) 62, (byte) 62, (byte) 62, (byte) -1, (byte) 25, (byte) 25,
+			(byte) 25, (byte) -1, (byte) 39, (byte) 39, (byte) 39, (byte) -1, (byte) 56, (byte) 56, (byte) 56,
+			(byte) -1, (byte) 60, (byte) 60, (byte) 60, (byte) -1, (byte) 40, (byte) 40, (byte) 40, (byte) -1,
+			(byte) 11, (byte) 11, (byte) 11, (byte) -85, (byte) 84, (byte) 84, (byte) 84, (byte) 0, (byte) -1,
+			(byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1,
+			(byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) -125,
+			(byte) -108, (byte) -108, (byte) -108, (byte) -1, (byte) -85, (byte) -85, (byte) -85, (byte) -1,
+			(byte) -108, (byte) -108, (byte) -108, (byte) -1, (byte) 103, (byte) 103, (byte) 103, (byte) -1, (byte) 80,
+			(byte) 80, (byte) 80, (byte) -1, (byte) 64, (byte) 64, (byte) 64, (byte) -1, (byte) 35, (byte) 35,
+			(byte) 35, (byte) -1, (byte) 56, (byte) 56, (byte) 56, (byte) -1, (byte) 53, (byte) 53, (byte) 53,
+			(byte) -1, (byte) 84, (byte) 84, (byte) 84, (byte) -1, (byte) 97, (byte) 97, (byte) 97, (byte) -1,
+			(byte) 52, (byte) 52, (byte) 52, (byte) -1, (byte) 26, (byte) 26, (byte) 26, (byte) -1, (byte) 3, (byte) 3,
+			(byte) 3, (byte) -58, (byte) 29, (byte) 29, (byte) 29, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) -68, (byte) 105, (byte) 105, (byte) 105,
+			(byte) -1, (byte) -110, (byte) -110, (byte) -110, (byte) -1, (byte) 93, (byte) 93, (byte) 93, (byte) -1,
+			(byte) 35, (byte) 35, (byte) 35, (byte) -1, (byte) 12, (byte) 12, (byte) 12, (byte) -1, (byte) 39,
+			(byte) 39, (byte) 39, (byte) -1, (byte) 34, (byte) 34, (byte) 34, (byte) -1, (byte) 63, (byte) 63,
+			(byte) 63, (byte) -1, (byte) -123, (byte) -123, (byte) -123, (byte) -1, (byte) -82, (byte) -82, (byte) -82,
+			(byte) -1, (byte) -75, (byte) -75, (byte) -75, (byte) -1, (byte) -105, (byte) -105, (byte) -105, (byte) -1,
+			(byte) 77, (byte) 77, (byte) 77, (byte) -1, (byte) 3, (byte) 3, (byte) 3, (byte) -31, (byte) 16, (byte) 16,
+			(byte) 16, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) -36, (byte) 80, (byte) 80, (byte) 80, (byte) -1, (byte) 71, (byte) 71, (byte) 71,
+			(byte) -1, (byte) 32, (byte) 32, (byte) 32, (byte) -1, (byte) 5, (byte) 5, (byte) 5, (byte) -1, (byte) 15,
+			(byte) 15, (byte) 15, (byte) -1, (byte) 77, (byte) 77, (byte) 77, (byte) -1, (byte) 107, (byte) 107,
+			(byte) 107, (byte) -1, (byte) -108, (byte) -108, (byte) -108, (byte) -1, (byte) -50, (byte) -50, (byte) -50,
+			(byte) -1, (byte) -51, (byte) -51, (byte) -51, (byte) -1, (byte) -63, (byte) -63, (byte) -63, (byte) -1,
+			(byte) -68, (byte) -68, (byte) -68, (byte) -1, (byte) -103, (byte) -103, (byte) -103, (byte) -1, (byte) 39,
+			(byte) 39, (byte) 39, (byte) -33, (byte) 23, (byte) 23, (byte) 23, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) -49, (byte) 51,
+			(byte) 51, (byte) 51, (byte) -1, (byte) 25, (byte) 25, (byte) 25, (byte) -1, (byte) 12, (byte) 12,
+			(byte) 12, (byte) -1, (byte) 29, (byte) 29, (byte) 29, (byte) -1, (byte) 68, (byte) 68, (byte) 68,
+			(byte) -1, (byte) 123, (byte) 123, (byte) 123, (byte) -1, (byte) -76, (byte) -76, (byte) -76, (byte) -1,
+			(byte) -65, (byte) -65, (byte) -65, (byte) -1, (byte) -42, (byte) -42, (byte) -42, (byte) -1, (byte) -58,
+			(byte) -58, (byte) -58, (byte) -1, (byte) -68, (byte) -68, (byte) -68, (byte) -1, (byte) -77, (byte) -77,
+			(byte) -77, (byte) -1, (byte) -94, (byte) -94, (byte) -94, (byte) -1, (byte) 106, (byte) 106, (byte) 106,
+			(byte) -38, (byte) 28, (byte) 28, (byte) 28, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1,
+			(byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1,
+			(byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) -83, (byte) 36, (byte) 36, (byte) 36, (byte) -1,
+			(byte) 12, (byte) 12, (byte) 12, (byte) -1, (byte) 14, (byte) 14, (byte) 14, (byte) -1, (byte) 71,
+			(byte) 71, (byte) 71, (byte) -1, (byte) -100, (byte) -100, (byte) -100, (byte) -1, (byte) -56, (byte) -56,
+			(byte) -56, (byte) -1, (byte) -37, (byte) -37, (byte) -37, (byte) -1, (byte) -31, (byte) -31, (byte) -31,
+			(byte) -1, (byte) -41, (byte) -41, (byte) -41, (byte) -1, (byte) -64, (byte) -64, (byte) -64, (byte) -1,
+			(byte) -60, (byte) -60, (byte) -60, (byte) -1, (byte) -61, (byte) -61, (byte) -61, (byte) -1, (byte) -84,
+			(byte) -84, (byte) -84, (byte) -1, (byte) -118, (byte) -118, (byte) -118, (byte) -44, (byte) 30, (byte) 30,
+			(byte) 30, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 123, (byte) 45, (byte) 45, (byte) 45, (byte) -1, (byte) 8, (byte) 8, (byte) 8, (byte) -1,
+			(byte) 16, (byte) 16, (byte) 16, (byte) -1, (byte) 124, (byte) 124, (byte) 124, (byte) -1, (byte) -37,
+			(byte) -37, (byte) -37, (byte) -1, (byte) -29, (byte) -29, (byte) -29, (byte) -1, (byte) -47, (byte) -47,
+			(byte) -47, (byte) -1, (byte) -109, (byte) -109, (byte) -109, (byte) -1, (byte) 120, (byte) 120, (byte) 120,
+			(byte) -1, (byte) -98, (byte) -98, (byte) -98, (byte) -1, (byte) -87, (byte) -87, (byte) -87, (byte) -1,
+			(byte) 124, (byte) 124, (byte) 124, (byte) -1, (byte) 100, (byte) 100, (byte) 100, (byte) -1, (byte) 112,
+			(byte) 112, (byte) 112, (byte) -70, (byte) 63, (byte) 63, (byte) 63, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) -114, (byte) -64,
+			(byte) -64, (byte) -64, (byte) -1, (byte) 69, (byte) 69, (byte) 69, (byte) -1, (byte) 46, (byte) 46,
+			(byte) 46, (byte) -1, (byte) -47, (byte) -47, (byte) -47, (byte) -1, (byte) -38, (byte) -38, (byte) -38,
+			(byte) -1, (byte) -111, (byte) -111, (byte) -111, (byte) -1, (byte) 88, (byte) 88, (byte) 88, (byte) -1,
+			(byte) 51, (byte) 51, (byte) 51, (byte) -1, (byte) 67, (byte) 67, (byte) 67, (byte) -1, (byte) -98,
+			(byte) -98, (byte) -98, (byte) -1, (byte) -122, (byte) -122, (byte) -122, (byte) -1, (byte) 21, (byte) 21,
+			(byte) 21, (byte) -1, (byte) 22, (byte) 22, (byte) 22, (byte) -1, (byte) 63, (byte) 63, (byte) 63,
+			(byte) -117, (byte) 116, (byte) 116, (byte) 116, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) -114, (byte) -56, (byte) -56, (byte) -56,
+			(byte) -1, (byte) -104, (byte) -104, (byte) -104, (byte) -1, (byte) 104, (byte) 104, (byte) 104, (byte) -1,
+			(byte) -42, (byte) -42, (byte) -42, (byte) -1, (byte) -27, (byte) -27, (byte) -27, (byte) -1, (byte) -60,
+			(byte) -60, (byte) -60, (byte) -1, (byte) -104, (byte) -104, (byte) -104, (byte) -1, (byte) -127,
+			(byte) -127, (byte) -127, (byte) -1, (byte) -104, (byte) -104, (byte) -104, (byte) -1, (byte) -45,
+			(byte) -45, (byte) -45, (byte) -1, (byte) -68, (byte) -68, (byte) -68, (byte) -1, (byte) 100, (byte) 100,
+			(byte) 100, (byte) -1, (byte) 104, (byte) 104, (byte) 104, (byte) -1, (byte) -124, (byte) -124, (byte) -124,
+			(byte) 120, (byte) -108, (byte) -108, (byte) -108, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 72, (byte) -29, (byte) -29, (byte) -29,
+			(byte) -1, (byte) -68, (byte) -68, (byte) -68, (byte) -1, (byte) -51, (byte) -51, (byte) -51, (byte) -1,
+			(byte) -45, (byte) -45, (byte) -45, (byte) -1, (byte) -31, (byte) -31, (byte) -31, (byte) -1, (byte) -15,
+			(byte) -15, (byte) -15, (byte) -1, (byte) -19, (byte) -19, (byte) -19, (byte) -1, (byte) -32, (byte) -32,
+			(byte) -32, (byte) -1, (byte) -39, (byte) -39, (byte) -39, (byte) -1, (byte) -34, (byte) -34, (byte) -34,
+			(byte) -1, (byte) -37, (byte) -37, (byte) -37, (byte) -1, (byte) -99, (byte) -99, (byte) -99, (byte) -1,
+			(byte) -82, (byte) -82, (byte) -82, (byte) -1, (byte) -92, (byte) -92, (byte) -92, (byte) 109, (byte) -115,
+			(byte) -115, (byte) -115, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -23, (byte) -23, (byte) -23, (byte) -67, (byte) -23,
+			(byte) -23, (byte) -23, (byte) -1, (byte) -24, (byte) -24, (byte) -24, (byte) -1, (byte) -47, (byte) -47,
+			(byte) -47, (byte) -1, (byte) -44, (byte) -44, (byte) -44, (byte) -1, (byte) -46, (byte) -46, (byte) -46,
+			(byte) -1, (byte) -43, (byte) -43, (byte) -43, (byte) -1, (byte) -57, (byte) -57, (byte) -57, (byte) -1,
+			(byte) -65, (byte) -65, (byte) -65, (byte) -1, (byte) -41, (byte) -41, (byte) -41, (byte) -1, (byte) -38,
+			(byte) -38, (byte) -38, (byte) -1, (byte) -100, (byte) -100, (byte) -100, (byte) -1, (byte) -101,
+			(byte) -101, (byte) -101, (byte) -1, (byte) -119, (byte) -119, (byte) -119, (byte) 101, (byte) 123,
+			(byte) 123, (byte) 123, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -34, (byte) -34, (byte) -34, (byte) 119, (byte) -37,
+			(byte) -37, (byte) -37, (byte) -1, (byte) -49, (byte) -49, (byte) -49, (byte) -1, (byte) -45, (byte) -45,
+			(byte) -45, (byte) -1, (byte) -46, (byte) -46, (byte) -46, (byte) -1, (byte) -61, (byte) -61, (byte) -61,
+			(byte) -1, (byte) -83, (byte) -83, (byte) -83, (byte) -1, (byte) -80, (byte) -80, (byte) -80, (byte) -1,
+			(byte) -68, (byte) -68, (byte) -68, (byte) -1, (byte) -113, (byte) -113, (byte) -113, (byte) -1, (byte) 123,
+			(byte) 123, (byte) 123, (byte) -1, (byte) 104, (byte) 104, (byte) 104, (byte) -1, (byte) -127, (byte) -127,
+			(byte) -127, (byte) -1, (byte) 119, (byte) 119, (byte) 119, (byte) 85, (byte) 118, (byte) 118, (byte) 118,
+			(byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1,
+			(byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1,
+			(byte) 0, (byte) -42, (byte) -42, (byte) -42, (byte) 0, (byte) -52, (byte) -52, (byte) -52, (byte) 68,
+			(byte) -81, (byte) -81, (byte) -81, (byte) -5, (byte) -60, (byte) -60, (byte) -60, (byte) -1, (byte) -53,
+			(byte) -53, (byte) -53, (byte) -1, (byte) -52, (byte) -52, (byte) -52, (byte) -1, (byte) -57, (byte) -57,
+			(byte) -57, (byte) -1, (byte) -72, (byte) -72, (byte) -72, (byte) -1, (byte) -83, (byte) -83, (byte) -83,
+			(byte) -1, (byte) -99, (byte) -99, (byte) -99, (byte) -1, (byte) 102, (byte) 102, (byte) 102, (byte) -1,
+			(byte) 89, (byte) 89, (byte) 89, (byte) -1, (byte) -113, (byte) -113, (byte) -113, (byte) -6, (byte) -122,
+			(byte) -122, (byte) -122, (byte) 42, (byte) 108, (byte) 108, (byte) 108, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0,
+			(byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -74,
+			(byte) -74, (byte) -74, (byte) 0, (byte) -76, (byte) -76, (byte) -76, (byte) 0, (byte) -86, (byte) -86,
+			(byte) -86, (byte) -75, (byte) -91, (byte) -91, (byte) -91, (byte) -1, (byte) -79, (byte) -79, (byte) -79,
+			(byte) -1, (byte) -71, (byte) -71, (byte) -71, (byte) -1, (byte) -65, (byte) -65, (byte) -65, (byte) -1,
+			(byte) -71, (byte) -71, (byte) -71, (byte) -1, (byte) -85, (byte) -85, (byte) -85, (byte) -1, (byte) -122,
+			(byte) -122, (byte) -122, (byte) -1, (byte) 103, (byte) 103, (byte) 103, (byte) -1, (byte) 110, (byte) 110,
+			(byte) 110, (byte) -1, (byte) -118, (byte) -118, (byte) -118, (byte) -69, (byte) 112, (byte) 112,
+			(byte) 112, (byte) 0, (byte) 109, (byte) 109, (byte) 109, (byte) 0, (byte) -1, (byte) -1, (byte) -1,
+			(byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1,
+			(byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -106, (byte) -106,
+			(byte) -106, (byte) 0, (byte) -106, (byte) -106, (byte) -106, (byte) 0, (byte) -104, (byte) -104,
+			(byte) -104, (byte) 35, (byte) -106, (byte) -106, (byte) -106, (byte) -41, (byte) -109, (byte) -109,
+			(byte) -109, (byte) -1, (byte) -108, (byte) -108, (byte) -108, (byte) -1, (byte) -106, (byte) -106,
+			(byte) -106, (byte) -1, (byte) -58, (byte) -58, (byte) -58, (byte) -1, (byte) -62, (byte) -62, (byte) -62,
+			(byte) -1, (byte) -104, (byte) -104, (byte) -104, (byte) -1, (byte) 126, (byte) 126, (byte) 126, (byte) -1,
+			(byte) -115, (byte) -115, (byte) -115, (byte) -12, (byte) 107, (byte) 107, (byte) 107, (byte) 52,
+			(byte) 105, (byte) 105, (byte) 105, (byte) 0, (byte) 110, (byte) 110, (byte) 110, (byte) 0, (byte) -1,
+			(byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1,
+			(byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -104,
+			(byte) -104, (byte) -104, (byte) 0, (byte) -104, (byte) -104, (byte) -104, (byte) 0, (byte) -104,
+			(byte) -104, (byte) -104, (byte) 0, (byte) -103, (byte) -103, (byte) -103, (byte) 27, (byte) -112,
+			(byte) -112, (byte) -112, (byte) -66, (byte) -123, (byte) -123, (byte) -123, (byte) -1, (byte) -107,
+			(byte) -107, (byte) -107, (byte) -1, (byte) -81, (byte) -81, (byte) -81, (byte) -1, (byte) -66, (byte) -66,
+			(byte) -66, (byte) -1, (byte) -71, (byte) -71, (byte) -71, (byte) -1, (byte) -94, (byte) -94, (byte) -94,
+			(byte) -1, (byte) -121, (byte) -121, (byte) -121, (byte) 91, (byte) 100, (byte) 100, (byte) 100, (byte) 0,
+			(byte) 104, (byte) 104, (byte) 104, (byte) 0, (byte) 104, (byte) 104, (byte) 104, (byte) 0, (byte) -1,
+			(byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1,
+			(byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -104,
+			(byte) -104, (byte) -104, (byte) 0, (byte) -104, (byte) -104, (byte) -104, (byte) 0, (byte) -104,
+			(byte) -104, (byte) -104, (byte) 0, (byte) -104, (byte) -104, (byte) -104, (byte) 0, (byte) -110,
+			(byte) -110, (byte) -110, (byte) 5, (byte) -122, (byte) -122, (byte) -122, (byte) 97, (byte) -125,
+			(byte) -125, (byte) -125, (byte) -66, (byte) 127, (byte) 127, (byte) 127, (byte) -32, (byte) 126,
+			(byte) 126, (byte) 126, (byte) -20, (byte) 125, (byte) 125, (byte) 125, (byte) -27, (byte) 109, (byte) 109,
+			(byte) 109, (byte) 100, (byte) 86, (byte) 86, (byte) 86, (byte) 0, (byte) 87, (byte) 87, (byte) 87,
+			(byte) 0, (byte) 88, (byte) 88, (byte) 88, (byte) 0, (byte) 88, (byte) 88, (byte) 88, (byte) 0, (byte) -1,
+			(byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1, (byte) -1, (byte) 0, (byte) -1, (byte) -1,
+			(byte) -1 };
 
-	private byte[] coSecExp = new byte[] { (byte) 94, (byte) -55, (byte) 95, (byte) 12, (byte) 106, (byte) -122, (byte) -23, (byte) -30, (byte) 15, (byte) -36, (byte) -110, (byte) -14, (byte) -55, (byte) -38, (byte) -115, (byte) -123, (byte) -96, (byte) -28, (byte) 5, (byte) 85, (byte) -109, (byte) -121, (byte) 50, (byte) -63, (byte) -100, (byte) 72, (byte) -128, (byte) 27, (byte) -58, (byte) 88, (byte) -100, (byte) -8, (byte) 12, (byte) -108, (byte) -11, (byte) 117, (byte) -64, (byte) -119, (byte) 120, (byte) 46, (byte) 90, (byte) 4, (byte) 57, (byte) 13, (byte) -109, (byte) 30, (byte) -32, (byte) -82, (byte) 10, (byte) -66, (byte) 26, (byte) -81, (byte) 37, (byte) -114, (byte) -94, (byte) -7, (byte) -21, (byte) 40, (byte) 69, (byte) -67, (byte) 8, (byte) 92, (byte) 64, (byte) -55 };
-	private byte[] coSecMod = new byte[] { (byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28, (byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80, (byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118, (byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71, (byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90, (byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73, (byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77, (byte) -33 };
-	private byte[] coCert = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -121, (byte) 48, (byte) -126, (byte) 1, (byte) 49, (byte) 2, (byte) 1, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17, (byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67, (byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 30, (byte) 23, (byte) 13, (byte) 49, (byte) 55, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 50, (byte) 53, (byte) 48, (byte) 50, (byte) 56, (byte) 90, (byte) 23, (byte) 13, (byte) 49, (byte) 57, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 50, (byte) 53, (byte) 48, (byte) 50, (byte) 56, (byte) 90, (byte) 48, (byte) 85, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1, (byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0, (byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28, (byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80, (byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118, (byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71, (byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90, (byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73, (byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77, (byte) -33, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 99, (byte) -110, (byte) 69, (byte) -43, (byte) -84, (byte) 34, (byte) -83, (byte) -65, (byte) 10, (byte) 81, (byte) -23, (byte) -21, (byte) -32, (byte) -43, (byte) 1, (byte) 20, (byte) 98, (byte) -128, (byte) -40, (byte) 92, (byte) -54, (byte) 124, (byte) 48, (byte) 29, (byte) 98, (byte) -52, (byte) 47, (byte) 114, (byte) 91, (byte) -22, (byte) -35, (byte) -80, (byte) 98, (byte) -75, (byte) -9, (byte) 48, (byte) 115, (byte) -57, (byte) -109, (byte) 62, (byte) -31, (byte) -18, (byte) -2, (byte) -101, (byte) 79, (byte) 78, (byte) 3, (byte) 86, (byte) 79, (byte) 7, (byte) 50, (byte) -34, (byte) -39, (byte) -86, (byte) -23, (byte) 80, (byte) 5, (byte) -117, (byte) -119, (byte) 112, (byte) -38, (byte) 36, (byte) -41, (byte) -58 };
+	private byte[] timePubExp = new byte[] { (byte) 1, (byte) 0, (byte) 1 };
+	private byte[] timePubMod = new byte[] { (byte) -17, (byte) -49, (byte) 3, (byte) -29, (byte) -86, (byte) 74,
+			(byte) 61, (byte) -60, (byte) 101, (byte) -54, (byte) -76, (byte) 23, (byte) -75, (byte) 63, (byte) -88,
+			(byte) 115, (byte) -93, (byte) -78, (byte) -22, (byte) -23, (byte) -74, (byte) 80, (byte) 73, (byte) -127,
+			(byte) 89, (byte) -89, (byte) -77, (byte) -48, (byte) 8, (byte) 78, (byte) -104, (byte) 114, (byte) -65,
+			(byte) -71, (byte) -117, (byte) -56, (byte) -126, (byte) 54, (byte) 69, (byte) -120, (byte) -75, (byte) 112,
+			(byte) -35, (byte) 30, (byte) -71, (byte) -65, (byte) 98, (byte) 112, (byte) 107, (byte) 117, (byte) -10,
+			(byte) 60, (byte) -44, (byte) -34, (byte) -119, (byte) 107, (byte) 74, (byte) 26, (byte) 74, (byte) 56,
+			(byte) -43, (byte) -79, (byte) 113, (byte) 49 };
+
+	private byte[] coSecExp = new byte[] { (byte) 94, (byte) -55, (byte) 95, (byte) 12, (byte) 106, (byte) -122,
+			(byte) -23, (byte) -30, (byte) 15, (byte) -36, (byte) -110, (byte) -14, (byte) -55, (byte) -38, (byte) -115,
+			(byte) -123, (byte) -96, (byte) -28, (byte) 5, (byte) 85, (byte) -109, (byte) -121, (byte) 50, (byte) -63,
+			(byte) -100, (byte) 72, (byte) -128, (byte) 27, (byte) -58, (byte) 88, (byte) -100, (byte) -8, (byte) 12,
+			(byte) -108, (byte) -11, (byte) 117, (byte) -64, (byte) -119, (byte) 120, (byte) 46, (byte) 90, (byte) 4,
+			(byte) 57, (byte) 13, (byte) -109, (byte) 30, (byte) -32, (byte) -82, (byte) 10, (byte) -66, (byte) 26,
+			(byte) -81, (byte) 37, (byte) -114, (byte) -94, (byte) -7, (byte) -21, (byte) 40, (byte) 69, (byte) -67,
+			(byte) 8, (byte) 92, (byte) 64, (byte) -55 };
+	private byte[] coSecMod = new byte[] { (byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15,
+			(byte) 50, (byte) 1, (byte) -28, (byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14,
+			(byte) -63, (byte) -96, (byte) 80, (byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117,
+			(byte) 23, (byte) 98, (byte) 118, (byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71,
+			(byte) -65, (byte) 74, (byte) 71, (byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118,
+			(byte) 56, (byte) -128, (byte) 90, (byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117,
+			(byte) -27, (byte) 56, (byte) -73, (byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124,
+			(byte) 60, (byte) 14, (byte) 77, (byte) -33 };
+	private byte[] coCert = new byte[] { (byte) 48, (byte) -126, (byte) 1, (byte) -121, (byte) 48, (byte) -126,
+			(byte) 1, (byte) 49, (byte) 2, (byte) 1, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9, (byte) 42,
+			(byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11, (byte) 5,
+			(byte) 0, (byte) 48, (byte) 72, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6, (byte) 3, (byte) 85,
+			(byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19, (byte) 48, (byte) 17,
+			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83, (byte) 111, (byte) 109,
+			(byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101, (byte) 49, (byte) 17,
+			(byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12, (byte) 8, (byte) 67,
+			(byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 49, (byte) 17,
+			(byte) 48, (byte) 15, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 8, (byte) 67,
+			(byte) 101, (byte) 114, (byte) 116, (byte) 65, (byte) 117, (byte) 116, (byte) 104, (byte) 48, (byte) 30,
+			(byte) 23, (byte) 13, (byte) 49, (byte) 55, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49,
+			(byte) 50, (byte) 53, (byte) 48, (byte) 50, (byte) 56, (byte) 90, (byte) 23, (byte) 13, (byte) 49,
+			(byte) 57, (byte) 48, (byte) 51, (byte) 50, (byte) 55, (byte) 49, (byte) 50, (byte) 53, (byte) 48,
+			(byte) 50, (byte) 56, (byte) 90, (byte) 48, (byte) 85, (byte) 49, (byte) 11, (byte) 48, (byte) 9, (byte) 6,
+			(byte) 3, (byte) 85, (byte) 4, (byte) 6, (byte) 19, (byte) 2, (byte) 66, (byte) 69, (byte) 49, (byte) 19,
+			(byte) 48, (byte) 17, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 8, (byte) 12, (byte) 10, (byte) 83,
+			(byte) 111, (byte) 109, (byte) 101, (byte) 45, (byte) 83, (byte) 116, (byte) 97, (byte) 116, (byte) 101,
+			(byte) 49, (byte) 15, (byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 10, (byte) 12,
+			(byte) 6, (byte) 67, (byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15,
+			(byte) 48, (byte) 13, (byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 11, (byte) 12, (byte) 6, (byte) 67,
+			(byte) 111, (byte) 109, (byte) 109, (byte) 111, (byte) 110, (byte) 49, (byte) 15, (byte) 48, (byte) 13,
+			(byte) 6, (byte) 3, (byte) 85, (byte) 4, (byte) 3, (byte) 12, (byte) 6, (byte) 67, (byte) 111, (byte) 109,
+			(byte) 109, (byte) 111, (byte) 110, (byte) 48, (byte) 92, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
+			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 1,
+			(byte) 5, (byte) 0, (byte) 3, (byte) 75, (byte) 0, (byte) 48, (byte) 72, (byte) 2, (byte) 65, (byte) 0,
+			(byte) -36, (byte) -33, (byte) 70, (byte) -88, (byte) -101, (byte) 15, (byte) 50, (byte) 1, (byte) -28,
+			(byte) 20, (byte) -122, (byte) 22, (byte) -112, (byte) 7, (byte) 14, (byte) -63, (byte) -96, (byte) 80,
+			(byte) 114, (byte) -114, (byte) -111, (byte) 29, (byte) 91, (byte) 117, (byte) 23, (byte) 98, (byte) 118,
+			(byte) 89, (byte) 127, (byte) 71, (byte) -89, (byte) -44, (byte) -71, (byte) -65, (byte) 74, (byte) 71,
+			(byte) 12, (byte) -9, (byte) 91, (byte) 43, (byte) -109, (byte) 118, (byte) 56, (byte) -128, (byte) 90,
+			(byte) -106, (byte) 0, (byte) 5, (byte) -5, (byte) 14, (byte) 117, (byte) -27, (byte) 56, (byte) -73,
+			(byte) -11, (byte) -62, (byte) 18, (byte) 102, (byte) 81, (byte) -124, (byte) 60, (byte) 14, (byte) 77,
+			(byte) -33, (byte) 2, (byte) 3, (byte) 1, (byte) 0, (byte) 1, (byte) 48, (byte) 13, (byte) 6, (byte) 9,
+			(byte) 42, (byte) -122, (byte) 72, (byte) -122, (byte) -9, (byte) 13, (byte) 1, (byte) 1, (byte) 11,
+			(byte) 5, (byte) 0, (byte) 3, (byte) 65, (byte) 0, (byte) 99, (byte) -110, (byte) 69, (byte) -43,
+			(byte) -84, (byte) 34, (byte) -83, (byte) -65, (byte) 10, (byte) 81, (byte) -23, (byte) -21, (byte) -32,
+			(byte) -43, (byte) 1, (byte) 20, (byte) 98, (byte) -128, (byte) -40, (byte) 92, (byte) -54, (byte) 124,
+			(byte) 48, (byte) 29, (byte) 98, (byte) -52, (byte) 47, (byte) 114, (byte) 91, (byte) -22, (byte) -35,
+			(byte) -80, (byte) 98, (byte) -75, (byte) -9, (byte) 48, (byte) 115, (byte) -57, (byte) -109, (byte) 62,
+			(byte) -31, (byte) -18, (byte) -2, (byte) -101, (byte) 79, (byte) 78, (byte) 3, (byte) 86, (byte) 79,
+			(byte) 7, (byte) 50, (byte) -34, (byte) -39, (byte) -86, (byte) -23, (byte) 80, (byte) 5, (byte) -117,
+			(byte) -119, (byte) 112, (byte) -38, (byte) 36, (byte) -41, (byte) -58 };
 
 	private RSAPublicKey timePublicKey;
 	private RSAPrivateKey coPrivateKey;
@@ -630,7 +877,9 @@ public class IdentityCard extends Applet {
 				decryptedData = cutOffNulls(decryptedData);
 
 				sign = new byte[240];
-				signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
+				byte[] hash = hash(decryptedData);
+				hash = cutOffNulls(hash);
+				short signLength = generateSignature(coPrivateKey, decryptedData, (short) 0, (short) 1, sign);
 				sign = cutOffNulls(sign);
 
 				short totLength = (short) (coCert.length + signLength + 1);
@@ -670,6 +919,13 @@ public class IdentityCard extends Applet {
 		} else {
 			ISOException.throwIt(SEQUENTIAL_FAILURE);
 		}
+	}
+
+	private byte[] hash(byte[] b) {
+		byte[] returnData = new byte[64];
+		MessageDigest digest = MessageDigest.getInstance(MessageDigest.ALG_SHA, false);
+		digest.doFinal(b, (short) 0, (short) b.length, returnData, (short) 0);
+		return returnData;
 	}
 
 	private void updateSig(APDU apdu) {
@@ -727,7 +983,8 @@ public class IdentityCard extends Applet {
 	public void signSomething(APDU apdu) {
 		byte[] buffer = apdu.getBuffer();
 		byte[] output = new byte[240];
-		short siglength = generateSignature(secretKey, buffer, ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(), output);
+		short siglength = generateSignature(secretKey, buffer, ISO7816.OFFSET_CDATA, apdu.setIncomingAndReceive(),
+				output);
 
 		apdu.setOutgoing();
 		apdu.setOutgoingLength(siglength);
