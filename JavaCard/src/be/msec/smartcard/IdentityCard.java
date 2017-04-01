@@ -68,6 +68,7 @@ public class IdentityCard extends Applet {
 	private final static short AUTH_FAILED = 0x6342;
 	private final static short TYPE_UNKNOWN = 0x6343;
 	private final static short INSUFFICIENT_RIGHTS = 0x6344;
+	private final static short INVALID_CERTIFICATE = 0x6345;
 
 	/** Invalid key ID. */
 	public static final byte INVALID_KEY = (byte) -1;
@@ -696,6 +697,8 @@ public class IdentityCard extends Applet {
 	}
 
 	public void generateKey(APDU apdu) {
+		if (certServiceProvider.length != (short) 109)
+			ISOException.throwIt(INVALID_CERTIFICATE);
 
 		short keySizeInBytes = (short) 64;
 		short keySizeInBits = (short) (keySizeInBytes * 8);
@@ -703,7 +706,6 @@ public class IdentityCard extends Applet {
 		pubCertKey.setExponent(certServiceProvider, (short) 64, (short) 3);
 		pubCertKey.setModulus(certServiceProvider, (short) 0, (short) 64);
 
-		// TODO if (verifyCert(CertSP)==false) abort()
 		// TODO if (CertSP.validEndTime < lastValidationTime) abort()
 
 		// DONE Ks := genNewSymKey(getSecureRand())
