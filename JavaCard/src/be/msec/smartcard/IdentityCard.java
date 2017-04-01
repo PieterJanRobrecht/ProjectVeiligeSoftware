@@ -697,7 +697,7 @@ public class IdentityCard extends Applet {
 	}
 
 	public void generateKey(APDU apdu) {
-		if (certServiceProvider.length != (short) 109)
+		if (certServiceProvider.length != (short) 110)
 			ISOException.throwIt(INVALID_CERTIFICATE);
 
 		short keySizeInBytes = (short) 64;
