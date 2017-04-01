@@ -641,8 +641,6 @@ public class MiddlewareController {
 		ResponseAPDU r;
 
 		try {
-			// TODO Hier voor pj
-
 			a = new CommandAPDU(IDENTITY_CARD_CLA, GET_CHAL_INS, 0x00, 0x00, challenge);
 			r = connection.transmit(a);
 

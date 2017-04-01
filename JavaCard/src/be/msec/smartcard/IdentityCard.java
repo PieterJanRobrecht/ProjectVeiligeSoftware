@@ -552,9 +552,9 @@ public class IdentityCard extends Applet {
 			boolean verified = verifyPublic(timePublicKey, tempTimeUpdate, signature);
 			if (verified) {
 				// TODO enable pastcheck
-				// boolean past = checkIfPast(lastTime, tempTimeUpdate);
-				// if(past)
-				// ISOException.throwIt(VERIFY_FAILED);
+				boolean past = checkIfPast(lastTime, tempTimeUpdate);
+				if (past)
+					ISOException.throwIt(VERIFY_FAILED);
 				lastTime = tempTimeUpdate;
 				tempTimeUpdate = null;
 				ISOException.throwIt(KAPPA);
@@ -885,12 +885,12 @@ public class IdentityCard extends Applet {
 	}
 
 	private boolean checkIfPast(byte[] lastTime, byte[] tempTimeUpdate) {
-		boolean past = false;
+		boolean past = true;
 		for (short i = 0; i < 4; i++) {
 			byte hulp = (byte) (lastTime[i] - tempTimeUpdate[i]);
-			if (hulp < 0) {
-				past = true;
-				break;
+			byte nul = 0x00;
+			if(hulp != nul && hulp < nul){
+				past = false;
 			}
 		}
 		return past;
