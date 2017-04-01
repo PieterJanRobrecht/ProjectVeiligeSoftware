@@ -105,6 +105,7 @@ public class MiddlewareController {
 	private final static short AUTH_FAILED = 0x6342;
 	private final static short TYPE_UNKNOWN = 0x6343;
 	private final static short INSUFFICIENT_RIGHTS = 0x6344;
+	private final static short INVALID_CERTIFICATE = 0x6345;
 
 	// getjoept.. moet nog aangepast worden aan eigen certificaten
 	// gebruik momenteel overal dezelfde :')
