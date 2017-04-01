@@ -24,6 +24,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -443,12 +444,16 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			for (int i = 0; i < 5; i++) {
 				msg += queue.take();
 			}
-
+			
+			
 			byte[] resp = hexStringToByteArray(msg);
+			controller.addText("MW -> SP \n\t Ontvangen van antwoord op query \n\t In encrypted bytes " + Arrays.toString(resp));
 			byte[] decrypted = symDecrypt(resp, Ks);
+			controller.addText("SP \n\t Decrypten van het antwoord \n\t In bytes "+ Arrays.toString(decrypted));
 			System.out.println(Arrays.toString(decrypted));
 
 			byte[] nym = cutOffNulls(slice(decrypted, 0, (short) 64));
+			controller.addText("SP \n\t Pseudoniem bepaalt \n\t In bytes "+Arrays.toString(nym));
 			System.out.println("\tNym: " + Arrays.toString(nym));
 			byte teller = decrypted[64];
 			decrypted = slice(decrypted, (short) (64 + 1), decrypted.length);
@@ -470,7 +475,8 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			byte[] foto = null;
 
 			byte oudeTeller;
-
+			
+			controller.addText("SP \n\t Antwoord op query");
 			for (int i = 0; i < 7; i++) {
 				if (query[i] == (byte) 1) {
 					switch (i) {
@@ -480,6 +486,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tName: " + new String(name));
+						controller.addText("\n\t Naam " + new String(name));
 						break;
 					case 1:
 						oudeTeller = teller;
@@ -487,6 +494,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tAdress: " + new String(adress));
+						controller.addText("\n\t Adres " + new String(adress));
 						break;
 					case 2:
 						oudeTeller = teller;
@@ -494,6 +502,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tCountry: " + new String(country));
+						controller.addText("\n\t Land " + new String(country));
 						break;
 					case 3:
 						oudeTeller = teller;
@@ -501,6 +510,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tBirthday: " + new String(birthday));
+						controller.addText("\n\t Verjaardag " + new String(birthday));
 						break;
 					case 4:
 						oudeTeller = teller;
@@ -508,6 +518,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tAge: " + new String(age));
+						controller.addText("\n\t Leeftijd " + new String(age));
 						break;
 					case 5:
 						oudeTeller = teller;
@@ -515,6 +526,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tGender: " + new String(gender));
+						controller.addText("\n\t Geslacht " + new String(gender));
 						break;
 					case 6:
 						oudeTeller = teller;
@@ -522,12 +534,14 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 						teller = decrypted[oudeTeller];
 						decrypted = slice(decrypted, (short) (oudeTeller + 1), decrypted.length);
 						System.out.println("\tFoto: " + Arrays.toString(foto));
+						controller.addText("\n\t Foto " + Arrays.toString(foto));
 						break;
 					default:
 						break;
 					}
 				}
 			}
+			controller.addText("### EINDE STAP 4 ###");
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Random;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -196,6 +197,7 @@ public class HandlingThread extends Communicator implements Runnable {
 		System.out.println("\tRelease attributes - rec: " + Arrays.toString(rec));
 
 		byte[] resp = mwc.requestReleaseOfAttributes(rec);
+		mwc.addText("MW -> SP \n\t Verzenden van antwoord \n\t In encrypted bytes " + Arrays.toString(resp));
 		String toSend = bytesToHex(resp);
 		send(toSend.substring(0, 100), outputStream);
 		send(toSend.substring(100, 200), outputStream);

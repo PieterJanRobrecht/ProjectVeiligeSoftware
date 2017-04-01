@@ -650,7 +650,7 @@ public class MiddlewareController {
 				response[i+250] = inc[i];
 			}
 			System.out.println("\tTotal payload: " + Arrays.toString(response));
-
+			addText("SC -> MW \n\t Ontvangen antwoord op query \n\t In encrypted bytes "+ Arrays.toString(response));
 			
 		} catch (Exception e) {
 			e.printStackTrace();
