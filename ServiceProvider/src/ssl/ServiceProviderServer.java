@@ -336,7 +336,7 @@ public class ServiceProviderServer extends Communicator implements Runnable {
 			System.out.println("Sending encrypted challenge: " + Arrays.toString(encrypted));
 			System.out.println("Or in hex: " + message + " with length " + message.length());
 			controller.addText("SP \n\t Encrypteren van de challenge \n\t In bytes " + Arrays.toString(encrypted));
-			controller.addText("SP -> MW Verzenden van challenge \n\t In encrypted bytes " + Arrays.toString(encrypted));
+			controller.addText("SP -> MW \n\t Verzenden van challenge \n\t In encrypted bytes " + Arrays.toString(encrypted));
 			send(message, outputStream);
 
 			boolean gaan = true;
