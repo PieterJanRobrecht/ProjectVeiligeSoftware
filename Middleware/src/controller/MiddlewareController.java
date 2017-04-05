@@ -165,6 +165,7 @@ public class MiddlewareController {
 		/*** STAP 1 ***/
 		System.out.println("Sending Time..");
 		addText("### BEGIN STAP 1 ###");
+		long startTime = System.currentTimeMillis();
 		boolean isValid = isValid();
 		System.out.println("revalidation needed: " + !isValid);
 		System.out.println("Complete! \n");
@@ -174,6 +175,9 @@ public class MiddlewareController {
 			sendNewTime(fetchNewTime());
 			System.out.println("Complete! \n");
 		}
+		long stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		System.out.println(elapsedTime);
 		addText("### EINDE STAP 1 ###");
 
 		// Nu connectie opzetten met SP
